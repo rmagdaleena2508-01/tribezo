@@ -180,7 +180,16 @@ Here is what happens when you use Tribezo.
 
 ## Project Status
 
-**Just getting started.** Right now, this project is an idea and a plan. The code is coming soon. The plan is below.
+| Phase | What | Status |
+|---|---|---|
+| 1 | The C core (stack and reverse) | Done |
+| 2 | The connection (HTTP server in C) | Next |
+| 3 | The frontend (with placeholders) | Not started |
+| 4 | The art | Not started |
+| 5 | Natural conversation with AI | Not started |
+| 6 | Changing scenes and poses | Not started |
+
+The plan for each phase is below.
 
 ---
 
@@ -202,10 +211,12 @@ tribezo/
     src/
       stack.c / stack.h     the stack: push, pop, peek, is_empty
       reverse.c / reverse.h reverses each word, keeps punctuation in place
-      server.c              a small HTTP server
+      demo.c                type English, see XYZ (for trying things by hand)
+      server.c              a small HTTP server (Phase 2)
     tests/
+      test_stack.c          checks that the stack works
       test_reverse.c        checks that reversing works
-    Makefile              make, make test, make run
+    Makefile              make test, make demo, make run
   frontend/             the website
     public/
       characters/           pose pictures for the tribe and the translator
@@ -214,10 +225,11 @@ tribezo/
       lib/content.js        all the text, poses, scenes, and picture paths in one place
       components/           ForestScene, Character, SpeechBubble, ChatBox
       pages/Home.jsx        the main page
+  .gitignore            keeps built files and secrets off GitHub
   README.md
 ```
 
-### Phase 1: The C core (the DSA part)
+### Phase 1: The C core (the DSA part) — Done
 
 1. **Build the stack.** It uses an array that grows when it gets full. `push`, `pop`, `peek`, and `is_empty` each take the same short time, no matter how big the stack is (O(1)).
 2. **Build the reverse function.** For each word:
@@ -232,6 +244,30 @@ tribezo/
    - numbers
    - a long paragraph
 4. **Done when** `make test` passes.
+
+#### What Phase 1 built
+
+- **The stack** (`stack.c`). It keeps characters in an array. When the array is full, it doubles in size. Because it doubles, it only needs to grow once in a while, so pushing stays fast. `push`, `pop`, `peek`, and `is_empty` all take O(1) time.
+- **The reverse function** (`reverse.c`). It makes one copy of the text. Spaces and punctuation are already in the right spots in the copy, so only the letters and numbers need to change. It goes over each word twice: once to push, once to pop. One stack is reused for every word, because the stack is empty again at the end of each word.
+  - **Time:** O(n). Each character is pushed at most once and popped at most once.
+  - **Space:** O(n) for the new text, plus a stack as big as the longest word.
+- **Push and pop counts.** The function also counts how many pushes and pops it did, so the website can show them later.
+- **Tests.** 2 test files check:
+  - the stack: empty stack, last in first out, growing past 1,000 items
+  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, capital letters, a long paragraph, and that reversing twice gives back the original English
+  - Tests are built with memory checkers (AddressSanitizer and UndefinedBehaviorSanitizer). These catch memory mistakes, like reading past the end of an array.
+- **A demo program** (`demo.c`). Type English, see XYZ and the push and pop counts.
+
+#### Things I noticed while building Phase 1
+
+Because punctuation stays in place, some words look a little different than you might guess:
+
+| English | XYZ | Why |
+|---|---|---|
+| `don't` | `tno'd` | The `'` stays in spot 4. |
+| `well-known` | `nwon-kllew` | The `-` stays in spot 5. |
+| `You` | `uoY` | Capital letters move with their letter. |
+| `$100.50` | `$050.01` | `$` and `.` stay. Only the numbers flip. |
 
 ### Phase 2: The connection (backend to frontend)
 
@@ -317,4 +353,30 @@ This README will change along with the project.
 
 ## How to Run It
 
-Coming soon. I will add the steps once the code is ready.
+You need a C compiler (`cc`, `gcc`, or `clang`) and `make`. On a Mac, running `xcode-select --install` gets both.
+
+### Run the tests
+
+```bash
+cd backend
+make test
+```
+
+You should see `all passed` twice.
+
+### Try it yourself
+
+```bash
+cd backend
+make demo
+```
+
+Type some English and press Enter. Press `Ctrl+D` to stop.
+
+```
+> hello, world!
+XYZ: olleh, dlrow!
+(stack: 10 pushes, 10 pops)
+```
+
+More steps will be added here as each phase is finished.

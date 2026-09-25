@@ -1,0 +1,13 @@
+# Built files
+backend/build/
+
+# Frontend
+node_modules/
+dist/
+
+# Secrets (API keys go here, never on GitHub)
+.env
+.env.*
+
+# System files
+.DS_Store
