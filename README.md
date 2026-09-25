@@ -167,14 +167,131 @@ Here is what happens when you use Tribezo.
 
 ### Art
 
-- **Tribe and translator characters.** Made with AI image tools.
+- **Tribe and translator characters.** Made with AI image tools, in a stop-motion style (claymation or paper cut-out).
 - **Forest background.** Sets the scene in the woods.
+
+### Later
+
+| Tool | What it does |
+|---|---|
+| **Google Gemini API** (free tier) | Helps the tribe reply in a natural way. |
 
 ---
 
 ## Project Status
 
-**Just getting started.** Right now, this project is an idea and a plan. The code is coming soon.
+**Just getting started.** Right now, this project is an idea and a plan. The code is coming soon. The plan is below.
+
+---
+
+## Build Plan
+
+### The order I am building in
+
+**Backend first, then the connection, then the frontend.**
+
+1. The **stack** is the main DSA part of this project, so I build it and test it first.
+2. Next comes the **connection**: a small server that lets the website talk to the C program.
+3. Then the **frontend**. It only needs to know what the server sends back, so it can start with placeholder pictures until the real art is ready.
+
+### Folder structure
+
+```
+tribezo/
+  backend/              the C part
+    src/
+      stack.c / stack.h     the stack: push, pop, peek, is_empty
+      reverse.c / reverse.h reverses each word, keeps punctuation in place
+      server.c              a small HTTP server
+    tests/
+      test_reverse.c        checks that reversing works
+    Makefile              make, make test, make run
+  frontend/             the website
+    public/
+      characters/           pose pictures for the tribe and the translator
+      scenes/               background pictures
+    src/
+      lib/content.js        all the text, poses, scenes, and picture paths in one place
+      components/           ForestScene, Character, SpeechBubble, ChatBox
+      pages/Home.jsx        the main page
+  README.md
+```
+
+### Phase 1: The C core (the DSA part)
+
+1. **Build the stack.** It uses an array that grows when it gets full. `push`, `pop`, `peek`, and `is_empty` each take the same short time, no matter how big the stack is (O(1)).
+2. **Build the reverse function.** For each word:
+   - Push only the letters and numbers onto the stack.
+   - Go through the word again. Where there was a letter or number, pop from the stack. Where there was punctuation, leave it where it is.
+   - Example: `hello, world!` becomes `olleh, dlrow!`
+3. **Write tests** for:
+   - empty input
+   - one word
+   - extra spaces between words
+   - punctuation inside a word, like `don't`, which becomes `tno'd`
+   - numbers
+   - a long paragraph
+4. **Done when** `make test` passes.
+
+### Phase 2: The connection (backend to frontend)
+
+1. **Build a small HTTP server in C** on port `8765`. It uses plain sockets, with no extra libraries.
+2. **Add two endpoints:**
+   - `GET /api/health` answers `{"ok":true}` so I can check the server is on.
+   - `POST /api/reverse` takes the text and answers with:
+     ```json
+     { "english": "hello, world!", "xyz": "olleh, dlrow!", "pushes": 10, "pops": 10 }
+     ```
+     `pushes` and `pops` show how much work the stack did. The website can show these numbers.
+3. **Keep it safe:**
+   - Text is limited to 10 KB.
+   - Slow connections time out.
+   - The server only listens on my own computer.
+4. **Connect it:** while building, Vite passes `/api` requests to the C server.
+5. **Done when** a `curl` command gets back the reversed text.
+
+### Phase 3: The frontend (with placeholders)
+
+1. **Set it up** with the same tools as my portfolio: Vite, React 19, Tailwind 3, Framer Motion, Lenis, Lucide React, and React Router. It runs on port `8766`.
+2. **Forest scene:** the background is split into layers. The layers move a little when the mouse moves, which gives a feeling of depth (parallax).
+3. **Characters:** each pose is a small set of pictures shown one after another, 8 to 12 pictures per second. This gives a stop-motion look. Simple placeholder drawings are used until the real art is ready. When the real pictures go into `public/characters/`, they replace the placeholders with no code changes.
+4. **Flow:**
+   1. **Intro:** the translator explains the tribe in speech bubbles. The user presses "Next", then "Start talking".
+   2. **Chat:** the user types English, and the translator says "Let me tell them…". The C server reverses the words. The tribe switches to its talking pose, and the reversed words appear in its speech bubble.
+   3. **History panel:** shows each English message next to its XYZ version, with the push and pop counts.
+   4. **Error message:** if the C server is off, the translator says "I can't reach the tribe right now."
+5. **Phones:** on small screens, the characters stack on top of each other and the chat sits at the bottom.
+6. **Done when** the whole flow works in the browser.
+
+### Phase 4: The art
+
+1. **Make the characters in order:** first a master picture of each character, then each pose, then 2 to 3 small changes of each pose for the stop-motion frames.
+2. **Clean up the pictures:** remove the backgrounds, and check that every picture is the same size and that the feet sit on the same line.
+3. **Connect them** in `content.js`.
+4. **Make the backgrounds:** `forest-entry` first, then the others.
+
+### Phase 5: Natural conversation with AI (later)
+
+1. **Flow:**
+   1. The user types English.
+   2. An AI model writes the tribe's reply in **normal English**, as JSON with three parts: `reply`, `scene`, and `pose`.
+   3. The **C stack** reverses the reply. The AI never does the reversing, so the stack stays the most important part.
+   4. The tribe says the reversed reply.
+2. **AI service:** the free tier of Google Gemini.
+3. **API key:** kept only on the backend, in a `.env` file. It is never put in the website code and never uploaded to GitHub.
+4. **Guardrails:** rules in the prompt keep the tribe friendly, on topic, and short. `scene` and `pose` can only be values from a fixed list. Anything else falls back to the `idle` pose.
+5. **Still to decide:** whether the C server calls the AI (using `libcurl`) or a small Node helper does it.
+
+### Phase 6: Changing scenes and poses
+
+1. **Scenes:** when the tribe invites you somewhere, like their village, `scene` changes the background.
+2. **Poses:** `pose` changes how the character stands, for example arms open to welcome you.
+3. **Changes between scenes and poses:** a quick stop-motion cut or a soft fade.
+
+### After each phase
+
+- The work is saved and pushed to GitHub.
+- This README is updated with how to run the new parts.
 
 ---
 
