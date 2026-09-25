@@ -78,6 +78,7 @@ These are the rules for turning English into XYZ:
 1. **Each word is reversed.**
 2. **The words stay in the same order.**
 3. **Punctuation stays in the same place.** Commas, periods, and marks like `!` and `?` do not move.
+4. **Money stays the same.** A word with a money sign (`$`, `€`, `£`, `¥`, `₹`) and a number is not reversed, so the amount means the same thing in both languages.
 
 ### Examples
 
@@ -88,6 +89,7 @@ These are the rules for turning English into XYZ:
 | `hello, world!` | `olleh, dlrow!` |
 | `you are kind.` | `uoy era dnik.` |
 | `how are you?` | `woh era uoy?` |
+| `it costs $20.` | `ti stsoc $20.` |
 
 ---
 
@@ -236,12 +238,14 @@ tribezo/
    - Push only the letters and numbers onto the stack.
    - Go through the word again. Where there was a letter or number, pop from the stack. Where there was punctuation, leave it where it is.
    - Example: `hello, world!` becomes `olleh, dlrow!`
+   - Money, like `$100.50`, is skipped and stays the same.
 3. **Write tests** for:
    - empty input
    - one word
    - extra spaces between words
    - punctuation inside a word, like `don't`, which becomes `tno'd`
    - numbers
+   - money
    - a long paragraph
 4. **Done when** `make test` passes.
 
@@ -251,10 +255,11 @@ tribezo/
 - **The reverse function** (`reverse.c`). It makes one copy of the text. Spaces and punctuation are already in the right spots in the copy, so only the letters and numbers need to change. It goes over each word twice: once to push, once to pop. One stack is reused for every word, because the stack is empty again at the end of each word.
   - **Time:** O(n). Each character is pushed at most once and popped at most once.
   - **Space:** O(n) for the new text, plus a stack as big as the longest word.
+- **Money check.** Before reversing a word, the function checks if it has a money sign and a number. If it does, the word is left as it is. Money is not pushed or popped.
 - **Push and pop counts.** The function also counts how many pushes and pops it did, so the website can show them later.
 - **Tests.** 2 test files check:
   - the stack: empty stack, last in first out, growing past 1,000 items
-  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, capital letters, a long paragraph, and that reversing twice gives back the original English
+  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, money, capital letters, a long paragraph, and that reversing twice gives back the original English
   - Tests are built with memory checkers (AddressSanitizer and UndefinedBehaviorSanitizer). These catch memory mistakes, like reading past the end of an array.
 - **A demo program** (`demo.c`). Type English, see XYZ and the push and pop counts.
 
@@ -267,7 +272,8 @@ Because punctuation stays in place, some words look a little different than you 
 | `don't` | `tno'd` | The `'` stays in spot 4. |
 | `well-known` | `nwon-kllew` | The `-` stays in spot 5. |
 | `You` | `uoY` | Capital letters move with their letter. |
-| `$100.50` | `$050.01` | `$` and `.` stay. Only the numbers flip. |
+| `$100.50` | `$100.50` | Money is never reversed. |
+| `123` | `321` | Plain numbers without a money sign are still reversed. |
 
 ### Phase 2: The connection (backend to frontend)
 

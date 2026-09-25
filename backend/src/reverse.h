@@ -16,8 +16,11 @@ typedef struct {
  *   1. Each word is reversed.
  *   2. The words stay in the same order.
  *   3. Punctuation stays in the same place.
+ *   4. Money stays the same. A word with a money sign ($ € £ ¥ ₹)
+ *      and a number, like "$100.50", is not reversed.
  *
  * Example: "hello, world!" becomes "olleh, dlrow!"
+ * Example: "it costs $20." becomes "ti stsoc $20."
  *
  * Returns a new string. The caller must free() it.
  * Returns NULL if there is no memory.

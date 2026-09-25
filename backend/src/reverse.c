@@ -18,6 +18,33 @@ static bool is_space(char c) {
     return isspace((unsigned char)c);
 }
 
+/* Money signs we look for. Some take more than one byte to store
+   (like the rupee sign), so we keep each one as a short string. */
+static const char *MONEY_SIGNS[] = {"$", "\xE2\x82\xAC" /* € */, "\xC2\xA3" /* £ */,
+                                    "\xC2\xA5" /* ¥ */, "\xE2\x82\xB9" /* ₹ */};
+
+/* A word is money if it has a money sign and at least one number,
+   like "$100.50" or "₹500". Money is never reversed, so the amount
+   means the same thing in English and in XYZ. */
+static bool is_money(const char *word, size_t length) {
+    bool has_number = false;
+    bool has_sign = false;
+
+    for (size_t i = 0; i < length; i++) {
+        if (isdigit((unsigned char)word[i])) {
+            has_number = true;
+        }
+        for (size_t k = 0; k < sizeof MONEY_SIGNS / sizeof MONEY_SIGNS[0]; k++) {
+            size_t sign_length = strlen(MONEY_SIGNS[k]);
+            if (i + sign_length <= length &&
+                memcmp(word + i, MONEY_SIGNS[k], sign_length) == 0) {
+                has_sign = true;
+            }
+        }
+    }
+    return has_number && has_sign;
+}
+
 char *reverse_words(const char *text, ReverseStats *stats) {
     size_t length = strlen(text);
 
@@ -55,6 +82,11 @@ char *reverse_words(const char *text, ReverseStats *stats) {
             i++;
         }
         size_t end = i; /* one past the last character of the word */
+
+        /* Money stays exactly the same. The copy already has it right. */
+        if (is_money(text + start, end - start)) {
+            continue;
+        }
 
         /* Step 1: push every letter and number in the word onto the stack.
            For "don't" the stack gets d, o, n, t (with t on top). */

@@ -49,7 +49,18 @@ static void test_spaces_stay(void) {
 static void test_numbers(void) {
     expect("123", "321");
     expect("room 42b", "moor b24");
-    expect("$100.50", "$050.01");
+}
+
+static void test_money_stays(void) {
+    expect("$100.50", "$100.50");
+    expect("it costs $20.", "ti stsoc $20.");
+    expect("pay 100$ now", "yap 100$ won");
+    expect("only \xE2\x82\xB9" "500!", "ylno \xE2\x82\xB9" "500!");       /* ₹500 */
+    expect("\xE2\x82\xAC" "9.99 each", "\xE2\x82\xAC" "9.99 hcae");     /* €9.99 */
+    expect("\xC2\xA3" "5, please", "\xC2\xA3" "5, esaelp");             /* £5 */
+    expect("$5,000", "$5,000");
+    /* A money sign with no number is not money, so the word is reversed. */
+    expect("$ab", "$ba");
 }
 
 static void test_mixed_case(void) {
@@ -113,6 +124,7 @@ int main(void) {
     test_punctuation_stays();
     test_spaces_stay();
     test_numbers();
+    test_money_stays();
     test_mixed_case();
     test_counts();
     test_long_paragraph();
