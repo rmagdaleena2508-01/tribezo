@@ -47,8 +47,12 @@ static void test_spaces_stay(void) {
 }
 
 static void test_numbers(void) {
-    expect("123", "321");
-    expect("room 42b", "moor b24");
+    /* Numbers never move. Only the letters around them are reversed. */
+    expect("123", "123");
+    expect("room 42b", "moor 42b");
+    expect("I have 3 cats", "I evah 3 stac");
+    expect("2nd place", "2dn ecalp");
+    expect("3.14", "3.14");
 }
 
 static void test_money_stays(void) {
@@ -61,6 +65,21 @@ static void test_money_stays(void) {
     expect("$5,000", "$5,000");
     /* A money sign with no number is not money, so the word is reversed. */
     expect("$ab", "$ba");
+}
+
+static void test_money_names_stay(void) {
+    expect("100 dollars", "100 dollars");
+    expect("it is 100 dollars.", "ti si 100 dollars.");
+    expect("Rs 500", "Rs 500");
+    expect("Rs. 500 only", "Rs. 500 ylno");
+    expect("Rs500", "Rs500");
+    expect("20usd", "20usd");
+    expect("USD 20", "USD 20");
+    expect("5 Rupees", "5 Rupees");
+    expect("50 cents, please", "50 cents, esaelp");
+    /* A money name with no number next to it is a normal word. */
+    expect("one dollar", "eno rallod");
+    expect("dollars are green", "srallod era neerg");
 }
 
 static void test_mixed_case(void) {
@@ -125,6 +144,7 @@ int main(void) {
     test_spaces_stay();
     test_numbers();
     test_money_stays();
+    test_money_names_stay();
     test_mixed_case();
     test_counts();
     test_long_paragraph();

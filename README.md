@@ -75,10 +75,16 @@ Here is how the word `hello` gets reversed.
 
 These are the rules for turning English into XYZ:
 
-1. **Each word is reversed.**
+1. **The letters in each word are reversed.**
 2. **The words stay in the same order.**
 3. **Punctuation stays in the same place.** Commas, periods, and marks like `!` and `?` do not move.
-4. **Money stays the same.** A word with a money sign (`$`, `€`, `£`, `¥`, `₹`) and a number is not reversed, so the amount means the same thing in both languages.
+4. **Numbers stay the same.** `123` stays `123`.
+5. **Money stays the same,** so the amount means the same thing in both languages. This covers:
+   - money signs: `$`, `€`, `£`, `¥`, `₹` (like `$100.50` or `₹500`)
+   - money names next to a number: `100 dollars`, `Rs 500`, `USD 20`, `50 cents`
+   - money names joined to a number: `Rs500`, `20usd`
+
+   The money names are: dollar, buck, cent, rupee, Rs, paise, euro, pound, yen, USD, INR, EUR, GBP, and JPY.
 
 ### Examples
 
@@ -90,6 +96,9 @@ These are the rules for turning English into XYZ:
 | `you are kind.` | `uoy era dnik.` |
 | `how are you?` | `woh era uoy?` |
 | `it costs $20.` | `ti stsoc $20.` |
+| `I have 3 cats` | `I evah 3 stac` |
+| `it is Rs 500` | `ti si Rs 500` |
+| `only 100 dollars` | `ylno 100 dollars` |
 
 ---
 
@@ -235,31 +244,31 @@ tribezo/
 
 1. **Build the stack.** It uses an array that grows when it gets full. `push`, `pop`, `peek`, and `is_empty` each take the same short time, no matter how big the stack is (O(1)).
 2. **Build the reverse function.** For each word:
-   - Push only the letters and numbers onto the stack.
-   - Go through the word again. Where there was a letter or number, pop from the stack. Where there was punctuation, leave it where it is.
+   - Push only the letters onto the stack.
+   - Go through the word again. Where there was a letter, pop from the stack. Numbers and punctuation stay where they are.
    - Example: `hello, world!` becomes `olleh, dlrow!`
-   - Money, like `$100.50`, is skipped and stays the same.
+   - Money, like `$100.50` or `100 dollars`, is skipped and stays the same.
 3. **Write tests** for:
    - empty input
    - one word
    - extra spaces between words
    - punctuation inside a word, like `don't`, which becomes `tno'd`
    - numbers
-   - money
+   - money signs and money names
    - a long paragraph
 4. **Done when** `make test` passes.
 
 #### What Phase 1 built
 
 - **The stack** (`stack.c`). It keeps characters in an array. When the array is full, it doubles in size. Because it doubles, it only needs to grow once in a while, so pushing stays fast. `push`, `pop`, `peek`, and `is_empty` all take O(1) time.
-- **The reverse function** (`reverse.c`). It makes one copy of the text. Spaces and punctuation are already in the right spots in the copy, so only the letters and numbers need to change. It goes over each word twice: once to push, once to pop. One stack is reused for every word, because the stack is empty again at the end of each word.
+- **The reverse function** (`reverse.c`). It makes one copy of the text. Spaces, numbers, and punctuation are already in the right spots in the copy, so only the letters need to change. It goes over each word twice: once to push, once to pop. One stack is reused for every word, because the stack is empty again at the end of each word.
   - **Time:** O(n). Each character is pushed at most once and popped at most once.
   - **Space:** O(n) for the new text, plus a stack as big as the longest word.
-- **Money check.** Before reversing a word, the function checks if it has a money sign and a number. If it does, the word is left as it is. Money is not pushed or popped.
+- **Money check.** Before reversing a word, the function checks if it is money. A word is money if it has a number and a money sign (`$100`) or a money name (`Rs500`). A money name with no number (`dollars`) also counts when the word just before or just after it has a number (`100 dollars`, `Rs 500`). Money is left as it is and is never pushed or popped.
 - **Push and pop counts.** The function also counts how many pushes and pops it did, so the website can show them later.
 - **Tests.** 2 test files check:
   - the stack: empty stack, last in first out, growing past 1,000 items
-  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, money, capital letters, a long paragraph, and that reversing twice gives back the original English
+  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, money signs, money names, capital letters, a long paragraph, and that reversing twice gives back the original English
   - Tests are built with memory checkers (AddressSanitizer and UndefinedBehaviorSanitizer). These catch memory mistakes, like reading past the end of an array.
 - **A demo program** (`demo.c`). Type English, see XYZ and the push and pop counts.
 
@@ -273,7 +282,10 @@ Because punctuation stays in place, some words look a little different than you 
 | `well-known` | `nwon-kllew` | The `-` stays in spot 5. |
 | `You` | `uoY` | Capital letters move with their letter. |
 | `$100.50` | `$100.50` | Money is never reversed. |
-| `123` | `321` | Plain numbers without a money sign are still reversed. |
+| `123` | `123` | Numbers never move. |
+| `2nd` | `2dn` | The number stays. Only the letters flip. |
+| `one dollar` | `eno rallod` | No number next to `dollar`, so it is a normal word. |
+| `5 pounds of rice` | `5 pounds fo ecir` | `pounds` is kept as money, even when it means weight. |
 
 ### Phase 2: The connection (backend to frontend)
 

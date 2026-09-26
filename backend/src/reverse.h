@@ -13,11 +13,12 @@ typedef struct {
  * Turn English into XYZ, the tribe's language.
  *
  * Rules:
- *   1. Each word is reversed.
+ *   1. The letters in each word are reversed.
  *   2. The words stay in the same order.
  *   3. Punctuation stays in the same place.
- *   4. Money stays the same. A word with a money sign ($ € £ ¥ ₹)
- *      and a number, like "$100.50", is not reversed.
+ *   4. Numbers stay the same: "123" stays "123".
+ *   5. Money stays the same, including money names:
+ *      "$100.50", "Rs500", "100 dollars", and "Rs 500" are not changed.
  *
  * Example: "hello, world!" becomes "olleh, dlrow!"
  * Example: "it costs $20." becomes "ti stsoc $20."
