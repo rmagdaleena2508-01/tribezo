@@ -2,17 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RotateCcw, ScrollText, Volume2, VolumeX } from "lucide-react";
 import Scene from "../components/Scene.jsx";
+import NameScreen from "../components/NameScreen.jsx";
 import Hero from "../components/Hero.jsx";
 import Character from "../components/Character.jsx";
 import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
-import NameForm from "../components/NameForm.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
-import { benjiLines, characters, greetings, hero, scenes, story } from "../lib/content.js";
+import { benjiLines, characters, greeting, hero, scenes, story } from "../lib/content.js";
 import { reverseText } from "../lib/api.js";
 import { zazoReply } from "../lib/zazo.js";
-import { forgetName, loadName, saveName } from "../lib/visitor.js";
 import { hasMusic, isMuted, playForScene, setMuted, startMusic } from "../lib/music.js";
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,28 +24,33 @@ function preload(urls) {
   }
 }
 
-// Each speech bubble gets its own number, so a new bubble always starts
-// typing from the beginning, even if the words are the same as before.
+// Every line of dialogue gets its own number, so a new speech bubble
+// always starts typing from the beginning.
 let nextId = 1;
-const speech = (text, extra = {}) => ({ id: nextId++, text, ...extra });
 
 // The page moves through these stages in order:
-//   hero      the start screen
-//   story     the short story, one step per tap
-//   name      Benji asks for your name
-//   greeting  Zazo says hello to you, backwards
-//   chat      you talk to Zazo through Benji
+//   name   ask for the visitor's name (always, on every visit)
+//   hero   the title screen
+//   story  the short story, one step per tap
+//   chat   you talk to Zazo through Benji
 export default function Home() {
-  const [stage, setStage] = useState("hero");
+  const [stage, setStage] = useState("name");
   const [step, setStep] = useState(0);
   const [scene, setScene] = useState(hero.scene);
-  const [name, setName] = useState(loadName);
+  const [name, setName] = useState("");
 
-  // What each character is doing. bubble: null means they are quiet.
-  const [zazo, setZazo] = useState({ pose: "idle", bubble: null });
-  const [benji, setBenji] = useState({ pose: "idle", bubble: null });
+  // The dialogue: a list of lines, shown one at a time. Tapping shows
+  // the next line. Each line is { id, who, text, pose, label?, scene? }.
+  const [lines, setLines] = useState([]);
+  const [lineIndex, setLineIndex] = useState(0);
+  const [lineDone, setLineDone] = useState(false); // finished typing?
+  const [showAll, setShowAll] = useState(false); // tapped while typing?
 
-  // True from pressing send until Zazo has finished answering.
+  // How each character stands when they are not the one talking.
+  const [zazoRest, setZazoRest] = useState("idle");
+  const [benjiRest, setBenjiRest] = useState("idle");
+
+  // True while waiting for the C server.
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -60,12 +64,16 @@ export default function Home() {
   // after that, it is old, so we ignore it.
   const round = useRef(0);
 
+  const line = lines[lineIndex] ?? null;
+  const moreLines = lineIndex < lines.length - 1;
+  const look = scenes[scene].look;
+
   // Load the characters and the story scenes right away.
   useEffect(() => {
     preload([
       ...Object.values(characters.zazo.poses),
       ...Object.values(characters.benji.poses),
-      ...story.map((s) => scenes[s.scene]),
+      ...story.map((s) => scenes[s.scene].src),
     ]);
   }, []);
 
@@ -74,17 +82,76 @@ export default function Home() {
     playForScene(scene);
   }, [scene]);
 
-  const showZazo = stage !== "hero" && !(stage === "story" && step === 0);
-  const showBenji = stage === "name" || stage === "greeting" || stage === "chat" || (stage === "story" && step >= 3);
+  // Some of Zazo's lines take you to a new place.
+  useEffect(() => {
+    if (line?.scene) setScene(line.scene);
+  }, [line]);
 
-  // ---------- The story ----------
+  // ---------- Dialogue ----------
+
+  function say(newLines) {
+    setLines(newLines.map((l) => ({ id: nextId++, ...l })));
+    setLineIndex(0);
+    setLineDone(false);
+    setShowAll(false);
+  }
+
+  const onLineDone = useCallback(() => setLineDone(true), []);
+
+  // One tap: finish the current line, or move to the next one.
+  function tap() {
+    if (line && !lineDone) {
+      setShowAll(true);
+      return;
+    }
+    if (stage === "story") {
+      nextStep();
+    } else if (stage === "chat" && moreLines) {
+      setLineIndex(lineIndex + 1);
+      setLineDone(false);
+      setShowAll(false);
+    }
+  }
+
+  // Tapping anywhere on the scene counts, and so do Enter, Space, and →.
+  const tapRef = useRef(tap);
+  tapRef.current = tap;
+  useEffect(() => {
+    const onKey = (event) => {
+      if (!["Enter", " ", "ArrowRight"].includes(event.key)) return;
+      if (event.target.closest("button, a, input, textarea, [role=dialog]")) return;
+      event.preventDefault();
+      tapRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  function onSceneClick(event) {
+    if (stage !== "story" && stage !== "chat") return;
+    if (event.target.closest("button, a, input, textarea, form, [role=dialog]")) return;
+    tap();
+  }
+
+  // ---------- Name, title, and story ----------
+
+  function onName(newName) {
+    setName(newName);
+    startMusic(hero.scene); // the Continue press is the tap browsers need before sound
+    preload(Object.values(scenes).map((s) => s.src));
+    setStage("hero");
+  }
 
   function showStep(index) {
     const s = story[index];
     setStep(index);
     setScene(s.scene);
-    setZazo({ pose: s.zazo?.pose ?? "idle", bubble: s.zazo?.xyz ? speech(s.zazo.xyz) : null });
-    setBenji({ pose: s.benji?.pose ?? "idle", bubble: s.benji?.says ? speech(s.benji.says) : null });
+    setZazoRest(s.zazo?.pose ?? "idle");
+    setBenjiRest(s.benji?.pose ?? "idle");
+    say([
+      ...(s.zazo?.xyz ? [{ who: "zazo", text: s.zazo.xyz, pose: s.zazo.pose }] : []),
+      ...(s.benji?.says ? [{ who: "benji", text: s.benji.says, pose: s.benji.pose }] : []),
+    ]);
   }
 
   function startStory() {
@@ -94,94 +161,69 @@ export default function Home() {
     showStep(0);
   }
 
-  function begin() {
-    startMusic(name ? "village" : story[0].scene);
-    preload(Object.values(scenes));
-    if (name) {
-      greet(name, true);
-    } else {
-      startStory();
-    }
-  }
-
-  function startFresh() {
-    forgetName();
-    setName("");
-    startMusic(story[0].scene);
-    preload(Object.values(scenes));
-    startStory();
-  }
-
   function nextStep() {
     if (step < story.length - 1) {
       showStep(step + 1);
     } else {
-      finishStory();
+      startChat();
     }
   }
 
-  function finishStory() {
-    if (name) {
-      greet(name, true);
-      return;
-    }
-    setStage("name");
-    setScene("village");
-    setZazo({ pose: "idle", bubble: null });
-    setBenji({ pose: "welcome", bubble: speech(benjiLines.askName) });
-  }
-
-  function onName(newName) {
-    saveName(newName);
-    setName(newName);
-    greet(newName, false);
-  }
-
-  // Zazo says hello, backwards. This is the first time the stack is used.
-  async function greet(visitorName, returning) {
+  // The story is over. Zazo greets you by name, backwards, and Benji
+  // tells you what he said. This is the first time the stack is used.
+  async function startChat() {
     const thisRound = ++round.current;
-    setStage("greeting");
+    setStage("chat");
     setScene("village");
-    setBenji({ pose: "idle", bubble: null });
-    setZazo({ pose: "idle", bubble: null });
+    setZazoRest("idle");
+    setBenjiRest("idle");
+    say([]);
+    setBusy(true);
 
-    const english = (returning ? greetings.returning : greetings.newVisitor).replaceAll("{name}", visitorName);
+    const english = greeting.zazo.replaceAll("{name}", name);
     try {
-      const [answer] = await Promise.all([reverseText(english), wait(500)]);
+      const [answer] = await Promise.all([reverseText(english), wait(400)]);
       if (thisRound !== round.current) return;
-      setZazo({ pose: "laughing", bubble: speech(answer.xyz, { translation: english }) });
+      say([
+        { who: "zazo", text: answer.xyz, pose: "laughing" },
+        {
+          who: "benji",
+          text: greeting.benji.replaceAll("{name}", name),
+          pose: "welcome",
+          label: "Benji translates",
+        },
+      ]);
     } catch {
       if (thisRound !== round.current) return;
-      setBenji({ pose: "confused", bubble: speech(benjiLines.error) });
-      setStage("chat");
+      say([{ who: "benji", text: benjiLines.error, pose: "confused" }]);
     }
+    setBusy(false);
   }
 
-  // ---------- The chat ----------
+  // ---------- Talking to Zazo ----------
 
   async function sendMessage(english) {
     const thisRound = ++round.current;
     setBusy(true);
-    setZazo({ pose: "idle", bubble: null });
-    setBenji({ pose: "talking", bubble: speech(benjiLines.relaying) });
+    say([{ who: "benji", text: benjiLines.relaying, pose: "talking" }]);
 
     try {
-      // 1. Benji flips your words and tells Zazo.
-      const [told] = await Promise.all([reverseText(english), wait(700)]);
+      // 1. Benji flips your words for Zazo.
+      const [told] = await Promise.all([reverseText(english), wait(600)]);
       if (thisRound !== round.current) return;
-      setBenji({ pose: "pointing", bubble: speech(told.xyz, { label: "Benji tells Zazo" }) });
 
-      // 2. Zazo thinks of an answer, and the stack flips it into XYZ.
+      // 2. Zazo thinks of an answer, and the stack flips it into XYZ too.
       const reply = zazoReply(english, name, memory.current);
       memory.current = reply.memory;
-      const readingTime = Math.min(3000, told.xyz.length * 40) + 900;
-      const [answer] = await Promise.all([reverseText(reply.says), wait(readingTime)]);
+      const answer = await reverseText(reply.says);
       if (thisRound !== round.current) return;
 
-      // 3. Zazo answers. If he is showing you around, the place changes.
-      if (reply.scene) setScene(reply.scene);
-      setBenji({ pose: "idle", bubble: null });
-      setZazo({ pose: reply.pose, bubble: speech(answer.xyz, { translation: reply.says }) });
+      // 3. Tap through: Benji tells Zazo, Zazo answers, Benji translates.
+      say([
+        { who: "benji", text: told.xyz, pose: "pointing", label: "Benji tells Zazo" },
+        { who: "zazo", text: answer.xyz, pose: reply.pose, scene: reply.scene },
+        { who: "benji", text: reply.says, pose: "talking", label: "Benji translates" },
+      ]);
       setHistory((entries) => [
         ...entries,
         {
@@ -196,21 +238,10 @@ export default function Home() {
       ]);
     } catch {
       if (thisRound !== round.current) return;
-      setBenji({ pose: "confused", bubble: speech(benjiLines.error) });
-      setBusy(false);
+      say([{ who: "benji", text: benjiLines.error, pose: "confused" }]);
     }
-  }
-
-  // When Zazo finishes speaking, you can talk again.
-  const onZazoDone = useCallback(() => {
-    setZazo((current) => (current.pose === "talking" ? { ...current, pose: "idle" } : current));
-    setStage((current) => (current === "greeting" ? "chat" : current));
     setBusy(false);
-  }, []);
-
-  const onBenjiDone = useCallback(() => {
-    setBenji((current) => (current.pose === "talking" && !current.bubble?.label ? { ...current, pose: "idle" } : current));
-  }, []);
+  }
 
   const closeHistory = useCallback(() => {
     setHistoryOpen(false);
@@ -224,12 +255,82 @@ export default function Home() {
 
   // ---------- The page ----------
 
+  const showZazo = stage === "chat" || (stage === "story" && step >= 1);
+  const showBenji = stage === "chat" || (stage === "story" && step >= 3);
+  const zazoPose = line?.who === "zazo" ? line.pose : zazoRest;
+  const benjiPose = line?.who === "benji" ? line.pose : benjiRest;
+  const hint = stage === "chat" && moreLines ? "Tap to continue" : undefined;
+
+  // Character height: set for laptops first (see --character-height in
+  // index.css), then made bigger or smaller for each place.
+  const characterStyle = { height: `calc(var(--character-height) * ${look.scale})` };
+
+  function bubbleFor(who, side) {
+    if (line?.who !== who) return null;
+    return (
+      <SpeechBubble
+        key={line.id}
+        text={line.text}
+        label={line.label}
+        side={side}
+        onDone={onLineDone}
+        showAll={showAll}
+        hint={hint}
+      />
+    );
+  }
+
   return (
-    <main className="relative h-[100svh] overflow-hidden">
-      <Scene scene={scene} />
+    <main className="relative h-[100svh] select-none overflow-hidden" onClick={onSceneClick}>
+      <Scene scene={scene} layer="back" />
+
+      {/* Zazo stands in the bottom left corner. */}
+      <AnimatePresence>
+        {showZazo && (
+          <motion.div
+            key="zazo"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute bottom-[1.5svh] left-[2vw] z-10 lg:left-[5vw]"
+            style={characterStyle}
+          >
+            <div className="absolute bottom-[calc(100%+8px)] left-[10%] z-20">
+              <AnimatePresence mode="wait">{bubbleFor("zazo", "left")}</AnimatePresence>
+            </div>
+            <Character who="zazo" pose={zazoPose} look={look} side="left" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Benji stands in the bottom right corner. */}
+      <AnimatePresence>
+        {showBenji && (
+          <motion.div
+            key="benji"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute bottom-[1.5svh] right-[2vw] z-10 lg:right-[5vw]"
+            style={characterStyle}
+          >
+            <div className="absolute bottom-[calc(100%+8px)] right-[10%] z-20">
+              <AnimatePresence mode="wait">{bubbleFor("benji", "right")}</AnimatePresence>
+            </div>
+            <Character who="benji" pose={benjiPose} look={look} side="right" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Front flowers, film grain, and soft edges go over the characters. */}
+      <div className="pointer-events-none absolute inset-0 z-[15]">
+        <Scene scene={scene} layer="front" />
+      </div>
 
       <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6">
-        {stage !== "hero" ? (
+        {stage === "story" || stage === "chat" ? (
           <p className="font-serif text-3xl font-semibold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] sm:text-4xl">
             Tribezo
           </p>
@@ -238,7 +339,7 @@ export default function Home() {
         )}
 
         <div className="flex items-center gap-2">
-          {hasMusic && (
+          {hasMusic && stage !== "name" && (
             <button
               type="button"
               onClick={toggleMute}
@@ -278,81 +379,24 @@ export default function Home() {
         </div>
       </header>
 
-      {stage === "hero" && <Hero name={name} onBegin={begin} onChangeName={startFresh} />}
+      {stage === "name" && <NameScreen onDone={onName} />}
+      {stage === "hero" && <Hero name={name} onBegin={startStory} />}
 
-      {/* Zazo stands in the bottom left corner. */}
-      <AnimatePresence>
-        {showZazo && (
-          <motion.div
-            key="zazo"
-            initial={{ opacity: 0, x: -80 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -80 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-0 left-[1vw] z-10 h-[40svh] sm:left-[3vw] sm:h-[min(60svh,600px)]"
-          >
-            <div className="absolute bottom-[calc(100%+10px)] left-[8%] z-20">
-              <AnimatePresence mode="wait">
-                {zazo.bubble && (
-                  <SpeechBubble key={zazo.bubble.id} text={zazo.bubble.text} side="left" onDone={onZazoDone}>
-                    {zazo.bubble.translation && (
-                      <div className="mt-2 border-t border-ink/15 pt-2">
-                        <p className="text-[11px] font-medium uppercase tracking-widest text-ink-soft">Benji translates</p>
-                        <p className="text-sm italic text-ink-soft">“{zazo.bubble.translation}”</p>
-                      </div>
-                    )}
-                  </SpeechBubble>
-                )}
-              </AnimatePresence>
-            </div>
-            <Character who="zazo" pose={zazo.pose} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Benji stands in the bottom right corner. */}
-      <AnimatePresence>
-        {showBenji && (
-          <motion.div
-            key="benji"
-            initial={{ opacity: 0, x: 80 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 80 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-0 right-[1vw] z-10 h-[40svh] sm:right-[3vw] sm:h-[min(60svh,600px)]"
-          >
-            <div className="absolute bottom-[calc(100%+10px)] right-[8%] z-20">
-              <AnimatePresence mode="wait">
-                {benji.bubble && (
-                  <SpeechBubble
-                    key={benji.bubble.id}
-                    text={benji.bubble.text}
-                    label={benji.bubble.label}
-                    side="right"
-                    onDone={onBenjiDone}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
-            <Character who="benji" pose={benji.pose} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* The glass panel at the bottom: the story card, the name box, or the chat box. */}
+      {/* The glass panel at the bottom: the story card, a Continue button,
+          or the chat box. */}
       <div className="absolute inset-x-0 bottom-4 z-20 px-3 sm:bottom-6">
         <div className="mx-auto max-w-xl">
           {stage === "story" && (
-            <StoryCard
-              caption={story[step].caption}
-              step={step}
-              steps={story.length}
-              onNext={nextStep}
-              onSkip={finishStory}
-            />
+            <StoryCard caption={story[step].caption} step={step} steps={story.length} onNext={tap} onSkip={startChat} />
           )}
-          {stage === "name" && <NameForm onDone={onName} />}
-          {stage === "chat" && <ChatBox onSend={sendMessage} disabled={busy} />}
+          {stage === "chat" &&
+            (moreLines ? (
+              <button type="button" onClick={tap} autoFocus className="glass-button mx-auto block rounded-full px-8 py-3 font-medium">
+                Tap to continue
+              </button>
+            ) : (
+              <ChatBox onSend={sendMessage} disabled={busy || (line !== null && !lineDone)} />
+            ))}
         </div>
       </div>
 

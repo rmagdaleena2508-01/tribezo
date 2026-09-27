@@ -106,27 +106,27 @@ These are the rules for turning English into XYZ:
 
 Here is what happens when you use Tribezo.
 
-1. **The start screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
+1. **Your name.** The first screen asks *"What's your name?"* The box starts empty. It asks every time you visit.
 
-2. **A short story (about 40 seconds).** One tap per step:
+2. **The title screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
+
+3. **A short story (about 40 seconds).** One tap per step:
    1. A beach: *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
    2. A jungle path: Zazo walks in and waves. *"Meet Zazo, leader of the islands."* He says `olleH, relevart! emocleW!`
    3. The village: Zazo looks puzzled and says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."*
    4. Benji walks in: *"Hi, I'm Benji! Zazo speaks XYZ, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you."*
 
-3. **Your name.** Benji asks, *"First, what should I call you?"*
+4. **The first reverse.** Your name goes to the C server. Zazo laughs and greets you backwards, like `olleH, anilegnavE! emocleW ot ym sdnalsi!` Tap, and Benji tells you what he said.
 
-4. **The first reverse.** Your name goes to the C server. Zazo laughs and greets you backwards, like `olleH, anilegnavE! emocleW ot ym sdnalsi!`, and Benji translates it.
-
-5. **Talk to Zazo.**
+5. **Talk to Zazo.** Only one person speaks at a time. Each tap moves the talk along; nothing else on the screen changes.
    1. You type English. Benji says *"Let me tell him…"*
-   2. The C server reverses your words, and Benji says them to Zazo in XYZ.
-   3. Zazo picks an answer. The C server reverses it too.
-   4. Zazo says it in XYZ, and Benji's translation shows under it.
+   2. The C server reverses your words. Benji says them to Zazo in XYZ. *(tap)*
+   3. Zazo picks an answer, and the C server reverses it too. Zazo says it in XYZ, in a bubble over his head. *(tap)*
+   4. Benji translates it for you in English, in a bubble over **his** head. Then you can type again.
 
 6. **The tour.** Ask *"Where are the other people?"* and Zazo explains they went on a 3-day vacation, and offers to show you around. Say *"yes"* or *"show me around"* and the place changes: his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
 
-Next time you visit, the start screen says **Continue as [your name]**, and Zazo welcomes you back.
+Phones are made to be held upright. If a phone is turned on its side, the game asks you to turn it back.
 
 ### The flow in a picture
 
@@ -233,24 +233,25 @@ tribezo/
     public/
       characters/           Zazo's and Benji's poses (zazo-idle.webp, benji-talking.webp, ...)
       scenes/               the 8 backgrounds
+      textures/grain.png    film grain laid over the whole scene
       music/                background music (add your own, see Phase 4)
     src/
       lib/
         content.js            all the words, the story, poses, scenes, and music in one place
         api.js                talks to the C server
         zazo.js               picks what Zazo says back
-        visitor.js            keeps the visitor's name in this browser only
+        visitor.js            checks the visitor's name
         music.js              plays music and fades between songs
       hooks/
-        useFrame.js           the counter for the stop-motion wobble
         useTypewriter.js      types speech out a few letters at a time
         useLenis.js           smooth scrolling
       components/
-        Scene.jsx             the background picture, with fades and parallax
-        Hero.jsx              the start screen
+        Scene.jsx             the background, plus the front flowers and grain
+        NameScreen.jsx        the first screen, which asks for your name
+        Hero.jsx              the title screen
         StoryCard.jsx         the story captions, dots, Next, and Skip
-        NameForm.jsx          the box where you type your name
-        Character.jsx         shows Zazo or Benji in a pose
+        Character.jsx         shows Zazo or Benji, lit to match the scene
+        RotateNotice.jsx      asks phone users to hold the phone upright
         SpeechBubble.jsx      a speech bubble
         ChatBox.jsx           the liquid glass box where you type
         HistoryPanel.jsx      the list of everything said
@@ -259,6 +260,8 @@ tribezo/
         NotFound.jsx          the page for a wrong address
     index.html
     vite.config.js        ports, the /api pass-through, and the security rules
+  tools/
+    cut_out_characters.py cuts the poses out of a character sheet with clean edges
   .gitignore            keeps built files and secrets off GitHub
   README.md
 ```
@@ -486,18 +489,17 @@ One honest note: anything that runs in a browser can be looked at with the brows
 
   | Step | Place | What happens |
   |---|---|---|
+  | Name | Mountain meadow | *"Welcome, traveler. What's your name?"* (added in round 2) |
   | Start | Mountain meadow | The title flips from backwards to forwards. **Begin**. |
   | 1 | Beach | *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."* |
   | 2 | Jungle path | Zazo walks in and waves: `olleH, relevart! emocleW!` *"Meet Zazo, leader of the islands. He is warm, kind, and always happy to see a visitor."* |
   | 3 | Village | Zazo is puzzled: `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."* |
   | 4 | Village | Benji walks in and explains how he will help. *"Luckily, someone here speaks both languages."* |
-  | 5 | Village | Benji asks for your name. |
-  | 6 | Village | Zazo greets you by name, backwards. The chat starts. |
+  | 5 | Village | Zazo greets you by name, backwards. Tap, and Benji translates. The chat starts. |
 
   - One tap per step. **Next** has the keyboard focus, so Enter works too.
-  - **Skip** is always there. It goes straight to the name, because the story needs your name.
+  - **Skip** is always there. It goes straight to Zazo's greeting.
   - Dots show how far along you are.
-  - If you have been here before, **Continue as [name]** skips the story, and Zazo welcomes you back. **Not [name]? Start fresh** forgets the name and plays the story again.
   - The **replay** button at the top plays the story again.
   - The Zazo lines in the story were made with the real C stack (`make demo`), so they match exactly.
 - **Talking to Zazo** (`zazo.js`). For now, Zazo picks his answer from a fixed list in `content.js`. In Phase 5 an AI model will write his answers instead.
@@ -555,18 +557,49 @@ Pixabay music can be used without a credit line. Kevin MacLeod's music can be us
 
 #### Security in Phase 4
 
-- **Your name stays in this browser.** It is kept in `localStorage` and never saved on a server. The C server reverses the greeting and forgets it.
+- **Your name is not saved anywhere.** It is only kept while the page is open (since round 2). The C server reverses the greeting and forgets it.
 - **Names are checked.** 1 to 20 characters, letters from any language, spaces, dots, dashes, and apostrophes only. They are always shown as plain text.
-- **Blocked storage is fine.** If the browser blocks storage (like some private windows), the site still works. The name is just not remembered next time.
 - **Music is local only.** The security rules now allow sound files, but only from this website (`media-src 'self'`).
 - **No new outside connections.** All pictures and music load from the website itself.
 
 #### Things I noticed while building Phase 4
 
 - **The crossfade got stuck at first.** The old song faded to a low volume but never paused. howler.js did not always send its "fade finished" signal when two fades ran at the same time. Now a timer pauses the old song once its fade time is over.
-- **One picture per pose.** Real stop-motion needs 2 to 3 small changes of each pose. The wobble covers it for now. More frames can be added later with no code changes to the story.
+- **One picture per pose.** Real stop-motion needs 2 to 3 small changes of each pose. More frames can be added later with no code changes to the story.
 - **Style.** The clay characters and the voxel backgrounds come from different styles, but the shadows and the tilt-shift blur help them sit together.
 - **"3-day" becomes "3-yad"**, because numbers stay in place and only the letters flip.
+
+#### Round 2 changes
+
+After trying Phase 4, I asked for these changes:
+
+| What I asked for | What changed |
+|---|---|
+| Benji's translation above Benji's head | Zazo's bubble shows only what Zazo says, in XYZ. Benji's translation now has its own bubble above Benji. |
+| Only the dialogue changes on a tap | The talk is a list of lines shown one at a time. A tap (anywhere, or Enter, Space, or →) finishes the line being typed, or shows the next one. Nothing else moves. A **Tap to continue** button sits where the chat box is until the talk is done. |
+| No shaking | The wobble, the bob, and the hop are gone. Poses now fade into each other in a quarter of a second. |
+| No white lines around the characters | The poses were cut out again with a better script (`tools/cut_out_characters.py`, using Pillow and NumPy). It shrinks the edge by 2 pixels to drop the grey-white outline, fills the edge with the colors just inside it ("color bleed"), removes larger grey gaps between arms and bodies, and softens the edge. |
+| Characters sized for each background | Each scene has a `scale`, like 1.08 inside the hut and 0.95 at the village and the lookout. |
+| Laptop first | Characters are about two thirds of the screen height on a laptop (`--character-height` in `index.css`). Phones held upright get a smaller size. |
+| Phones upright only | A phone turned on its side (a touch screen that is short and wide) sees *"Please turn your phone upright"* until it is turned back. Laptops and tablets are not affected. |
+| Always ask the name first, with an empty box | The first screen asks *"What's your name?"* with no hint text in the box. The name is asked on every visit and is not saved. Then the title screen, then the story, then the game. |
+| Make the characters blend with each background's light | See the table below. |
+
+**How the characters blend in.** Everything is done with the browser's own CSS (filters, blend modes, and masks) through Tailwind, so no extra library is needed:
+
+| Trick | What it does |
+|---|---|
+| Color filter per scene | Matches brightness and color. For example, darker and less colorful at night. |
+| Scene light over the character | A colored light (warm gold in the hut, green in the jungle, fire orange at night) is laid over the character. The character's own picture is used as a mask, so only the character is colored. |
+| Moonlight | At night, a blue shade is added too. |
+| Shade on the far side | The side away from the light is a little darker. |
+| Rim light | A thin line of light on the edge that faces the sun. At the campfire, both characters are lit from the fire between them. |
+| Ground shadow | A soft shadow under the feet, darker in shady scenes. |
+| Front flowers | The blurry flowers at the bottom of each background are drawn again in front of the feet, so the characters stand in the scene instead of on top of it. |
+| Film grain | A fine grain over the whole picture, characters included, so the clay and the voxel worlds share one texture. |
+| Soft edges | A gentle dark vignette around the screen, like a camera lens. |
+
+Each scene's settings live in `content.js`, under `scenes`, so they are easy to adjust.
 
 ### Phase 5: Natural conversation with AI (later)
 

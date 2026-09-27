@@ -8,51 +8,99 @@ export const MAX_MESSAGE_LENGTH = 2000;
 // The longest name someone can pick.
 export const MAX_NAME_LENGTH = 20;
 
-// How many times per second the characters wobble, for a stop-motion look.
-export const FRAMES_PER_SECOND = 8;
-
 // ---------- Characters ----------
 
 // Each pose is one picture. Benji's pictures are flipped so he faces
 // Zazo, because Benji stands on the right and Zazo on the left.
+// "shape" is the width and height of every picture, so a character
+// keeps the same size when the pose changes.
 const pose = (who, name) => `/characters/${who}-${name}.webp`;
+const posesFor = (who) =>
+  Object.fromEntries(
+    ["idle", "talking", "welcome", "pointing", "laughing", "confused"].map((name) => [name, pose(who, name)])
+  );
 
 export const characters = {
-  zazo: {
-    name: "Zazo",
-    poses: {
-      idle: pose("zazo", "idle"),
-      talking: pose("zazo", "talking"),
-      welcome: pose("zazo", "welcome"),
-      pointing: pose("zazo", "pointing"),
-      laughing: pose("zazo", "laughing"),
-      confused: pose("zazo", "confused"),
-    },
-  },
-  benji: {
-    name: "Benji",
-    poses: {
-      idle: pose("benji", "idle"),
-      talking: pose("benji", "talking"),
-      welcome: pose("benji", "welcome"),
-      pointing: pose("benji", "pointing"),
-      laughing: pose("benji", "laughing"),
-      confused: pose("benji", "confused"),
-    },
-  },
+  zazo: { name: "Zazo", shape: "398 / 715", poses: posesFor("zazo") },
+  benji: { name: "Benji", shape: "434 / 714", poses: posesFor("benji") },
 };
 
 // ---------- Scenes ----------
 
+// Every scene has its picture and a "look" that makes the characters
+// match its light, so they feel like they are really standing there:
+//
+//   scale      how big the characters are here (1 is normal)
+//   filter     color changes for the characters (brightness, saturation…)
+//   tint       colored light laid over the characters
+//   shade      a second, darker light (only at night)
+//   sun        which side the light comes from: "left", "right", or
+//              "middle" (like a campfire between them)
+//   rim        the color of the thin line of light on the sunny edge
+//   shadow     how dark the shadow under their feet is (0 to 1)
+//   flowers    how much of the bottom of the picture is drawn again in
+//              front of their feet, so they stand in the flowers (0 to 1)
+const day = {
+  scale: 1,
+  filter: "brightness(1.03) saturate(1.06)",
+  tint: { color: "#ffe9c4", blend: "soft-light", opacity: 0.35 },
+  shade: null,
+  sun: "left",
+  rim: "rgba(255, 244, 214, 0.6)",
+  shadow: 0.42,
+  flowers: 0.13,
+};
+
 export const scenes = {
-  "hero-meadow": "/scenes/hero-meadow.webp",
-  "island-arrival": "/scenes/island-arrival.webp",
-  "jungle-path": "/scenes/jungle-path.webp",
-  village: "/scenes/village.webp",
-  "family-hut": "/scenes/family-hut.webp",
-  waterfall: "/scenes/waterfall.webp",
-  lookout: "/scenes/lookout.webp",
-  "fire-camp": "/scenes/fire-camp.webp",
+  "hero-meadow": { src: "/scenes/hero-meadow.webp", look: day },
+  "island-arrival": {
+    src: "/scenes/island-arrival.webp",
+    look: { ...day, tint: { color: "#fff0cc", blend: "soft-light", opacity: 0.35 } },
+  },
+  "jungle-path": {
+    src: "/scenes/jungle-path.webp",
+    look: {
+      ...day,
+      filter: "brightness(0.96) saturate(1.05)",
+      tint: { color: "#bfe28f", blend: "soft-light", opacity: 0.38 },
+      rim: "rgba(236, 255, 200, 0.5)",
+      shadow: 0.5,
+    },
+  },
+  village: { src: "/scenes/village.webp", look: { ...day, scale: 0.95 } },
+  "family-hut": {
+    src: "/scenes/family-hut.webp",
+    look: {
+      ...day,
+      scale: 1.08,
+      filter: "brightness(0.98) saturate(1.1) sepia(0.08)",
+      tint: { color: "#ffb867", blend: "soft-light", opacity: 0.45 },
+      rim: "rgba(255, 206, 132, 0.65)",
+      shadow: 0.55,
+      flowers: 0.1,
+    },
+  },
+  waterfall: {
+    src: "/scenes/waterfall.webp",
+    look: { ...day, tint: { color: "#d8f2ff", blend: "soft-light", opacity: 0.32 }, rim: "rgba(236, 250, 255, 0.6)" },
+  },
+  lookout: {
+    src: "/scenes/lookout.webp",
+    look: { ...day, scale: 0.95, filter: "brightness(1.05) saturate(1.05)", shadow: 0.36 },
+  },
+  "fire-camp": {
+    src: "/scenes/fire-camp.webp",
+    look: {
+      ...day,
+      scale: 0.95,
+      filter: "brightness(0.64) saturate(0.85) contrast(1.06)",
+      tint: { color: "#ff9a45", blend: "soft-light", opacity: 0.6 },
+      shade: { color: "#2d4180", blend: "multiply", opacity: 0.35 },
+      sun: "middle",
+      rim: "rgba(255, 160, 72, 0.8)",
+      shadow: 0.62,
+    },
+  },
 };
 
 // ---------- The start screen ----------
@@ -94,19 +142,26 @@ export const story = [
   },
 ];
 
+// ---------- The name screen ----------
+
+export const nameScreen = {
+  title: "Welcome, traveler.",
+  question: "What's your name?",
+  badName: "Please use 1 to 20 letters.",
+};
+
 // ---------- Benji's lines ----------
 
 export const benjiLines = {
-  askName: "First, what should I call you?",
-  badName: "Hmm, try a name with 1 to 20 letters.",
   relaying: "Let me tell him…",
   error: "I can't reach Zazo right now. Please try again in a moment.",
 };
 
-// What Zazo says to greet you. {name} is swapped for your name.
-export const greetings = {
-  newVisitor: "Hello, {name}! Welcome to my islands!",
-  returning: "Welcome back, {name}! The islands missed you!",
+// What Zazo says when the story ends, and how Benji explains it.
+// {name} is swapped for your name.
+export const greeting = {
+  zazo: "Hello, {name}! Welcome to my islands!",
+  benji: "He says, “Hello, {name}! Welcome to my islands!” Go on, say something to him.",
 };
 
 // ---------- What Zazo says back ----------

@@ -6,10 +6,12 @@ import { useTypewriter } from "../hooks/useTypewriter.js";
 // whole text at once, so they do not read it letter by letter.
 //
 // side: "left" or "right", which side of the screen the speaker is on.
-// label: a small title above the text, like "Benji tells Zazo".
-// children: anything to show under the text, like a translation or buttons.
-export default function SpeechBubble({ text, side = "left", label, onDone, children }) {
-  const shown = useTypewriter(text, onDone);
+// label: a small title above the text, like "Benji translates".
+// showAll: true when the visitor tapped, so the rest of the text appears at once.
+// hint: a small line at the bottom, like "Tap to continue".
+export default function SpeechBubble({ text, side = "left", label, onDone, showAll, hint }) {
+  const shown = useTypewriter(text, onDone, showAll);
+  const finished = shown.length === text.length;
 
   return (
     <motion.div
@@ -38,7 +40,11 @@ export default function SpeechBubble({ text, side = "left", label, onDone, child
         {shown}
       </p>
 
-      {children}
+      {hint && finished && (
+        <p aria-hidden="true" className="mt-2 text-right text-xs font-medium text-ink-soft">
+          {hint} ▸
+        </p>
+      )}
 
       {/* The little tail pointing down at the speaker */}
       <span

@@ -15,6 +15,16 @@
   --ember: #d9793a;
 
   color-scheme: dark;
+
+  /* How tall the characters are. Set for laptops first. */
+  --character-height: min(66svh, 680px);
+}
+
+/* Phones, held upright */
+@media (max-width: 640px) {
+  :root {
+    --character-height: 40svh;
+  }
 }
 
 @layer base {

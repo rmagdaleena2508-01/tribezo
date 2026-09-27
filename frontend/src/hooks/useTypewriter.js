@@ -5,22 +5,22 @@ const TICK_MS = 40;
 const LONGEST_MS = 3000; // even a long paragraph finishes in about 3 seconds
 
 // Show text a few letters at a time, like someone speaking.
+// If showAll becomes true (the visitor tapped), the rest appears at once.
 // Calls onDone once all the text is showing.
-export function useTypewriter(text, onDone) {
+export function useTypewriter(text, onDone, showAll = false) {
   const reduceMotion = useReducedMotion();
   const [count, setCount] = useState(0);
 
   // Split into real characters, so letters like "é" or emoji are never cut in half.
   const letters = Array.from(text);
+  const total = letters.length;
 
   // Keep the latest onDone without restarting the typing when it changes.
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
-    const total = Array.from(text).length;
-
-    if (reduceMotion || total === 0) {
+    if (reduceMotion || showAll || total === 0) {
       setCount(total);
       onDoneRef.current?.();
       return;
@@ -41,7 +41,7 @@ export function useTypewriter(text, onDone) {
     }, TICK_MS);
 
     return () => clearInterval(timer);
-  }, [text, reduceMotion]);
+  }, [text, total, reduceMotion, showAll]);
 
   return letters.slice(0, count).join("");
 }
