@@ -9,7 +9,8 @@ import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
-import { benjiLines, characters, greeting, hero, scenes, story } from "../lib/content.js";
+import { benjiLines, characters, greeting, hero, nameScreen, scenes, story } from "../lib/content.js";
+import { useKeyboard } from "../hooks/useKeyboard.js";
 import { reverseText } from "../lib/api.js";
 import { zazoReply } from "../lib/zazo.js";
 import { hasMusic, isMuted, playForScene, setMuted, startMusic } from "../lib/music.js";
@@ -29,12 +30,12 @@ function preload(urls) {
 let nextId = 1;
 
 // The page moves through these stages in order:
-//   name   ask for the visitor's name (always, on every visit)
-//   hero   the title screen
-//   story  the short story, one step per tap
+//   hero   the Tribezo title screen
+//   story  the short story that introduces Zazo and Benji, one step per tap
+//   name   Benji asks for your name (every visit, starting with an empty box)
 //   chat   you talk to Zazo through Benji
 export default function Home() {
-  const [stage, setStage] = useState("name");
+  const [stage, setStage] = useState("hero");
   const [step, setStep] = useState(0);
   const [scene, setScene] = useState(hero.scene);
   const [name, setName] = useState("");
@@ -56,6 +57,7 @@ export default function Home() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [muted, setMutedState] = useState(isMuted);
   const historyButton = useRef(null);
+  const keyboardOpen = useKeyboard();
 
   // Where Zazo's tour is, and which fallback answer is next.
   const memory = useRef({ tourStop: 0, fallback: 0 });
@@ -133,13 +135,12 @@ export default function Home() {
     tap();
   }
 
-  // ---------- Name, title, and story ----------
+  // ---------- Title, story, and name ----------
 
-  function onName(newName) {
-    setName(newName);
-    startMusic(hero.scene); // the Continue press is the tap browsers need before sound
+  function begin() {
+    startMusic(hero.scene); // the Begin press is the tap browsers need before sound
     preload(Object.values(scenes).map((s) => s.src));
-    setStage("hero");
+    startStory();
   }
 
   function showStep(index) {
@@ -165,13 +166,33 @@ export default function Home() {
     if (step < story.length - 1) {
       showStep(step + 1);
     } else {
-      startChat();
+      askName();
     }
+  }
+
+  // After the story, Benji asks for your name. If you watch the story
+  // again later, he already knows it.
+  function askName() {
+    if (name) {
+      startChat(name);
+      return;
+    }
+    round.current++;
+    setStage("name");
+    setScene("village");
+    setZazoRest("idle");
+    setBenjiRest("idle");
+    say([{ who: "benji", text: nameScreen.benjiAsks, pose: "welcome" }]);
+  }
+
+  function onName(newName) {
+    setName(newName);
+    startChat(newName);
   }
 
   // The story is over. Zazo greets you by name, backwards, and Benji
   // tells you what he said. This is the first time the stack is used.
-  async function startChat() {
+  async function startChat(visitorName) {
     const thisRound = ++round.current;
     setStage("chat");
     setScene("village");
@@ -180,7 +201,7 @@ export default function Home() {
     say([]);
     setBusy(true);
 
-    const english = greeting.zazo.replaceAll("{name}", name);
+    const english = greeting.zazo.replaceAll("{name}", visitorName);
     try {
       const [answer] = await Promise.all([reverseText(english), wait(400)]);
       if (thisRound !== round.current) return;
@@ -188,7 +209,7 @@ export default function Home() {
         { who: "zazo", text: answer.xyz, pose: "laughing" },
         {
           who: "benji",
-          text: greeting.benji.replaceAll("{name}", name),
+          text: greeting.benji.replaceAll("{name}", visitorName),
           pose: "welcome",
           label: "Benji translates",
         },
@@ -255,8 +276,8 @@ export default function Home() {
 
   // ---------- The page ----------
 
-  const showZazo = stage === "chat" || (stage === "story" && step >= 1);
-  const showBenji = stage === "chat" || (stage === "story" && step >= 3);
+  const showZazo = stage === "chat" || stage === "name" || (stage === "story" && step >= 1);
+  const showBenji = stage === "chat" || stage === "name" || (stage === "story" && step >= 3);
   const zazoPose = line?.who === "zazo" ? line.pose : zazoRest;
   const benjiPose = line?.who === "benji" ? line.pose : benjiRest;
   const hint = stage === "chat" && moreLines ? "Tap to continue" : undefined;
@@ -267,6 +288,9 @@ export default function Home() {
 
   function bubbleFor(who, side) {
     if (line?.who !== who) return null;
+    // While the phone keyboard is open there is very little room, so the
+    // bubbles step aside. They come back when the keyboard closes.
+    if (keyboardOpen) return null;
     return (
       <SpeechBubble
         key={line.id}
@@ -281,7 +305,8 @@ export default function Home() {
   }
 
   return (
-    <main className="relative h-[100svh] select-none overflow-hidden" onClick={onSceneClick}>
+    // "fixed inset-0" keeps the whole game still when the phone keyboard opens.
+    <main className="fixed inset-0 select-none overflow-hidden" onClick={onSceneClick}>
       <Scene scene={scene} layer="back" />
 
       {/* Zazo stands in the bottom left corner. */}
@@ -329,9 +354,9 @@ export default function Home() {
         <Scene scene={scene} layer="front" />
       </div>
 
-      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6">
-        {stage === "story" || stage === "chat" ? (
-          <p className="font-serif text-3xl font-semibold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] sm:text-4xl">
+      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6 short:py-2">
+        {stage !== "hero" ? (
+          <p className="title-text font-display text-3xl font-bold tracking-tight sm:text-4xl short:hidden">
             Tribezo
           </p>
         ) : (
@@ -339,13 +364,13 @@ export default function Home() {
         )}
 
         <div className="flex items-center gap-2">
-          {hasMusic && stage !== "name" && (
+          {hasMusic && (
             <button
               type="button"
               onClick={toggleMute}
               aria-label={muted ? "Turn music on" : "Turn music off"}
               aria-pressed={muted}
-              className="glass-button grid h-11 w-11 place-items-center rounded-full"
+              className="glass-button grid h-11 w-11 place-items-center rounded-full short:h-9 short:w-9"
             >
               {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
             </button>
@@ -356,7 +381,7 @@ export default function Home() {
                 type="button"
                 onClick={startStory}
                 aria-label="Watch the story again"
-                className="glass-button grid h-11 w-11 place-items-center rounded-full"
+                className="glass-button grid h-11 w-11 place-items-center rounded-full short:h-9 short:w-9"
               >
                 <RotateCcw size={18} />
               </button>
@@ -364,7 +389,7 @@ export default function Home() {
                 ref={historyButton}
                 type="button"
                 onClick={() => setHistoryOpen(true)}
-                className="glass-button flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium"
+                className="glass-button flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold short:h-9"
               >
                 <ScrollText size={18} />
                 <span>History</span>
@@ -379,19 +404,23 @@ export default function Home() {
         </div>
       </header>
 
-      {stage === "name" && <NameScreen onDone={onName} />}
-      {stage === "hero" && <Hero name={name} onBegin={startStory} />}
+      {stage === "hero" && <Hero onBegin={begin} />}
 
-      {/* The glass panel at the bottom: the story card, a Continue button,
-          or the chat box. */}
-      <div className="absolute inset-x-0 bottom-4 z-20 px-3 sm:bottom-6">
+      {/* The glass panel at the bottom: the story card, the name box, a
+          Continue button, or the chat box. When the phone keyboard is open,
+          it sits just above the keyboard. */}
+      <div
+        className="absolute inset-x-0 z-20 px-3 transition-[bottom] duration-200"
+        style={{ bottom: `calc(var(--keyboard-inset) + ${keyboardOpen ? "8px" : "clamp(8px, 3svh, 24px)"})` }}
+      >
         <div className="mx-auto max-w-xl">
           {stage === "story" && (
-            <StoryCard caption={story[step].caption} step={step} steps={story.length} onNext={tap} onSkip={startChat} />
+            <StoryCard caption={story[step].caption} step={step} steps={story.length} onNext={tap} onSkip={askName} />
           )}
+          {stage === "name" && <NameScreen onDone={onName} />}
           {stage === "chat" &&
             (moreLines ? (
-              <button type="button" onClick={tap} autoFocus className="glass-button mx-auto block rounded-full px-8 py-3 font-medium">
+              <button type="button" onClick={tap} autoFocus className="glass-button mx-auto block rounded-full px-8 py-3 font-display font-semibold short:py-2">
                 Tap to continue
               </button>
             ) : (

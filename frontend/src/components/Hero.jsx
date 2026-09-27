@@ -4,10 +4,10 @@ import { hero } from "../lib/content.js";
 
 const TITLE = "Tribezo";
 
-// The title screen, shown after the name.
+// The first screen: the Tribezo title.
 // The title first shows up backwards ("ozebirT"), then the letters slide
 // into place, which shows the whole idea of the game in one second.
-export default function Hero({ name, onBegin }) {
+export default function Hero({ onBegin }) {
   const reduceMotion = useReducedMotion();
   const [flipped, setFlipped] = useState(!reduceMotion);
 
@@ -22,11 +22,9 @@ export default function Hero({ name, onBegin }) {
 
   return (
     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
-      <p className="mb-2 text-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Hi, {name}. Welcome to</p>
-
       <h1
         aria-label={TITLE}
-        className="flex font-serif text-[clamp(3.5rem,14vw,9rem)] font-semibold leading-none tracking-tight text-white drop-shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
+        className="title-text flex font-display text-[clamp(3.5rem,14vw,9rem)] font-bold leading-none tracking-tight short:text-[clamp(3rem,18vh,6rem)]"
       >
         {letters.map((letter) => (
           <motion.span key={letter} layout aria-hidden="true" transition={{ type: "spring", stiffness: 260, damping: 22 }}>
@@ -39,7 +37,7 @@ export default function Hero({ name, onBegin }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.6, duration: 0.6 }}
-        className="mt-4 max-w-md text-lg text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:text-xl"
+        className="title-text mt-4 max-w-md font-display text-lg font-medium sm:text-xl short:mt-2 short:text-base"
       >
         {hero.tagline}
       </motion.p>
@@ -48,9 +46,9 @@ export default function Hero({ name, onBegin }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2, duration: 0.6 }}
-        className="mt-8"
+        className="mt-8 short:mt-4"
       >
-        <button type="button" onClick={onBegin} autoFocus className="glass-button rounded-full px-10 py-3.5 text-lg font-medium">
+        <button type="button" onClick={onBegin} autoFocus className="glass-button rounded-full px-10 py-3.5 font-display text-lg font-semibold short:py-2.5">
           {hero.begin}
         </button>
       </motion.div>

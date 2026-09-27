@@ -106,15 +106,15 @@ These are the rules for turning English into XYZ:
 
 Here is what happens when you use Tribezo.
 
-1. **Your name.** The first screen asks *"What's your name?"* The box starts empty. It asks every time you visit.
+1. **The title screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
 
-2. **The title screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
-
-3. **A short story (about 40 seconds).** One tap per step:
+2. **The splash story (about 40 seconds).** It introduces Zazo, the problem, and Benji. One tap per step:
    1. A beach: *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
    2. A jungle path: Zazo walks in and waves. *"Meet Zazo, leader of the islands."* He says `olleH, relevart! emocleW!`
    3. The village: Zazo looks puzzled and says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."*
    4. Benji walks in: *"Hi, I'm Benji! Zazo speaks XYZ, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you."*
+
+3. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The name box starts empty, with no hint text. It asks every time you visit.
 
 4. **The first reverse.** Your name goes to the C server. Zazo laughs and greets you backwards, like `olleH, anilegnavE! emocleW ot ym sdnalsi!` Tap, and Benji tells you what he said.
 
@@ -126,7 +126,7 @@ Here is what happens when you use Tribezo.
 
 6. **The tour.** Ask *"Where are the other people?"* and Zazo explains they went on a 3-day vacation, and offers to show you around. Say *"yes"* or *"show me around"* and the place changes: his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
 
-Phones are made to be held upright. If a phone is turned on its side, the game asks you to turn it back.
+On a phone, the game is played sideways (the wide way), like most games. If the phone is held upright, the game asks you to turn it.
 
 ### The flow in a picture
 
@@ -166,6 +166,7 @@ Phones are made to be held upright. If a phone is turned on its side, the game a
 | **Framer Motion** | Animates the characters. |
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
+| **Google Fonts** | Fredoka for titles, Nunito for dialogue. |
 | **howler.js** | Plays the background music and fades between songs when the place changes. |
 
 ### Backend (the part that does the work)
@@ -244,14 +245,15 @@ tribezo/
         music.js              plays music and fades between songs
       hooks/
         useTypewriter.js      types speech out a few letters at a time
+        useKeyboard.js        keeps the chat box above the phone keyboard
         useLenis.js           smooth scrolling
       components/
         Scene.jsx             the background, plus the front flowers and grain
-        NameScreen.jsx        the first screen, which asks for your name
         Hero.jsx              the title screen
+        NameScreen.jsx        the name box, shown after the story
         StoryCard.jsx         the story captions, dots, Next, and Skip
         Character.jsx         shows Zazo or Benji, lit to match the scene
-        RotateNotice.jsx      asks phone users to hold the phone upright
+        RotateNotice.jsx      asks phone users to turn the phone sideways
         SpeechBubble.jsx      a speech bubble
         ChatBox.jsx           the liquid glass box where you type
         HistoryPanel.jsx      the list of everything said
@@ -581,8 +583,8 @@ After trying Phase 4, I asked for these changes:
 | No white lines around the characters | The poses were cut out again with a better script (`tools/cut_out_characters.py`, using Pillow and NumPy). It shrinks the edge by 2 pixels to drop the grey-white outline, fills the edge with the colors just inside it ("color bleed"), removes larger grey gaps between arms and bodies, and softens the edge. |
 | Characters sized for each background | Each scene has a `scale`, like 1.08 inside the hut and 0.95 at the village and the lookout. |
 | Laptop first | Characters are about two thirds of the screen height on a laptop (`--character-height` in `index.css`). Phones held upright get a smaller size. |
-| Phones upright only | A phone turned on its side (a touch screen that is short and wide) sees *"Please turn your phone upright"* until it is turned back. Laptops and tablets are not affected. |
-| Always ask the name first, with an empty box | The first screen asks *"What's your name?"* with no hint text in the box. The name is asked on every visit and is not saved. Then the title screen, then the story, then the game. |
+| Phones upright only | *(Changed in round 3: phones are now played sideways.)* |
+| Always ask the name, with an empty box | The name box has no hint text. The name is asked on every visit and is not saved. *(Round 3 moved it to after the story.)* |
 | Make the characters blend with each background's light | See the table below. |
 
 **How the characters blend in.** Everything is done with the browser's own CSS (filters, blend modes, and masks) through Tailwind, so no extra library is needed:
@@ -600,6 +602,55 @@ After trying Phase 4, I asked for these changes:
 | Soft edges | A gentle dark vignette around the screen, like a camera lens. |
 
 Each scene's settings live in `content.js`, under `scenes`, so they are easy to adjust.
+
+#### Round 3 changes
+
+| What I asked for | What changed |
+|---|---|
+| The order: title, then splash story, then the name | The game now opens on the Tribezo title screen. **Begin** starts the story that introduces Zazo and Benji. After the story, Benji asks for your name in an empty box. Then Zazo greets you and the game starts. |
+| Play sideways on phones | People scroll with their phone upright, but games are played sideways. A phone held upright (a narrow touch screen) now sees *"Please turn your phone sideways"*. Laptops and tablets are not affected. |
+| A short-screen layout for phones held sideways | On screens shorter than 500 pixels, the characters, the speech bubbles, the story card, and the buttons get smaller, and the Tribezo word at the top is hidden to make room. |
+| The keyboard should work well on phones | See below. |
+| Fonts that fit the game | See below. |
+
+**How the phone keyboard works now**
+
+When a phone keyboard opens, the browser does not shrink the page. It only shrinks the part you can see (the "visual viewport"), so a box stuck to the bottom of the page ends up hidden behind the keyboard. Different browsers also handle this in different ways. So:
+
+1. The whole game is pinned to the screen (`position: fixed`), so the scene and the characters never jump or squash when the keyboard opens.
+2. `useKeyboard.js` uses the browser's `visualViewport` to work out how much of the screen the keyboard covers, and saves it in the CSS variable `--keyboard-inset`.
+3. The chat box and the name box sit that far up from the bottom, so they are always just above the keyboard.
+4. The page tells Chrome on Android to act the same way as Safari on iPhone (`interactive-widget=resizes-visual`), so there is one behavior to handle.
+5. While the keyboard is open, the speech bubbles step aside so they are not stuck behind the chat box. They come back when it closes.
+6. The keyboard shows a **Send** key, and sentences start with a capital letter. The name box starts names with capitals.
+7. After you send a message, the keyboard closes, so you can watch Zazo and Benji talk.
+8. Text in the boxes is 16 pixels, so iPhones do not zoom in when you tap them.
+
+I tested this by pretending the keyboard covered 190 pixels of a sideways phone screen. The chat box moved up above it and the scene stayed still. A real phone keyboard can't be opened in the desktop browser, so it still needs a try on a real phone.
+
+**Fonts**
+
+Tribezo looks like soft clay characters in a sunny, handmade island world. It is cozy and friendly, not serious. The research pointed to rounded fonts for this kind of game, with no more than two or three font families.
+
+| Use | Font | Why |
+|---|---|---|
+| Titles, captions, labels, buttons | **Fredoka** (Google Fonts) | Chunky and rounded, like the clay characters. It is the most-used free "bubbly" font, and it has many weights. |
+| Dialogue and chat | **Nunito** (Google Fonts) | Rounded like Fredoka, but calmer and very easy to read in longer text. The two fonts pair well. |
+| The stack counts | **JetBrains Mono** | A code font, for the DSA part. |
+
+The old fonts (Cormorant Garamond, a thin book serif, and Outfit) were from the portfolio and felt too formal for a game.
+
+**Font colors**
+
+| Where | Color |
+|---|---|
+| Big titles | Warm cream `#fff8ec` with a soft brown "clay" shadow under the letters |
+| Speech bubble text | Cocoa brown `#3a2618` on cream `#fbf4e4` (much easier on the eyes than black, with about 13 to 1 contrast) |
+| Zazo's labels | Burnt orange `#b9531f`, from his sash |
+| Benji's labels | Dark mustard `#8a5c0f`, from his hoodie |
+| Glass buttons and boxes | White with a light shadow |
+
+Text in the speech bubbles is semi-bold and at least 16 pixels on laptops, following game-UI advice on size and contrast.
 
 ### Phase 5: Natural conversation with AI (later)
 

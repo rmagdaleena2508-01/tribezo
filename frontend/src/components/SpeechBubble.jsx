@@ -19,12 +19,12 @@ export default function SpeechBubble({ text, side = "left", label, onDone, showA
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 6, scale: 0.96 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className={`relative w-[min(80vw,24rem)] rounded-2xl border-2 border-ink/80 bg-parchment px-4 py-3 text-ink shadow-[4px_5px_0_rgba(0,0,0,0.3)] ${
+      className={`relative w-[min(80vw,24rem)] rounded-2xl border-2 border-ink/70 bg-parchment px-4 py-3 text-ink shadow-[4px_5px_0_rgba(58,38,24,0.35)] short:w-[min(44vw,20rem)] short:px-3 short:py-2 ${
         side === "left" ? "origin-bottom-left" : "origin-bottom-right"
       }`}
     >
       {label && (
-        <p className="mb-1 text-[11px] font-medium uppercase tracking-widest text-ink-soft">{label}</p>
+        <p className={`mb-1 font-display text-xs font-semibold uppercase tracking-wider ${side === "left" ? "text-sash" : "text-mustard"}`}>{label}</p>
       )}
 
       <p className="sr-only" aria-live="polite">
@@ -35,13 +35,13 @@ export default function SpeechBubble({ text, side = "left", label, onDone, showA
       <p
         aria-hidden="true"
         data-lenis-prevent
-        className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-[15px] font-normal leading-snug sm:text-base"
+        className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-base font-semibold leading-snug short:max-h-24 short:text-sm"
       >
         {shown}
       </p>
 
       {hint && finished && (
-        <p aria-hidden="true" className="mt-2 text-right text-xs font-medium text-ink-soft">
+        <p aria-hidden="true" className="mt-2 text-right text-xs font-bold text-ink-soft short:mt-1">
           {hint} ▸
         </p>
       )}
@@ -49,7 +49,7 @@ export default function SpeechBubble({ text, side = "left", label, onDone, showA
       {/* The little tail pointing down at the speaker */}
       <span
         aria-hidden="true"
-        className={`absolute -bottom-[11px] h-5 w-5 rotate-45 border-b-2 border-r-2 border-ink/80 bg-parchment ${
+        className={`absolute -bottom-[11px] h-5 w-5 rotate-45 border-b-2 border-r-2 border-ink/70 bg-parchment ${
           side === "left" ? "left-12" : "right-12"
         }`}
       />

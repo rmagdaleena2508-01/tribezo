@@ -142,11 +142,11 @@ export const story = [
   },
 ];
 
-// ---------- The name screen ----------
+// ---------- Asking for the name (right after the story) ----------
 
 export const nameScreen = {
-  title: "Welcome, traveler.",
-  question: "What's your name?",
+  benjiAsks: "Before we go in, what should I call you?",
+  question: "Your name",
   badName: "Please use 1 to 20 letters.",
 };
 

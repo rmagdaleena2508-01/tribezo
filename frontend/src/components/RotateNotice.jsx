@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react";
 import { Smartphone } from "lucide-react";
 
-// Phones are held upright for Tribezo. A phone turned on its side
-// (a touch screen that is wider than tall and short) gets a message
-// asking to turn it back. Laptops and tablets are not affected.
-const PHONE_ON_ITS_SIDE = "(orientation: landscape) and (pointer: coarse) and (max-height: 540px)";
+// On a phone, Tribezo is played with the phone turned sideways (the wide
+// way), like most games. A phone held upright (a narrow touch screen)
+// gets a message asking to turn it. Laptops and tablets are not affected.
+const PHONE_UPRIGHT = "(orientation: portrait) and (pointer: coarse) and (max-width: 540px)";
 
 export default function RotateNotice() {
-  const [sideways, setSideways] = useState(() => window.matchMedia(PHONE_ON_ITS_SIDE).matches);
+  const [upright, setUpright] = useState(() => window.matchMedia(PHONE_UPRIGHT).matches);
 
   useEffect(() => {
-    const query = window.matchMedia(PHONE_ON_ITS_SIDE);
-    const onChange = () => setSideways(query.matches);
+    const query = window.matchMedia(PHONE_UPRIGHT);
+    const onChange = () => setUpright(query.matches);
     query.addEventListener("change", onChange);
     return () => query.removeEventListener("change", onChange);
   }, []);
 
-  if (!sideways) return null;
+  if (!upright) return null;
 
   return (
     <div role="alert" className="fixed inset-0 z-[100] grid place-items-center bg-night px-8 text-center">
       <div>
-        <Smartphone size={44} className="mx-auto mb-4 text-parchment" strokeWidth={1.6} />
-        <p className="font-serif text-3xl font-semibold text-parchment">Please turn your phone upright</p>
-        <p className="mt-2 text-parchment/75">Tribezo is made to be played with your phone held the tall way.</p>
+        <Smartphone size={44} className="mx-auto mb-4 rotate-90 text-parchment" strokeWidth={1.6} />
+        <p className="title-text font-display text-3xl font-semibold">Please turn your phone sideways</p>
+        <p className="mt-2 text-parchment/80">Tribezo is played with your phone held the wide way, like most games.</p>
       </div>
     </div>
   );

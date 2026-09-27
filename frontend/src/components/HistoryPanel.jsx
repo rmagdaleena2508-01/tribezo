@@ -42,7 +42,7 @@ export default function HistoryPanel({ open, onClose, entries }) {
             className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-parchment/10 bg-night/95 backdrop-blur-md"
           >
             <div className="flex items-center justify-between border-b border-parchment/10 px-5 py-4">
-              <h2 id="history-title" className="font-serif text-2xl font-semibold">
+              <h2 id="history-title" className="font-display text-2xl font-semibold">
                 What was said
               </h2>
               <button

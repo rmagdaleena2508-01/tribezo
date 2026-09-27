@@ -9,21 +9,27 @@
   --leaf: #3f6b45;
   --moss: #7c9a6a;
   --bark: #5a3d2b;
-  --parchment: #f6f1e4;
-  --ink: #1d231e;
-  --ink-soft: #4d574f;
+  --parchment: #fbf4e4;
+  --ink: #3a2618; /* warm cocoa brown, for text on the speech bubbles */
+  --ink-soft: #6b5040;
+  --cocoa: #3a2618;
+  --sash: #b9531f; /* Zazo's orange sash, darkened so text on cream stays readable */
+  --mustard: #8a5c0f; /* Benji's mustard hoodie, darkened the same way */
   --ember: #d9793a;
 
   color-scheme: dark;
 
   /* How tall the characters are. Set for laptops first. */
   --character-height: min(66svh, 680px);
+
+  /* How much of the screen the phone keyboard covers (set by useKeyboard). */
+  --keyboard-inset: 0px;
 }
 
-/* Phones, held upright */
-@media (max-width: 640px) {
+/* Short screens, like a phone held sideways */
+@media (max-height: 500px) {
   :root {
-    --character-height: 40svh;
+    --character-height: 56svh;
   }
 }
 
@@ -42,10 +48,13 @@
     margin: 0;
     background: var(--night);
     color: var(--parchment);
-    font-family: "Outfit", system-ui, sans-serif;
-    font-weight: 300;
-    line-height: 1.6;
-    overflow-x: hidden;
+    font-family: "Nunito", system-ui, sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
+    /* The game fills the screen and never scrolls, so the page does not
+       jump around when the phone keyboard opens. */
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   ::selection {
@@ -98,6 +107,14 @@
     border-radius: inherit;
     pointer-events: none;
     background: rgba(12, 30, 22, 0.22);
+  }
+
+  /* Big titles: warm cream with a soft brown "clay" shadow under them. */
+  .title-text {
+    color: #fff8ec;
+    text-shadow:
+      0 3px 0 rgba(90, 52, 24, 0.55),
+      0 10px 28px rgba(0, 0, 0, 0.35);
   }
 
   .glass-button {

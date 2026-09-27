@@ -12,13 +12,13 @@ export default function StoryCard({ caption, step, steps, onNext, onSkip }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="glass rounded-3xl px-5 pb-4 pt-5 sm:px-7"
+      className="glass rounded-3xl px-5 pb-4 pt-5 sm:px-7 short:px-4 short:pb-2.5 short:pt-3"
     >
-      <p aria-live="polite" className="font-serif text-xl font-medium leading-snug sm:text-2xl">
+      <p aria-live="polite" className="font-display text-xl font-medium leading-snug sm:text-2xl short:text-base">
         {caption}
       </p>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-4 flex items-center justify-between gap-3 short:mt-2">
         <button
           type="button"
           onClick={onSkip}

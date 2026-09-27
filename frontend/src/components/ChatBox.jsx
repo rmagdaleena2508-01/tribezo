@@ -13,6 +13,9 @@ export default function ChatBox({ onSend, disabled }) {
     if (!canSend) return;
     onSend(trimmed);
     setText("");
+    // On phones and tablets, close the keyboard so the characters can
+    // be seen while they talk.
+    if (window.matchMedia("(pointer: coarse)").matches) document.activeElement?.blur();
   }
 
   function onKeyDown(event) {
@@ -42,9 +45,11 @@ export default function ChatBox({ onSend, disabled }) {
         onKeyDown={onKeyDown}
         placeholder="Say something in English…"
         autoComplete="off"
+        autoCapitalize="sentences"
+        enterKeyHint="send"
         spellCheck="true"
         data-lenis-prevent
-        className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/75 focus:outline-none [field-sizing:content]"
+        className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base font-semibold text-white placeholder:font-medium placeholder:text-white/80 focus:outline-none [field-sizing:content] short:max-h-20"
       />
 
       {/* Only show the count when getting close to the limit. */}
