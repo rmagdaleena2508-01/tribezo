@@ -1,8 +1,8 @@
 # Tribezo
 
-**Talk to a friendly forest tribe that speaks in reverse.**
+**Talk to Zazo, the friendly leader of an island where every word comes out backwards.**
 
-Tribezo is a website. You type words in English. A helper turns your words around. Then a tribe in the forest talks back to you in their own language.
+Tribezo is a website. You type words in English. Benji, the translator, turns your words around. Then Zazo talks back to you in his own language.
 
 Their language is called **XYZ**. XYZ is English with every word reversed.
 
@@ -24,12 +24,12 @@ That is how Tribezo started, right there in class.
 
 ## What Is This Project About?
 
-In Tribezo, you meet two characters in a forest:
+In Tribezo, you visit a far-away island and meet two characters:
 
-1. **The Tribe Member.** They live in the forest. They are kind and friendly, but they do not know English. They only speak XYZ, which is reversed English.
-2. **The Translator.** He wears modern clothes. He knows English and XYZ, and he helps you talk to the tribe.
+1. **Zazo.** He is the leader of the islands. He is warm, kind, and always happy to see a visitor. But he does not know English. He only speaks XYZ, which is reversed English. Right now the rest of his people are away on a 3-day trip to another island to see their families, so Zazo is looking after everything by himself.
+2. **Benji.** He is the translator. He wears modern clothes, and he knows English and XYZ.
 
-You talk to the translator in English. He reverses your words and passes them to the tribe. The tribe replies to you.
+You talk to Benji in English. He reverses your words with a stack and tells Zazo. Zazo answers in XYZ, and Benji tells you what he said. Zazo can even show you around the island.
 
 ---
 
@@ -106,28 +106,27 @@ These are the rules for turning English into XYZ:
 
 Here is what happens when you use Tribezo.
 
-1. **You open the website.**
-   You see a forest with the tribe member and the translator standing in it.
+1. **The start screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
 
-2. **The translator says hello.**
-   He says something like this:
+2. **A short story (about 40 seconds).** One tap per step:
+   1. A beach: *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
+   2. A jungle path: Zazo walks in and waves. *"Meet Zazo, leader of the islands."* He says `olleH, relevart! emocleW!`
+   3. The village: Zazo looks puzzled and says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."*
+   4. Benji walks in: *"Hi, I'm Benji! Zazo speaks XYZ, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you."*
 
-   > "Meet the tribe. They are friendly, kind, and welcoming, but they don't know your language. They speak XYZ, which is English in reverse. You can talk to me in English. I will reverse your words and tell them, and they will speak back to you."
+3. **Your name.** Benji asks, *"First, what should I call you?"*
 
-3. **You type something.**
-   You type a word, a sentence, or even a whole paragraph in the box.
+4. **The first reverse.** Your name goes to the C server. Zazo laughs and greets you backwards, like `olleH, anilegnavE! emocleW ot ym sdnalsi!`, and Benji translates it.
 
-4. **You press send.**
-   Your words go to the **backend**. The backend is written in C. It uses a stack to reverse every word.
+5. **Talk to Zazo.**
+   1. You type English. Benji says *"Let me tell him…"*
+   2. The C server reverses your words, and Benji says them to Zazo in XYZ.
+   3. Zazo picks an answer. The C server reverses it too.
+   4. Zazo says it in XYZ, and Benji's translation shows under it.
 
-5. **The translator passes it on.**
-   The reversed words come back to the website, and the translator passes them to the tribe.
+6. **The tour.** Ask *"Where are the other people?"* and Zazo explains they went on a 3-day vacation, and offers to show you around. Say *"yes"* or *"show me around"* and the place changes: his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
 
-6. **The tribe talks back.**
-   The tribe member is animated and speaks your words in XYZ. Their reply shows on the screen.
-
-7. **Keep talking.**
-   You can keep typing and talking to the tribe.
+Next time you visit, the start screen says **Continue as [your name]**, and Zazo welcomes you back.
 
 ### The flow in a picture
 
@@ -146,10 +145,10 @@ Here is what happens when you use Tribezo.
    Website (frontend)
         |
         v
-   Translator tells the tribe
+   Benji tells Zazo
         |
         v
-   Tribe talks back in XYZ
+   Zazo answers in XYZ (reversed by the same stack), and Benji translates
 ```
 
 ---
@@ -167,6 +166,7 @@ Here is what happens when you use Tribezo.
 | **Framer Motion** | Animates the characters. |
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
+| **howler.js** | Plays the background music and fades between songs when the place changes. |
 
 ### Backend (the part that does the work)
 
@@ -178,14 +178,14 @@ Here is what happens when you use Tribezo.
 
 ### Art
 
-- **Tribe and translator characters.** Made with AI image tools, in a stop-motion style (claymation or paper cut-out).
-- **Forest background.** Sets the scene in the woods.
+- **Zazo and Benji.** Made with AI image tools, in a clay and felt stop-motion style. Each one has 6 poses: idle, talking, welcome, pointing, laughing, and confused.
+- **8 backgrounds.** Made with AI image tools, in a voxel style (built from little blocks) with a tilt-shift look: a mountain meadow, a beach, a jungle path, the village, a family hut, a waterfall, a lookout hill, and a campfire at night.
 
 ### Later
 
 | Tool | What it does |
 |---|---|
-| **Google Gemini API** (free tier) | Helps the tribe reply in a natural way. |
+| **Google Gemini API** (free tier) | Helps Zazo reply in a natural way. |
 
 ---
 
@@ -196,8 +196,8 @@ Here is what happens when you use Tribezo.
 | 1 | The C core (stack and reverse) | Done |
 | 2 | The connection (HTTP server in C) | Done |
 | 3 | The frontend (with placeholders) | Done |
-| 4 | The art | Next |
-| 5 | Natural conversation with AI | Not started |
+| 4 | The art, the story, and the music system | Done |
+| 5 | Natural conversation with AI | Next |
 | 6 | Changing scenes and poses | Not started |
 
 The plan for each phase is below.
@@ -231,22 +231,28 @@ tribezo/
     Makefile              make test, make test-server, make run, make demo
   frontend/             the website
     public/
-      characters/           pose pictures for the tribe and the translator (Phase 4)
-      scenes/               background pictures (Phase 4)
+      characters/           Zazo's and Benji's poses (zazo-idle.webp, benji-talking.webp, ...)
+      scenes/               the 8 backgrounds
+      music/                background music (add your own, see Phase 4)
     src/
       lib/
-        content.js            all the text, poses, scenes, and picture paths in one place
+        content.js            all the words, the story, poses, scenes, and music in one place
         api.js                talks to the C server
+        zazo.js               picks what Zazo says back
+        visitor.js            keeps the visitor's name in this browser only
+        music.js              plays music and fades between songs
       hooks/
-        useFrame.js           the flip-book counter for stop-motion
+        useFrame.js           the counter for the stop-motion wobble
         useTypewriter.js      types speech out a few letters at a time
         useLenis.js           smooth scrolling
       components/
-        ForestScene.jsx       the forest background with parallax
-        Character.jsx         shows a character in a pose
-        PlaceholderFigure.jsx the drawn characters used until the real art is ready
+        Scene.jsx             the background picture, with fades and parallax
+        Hero.jsx              the start screen
+        StoryCard.jsx         the story captions, dots, Next, and Skip
+        NameForm.jsx          the box where you type your name
+        Character.jsx         shows Zazo or Benji in a pose
         SpeechBubble.jsx      a speech bubble
-        ChatBox.jsx           the box where you type
+        ChatBox.jsx           the liquid glass box where you type
         HistoryPanel.jsx      the list of everything said
       pages/
         Home.jsx              the main page
@@ -405,8 +411,8 @@ curl -X POST --data-binary 'Welcome, friend! It costs $5.' http://127.0.0.1:8765
 #### What Phase 3 built
 
 - **The website** with the same tools as my portfolio. It runs on port `8766`. Vite passes every `/api` request to the C server on port `8765`.
-- **The forest** (`ForestScene.jsx`). It is drawn with shapes: sky, far trees, beams of light, near trees, the ground, fireflies, and big leaves in the front corners. Each layer moves a different amount when the mouse moves, so the forest feels deep. The trees are placed by a "random" formula that always gives the same answer, so the forest looks the same every time.
-- **The characters** (`Character.jsx` and `PlaceholderFigure.jsx`). Until the real art is ready, both characters are drawn with shapes that match the character descriptions: the translator's glasses, beard, mustard hoodie, and bag, and the tribe member's curly hair, leaf, face dots, beads, sash, and green wrap. They move like stop-motion:
+- **The forest** (`ForestScene.jsx`, replaced in Phase 4 by the real backgrounds). It is drawn with shapes: sky, far trees, beams of light, near trees, the ground, fireflies, and big leaves in the front corners. Each layer moves a different amount when the mouse moves, so the forest feels deep. The trees are placed by a "random" formula that always gives the same answer, so the forest looks the same every time.
+- **The characters** (`Character.jsx` and `PlaceholderFigure.jsx`, replaced in Phase 4 by the real art). Until the real art is ready, both characters are drawn with shapes that match the character descriptions: the translator's glasses, beard, mustard hoodie, and bag, and the tribe member's curly hair, leaf, face dots, beads, sash, and green wrap. They move like stop-motion:
   - 10 frames per second
   - a tiny wobble on every frame
   - the mouth opens and closes while talking
@@ -458,12 +464,109 @@ One honest note: anything that runs in a browser can be looked at with the brows
 - **Old answers:** if you restart the intro while a message is on its way, the late answer is now ignored instead of popping up in the middle of the intro.
 - **The translator pointed the wrong way** at first, away from the tribe. Fixed.
 
-### Phase 4: The art
+### Phase 4: The art, the story, and the music system — Done
 
 1. **Make the characters in order:** first a master picture of each character, then each pose, then 2 to 3 small changes of each pose for the stop-motion frames.
 2. **Clean up the pictures:** remove the backgrounds, and check that every picture is the same size and that the feet sit on the same line.
 3. **Connect them** in `content.js`.
 4. **Make the backgrounds:** `forest-entry` first, then the others.
+5. **Tell the story:** a short onboarding story that introduces the island, Zazo, the problem, and Benji, and then asks for your name.
+6. **Add music** that changes with the place.
+
+#### What Phase 4 built
+
+- **Characters.** Zazo stands in the bottom left corner. Benji stands in the bottom right corner.
+  - A small script cut the 6 poses out of each character sheet. It removed the grey background, including the small grey gaps between an arm and the head.
+  - Every pose sits on the same size canvas with the feet on the bottom edge, so a character does not jump when the pose changes.
+  - Benji's pictures are flipped so he faces Zazo, and his pointing pose points at Zazo.
+  - There is only one picture per pose, so the stop-motion look comes from a tiny wobble 8 times per second, a small bob while talking, and a hop when the pose changes.
+- **Backgrounds.** All 8 pictures are in `public/scenes/`. When the place changes, the new picture fades in over the old one. Each picture also drifts very slowly and moves a little with the mouse. The hut picture had a small mark in its top left corner from the image tool, so it was trimmed a little.
+- **Start screen** (`Hero.jsx`). The meadow picture, with the title flipping from `ozebirT` to `Tribezo`.
+- **The story** (about 40 seconds). It follows the research below: show the problem first, let a guide character ask your name inside the story, and make the first reverse happen right away.
+
+  | Step | Place | What happens |
+  |---|---|---|
+  | Start | Mountain meadow | The title flips from backwards to forwards. **Begin**. |
+  | 1 | Beach | *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."* |
+  | 2 | Jungle path | Zazo walks in and waves: `olleH, relevart! emocleW!` *"Meet Zazo, leader of the islands. He is warm, kind, and always happy to see a visitor."* |
+  | 3 | Village | Zazo is puzzled: `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."* |
+  | 4 | Village | Benji walks in and explains how he will help. *"Luckily, someone here speaks both languages."* |
+  | 5 | Village | Benji asks for your name. |
+  | 6 | Village | Zazo greets you by name, backwards. The chat starts. |
+
+  - One tap per step. **Next** has the keyboard focus, so Enter works too.
+  - **Skip** is always there. It goes straight to the name, because the story needs your name.
+  - Dots show how far along you are.
+  - If you have been here before, **Continue as [name]** skips the story, and Zazo welcomes you back. **Not [name]? Start fresh** forgets the name and plays the story again.
+  - The **replay** button at the top plays the story again.
+  - The Zazo lines in the story were made with the real C stack (`make demo`), so they match exactly.
+- **Talking to Zazo** (`zazo.js`). For now, Zazo picks his answer from a fixed list in `content.js`. In Phase 5 an AI model will write his answers instead.
+
+  | You say something like | Zazo says |
+  |---|---|
+  | "Where are the other people?" | They have gone on a 3-day vacation to another island to meet their families and relatives. I'm the only one taking care of the islands. Come, let me show you around! |
+  | "Yes", "show me around", "next" | The next stop on the tour, and the place changes |
+  | "I'm hungry" | Come to my hut! There is fresh fruit on the table. |
+  | "Who are you?" | I am Zazo, leader of these islands. Benji is my good friend. |
+  | "How are you?" | I am very happy today, because I have a visitor! |
+  | "Thank you" | You are always welcome here. |
+  | "Bye" | Goodbye! Come back soon. |
+  | "Hi" | Hello! It is so good to see you. |
+  | Anything else | One of 4 friendly answers, taking turns |
+
+  **The tour:**
+
+  | Stop | Place | Zazo says |
+  |---|---|---|
+  | 1 | Family hut | This is my family's hut. My mother wove these rugs herself. Sit down, have some fruit! |
+  | 2 | Waterfall | These are the Singing Falls. We drink this water, and the children swim here on hot days. |
+  | 3 | Lookout hill | From this hill you can see every island. The small one far away? That's where my people are now. |
+  | 4 | Campfire at night | Night comes fast here. When everyone is home, we sing around this fire until the moon is high. |
+  | 5 | Village | And we are back in the village! That's the whole island. |
+
+  Every message uses the stack twice: once for your words, and once for Zazo's answer. The history panel shows both, with Benji's translation.
+- **Liquid glass.** The chat box, the name box, the story card, and the buttons at the top right (music, replay, history) are now see-through glass: they blur the scene behind them and have a soft shine on the top edge. It is plain CSS (the `.glass` class in `index.css`), the same way as in my portfolio, so there is no extra library.
+- **Music system** (`music.js`), using **howler.js**:
+  - Music can only start after a tap, because browsers block sound until then. The **Begin** button is that tap.
+  - Each place has a track. When you move to a place with a different track, the old one fades out while the new one fades in (1.8 seconds).
+  - A music button at the top turns it on and off. The choice is remembered in this browser.
+  - Tracks are listed in `content.js`. No music files are in the project yet, so the site works quietly and the music button stays hidden until tracks are added.
+
+#### Onboarding research
+
+| App | What works | What Tribezo uses |
+|---|---|---|
+| Pokémon GO | A guide character (Professor Willow) teaches you by talking, asks your name, and then lets you play right away. | Benji asks your name inside the story, and Zazo greets you with it right after. |
+| Opal | Shows you the problem first, then how the app fixes it. | First the problem (Zazo speaks backwards), then the fix (Benji and his stack). |
+| Duolingo | Lets you try the main thing before asking for anything. | The first reverse happens during the story. There is no sign-up. |
+| Game onboarding studies | Get to the fun within about a minute. Make tutorials skippable, and keep them short. | About 40 seconds, one tap per step, and Skip is always there. |
+
+#### Music picks
+
+These fit the calm, sunny, handmade feel of the island. They need to be downloaded and put in `public/music/`, then listed in `content.js`.
+
+| Track slot | Places | Mood | Suggestion |
+|---|---|---|---|
+| `theme` | Start screen, beach | Gentle, curious, a little magical | Soft acoustic or marimba, like Pixabay's "tropical island" results |
+| `island` | Jungle, village, hut, waterfall, lookout | Happy, relaxed island daytime | "Island Meet and Greet" by Kevin MacLeod (Creative Commons Attribution 3.0, needs a credit line) |
+| `night` | Campfire at night | Calm, warm, quiet | Slow acoustic guitar or soft ambient, from Pixabay |
+
+Pixabay music can be used without a credit line. Kevin MacLeod's music can be used for free with a credit line like: *"Island Meet and Greet" Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 3.0.*
+
+#### Security in Phase 4
+
+- **Your name stays in this browser.** It is kept in `localStorage` and never saved on a server. The C server reverses the greeting and forgets it.
+- **Names are checked.** 1 to 20 characters, letters from any language, spaces, dots, dashes, and apostrophes only. They are always shown as plain text.
+- **Blocked storage is fine.** If the browser blocks storage (like some private windows), the site still works. The name is just not remembered next time.
+- **Music is local only.** The security rules now allow sound files, but only from this website (`media-src 'self'`).
+- **No new outside connections.** All pictures and music load from the website itself.
+
+#### Things I noticed while building Phase 4
+
+- **The crossfade got stuck at first.** The old song faded to a low volume but never paused. howler.js did not always send its "fade finished" signal when two fades ran at the same time. Now a timer pauses the old song once its fade time is over.
+- **One picture per pose.** Real stop-motion needs 2 to 3 small changes of each pose. The wobble covers it for now. More frames can be added later with no code changes to the story.
+- **Style.** The clay characters and the voxel backgrounds come from different styles, but the shadows and the tilt-shift blur help them sit together.
+- **"3-day" becomes "3-yad"**, because numbers stay in place and only the letters flip.
 
 ### Phase 5: Natural conversation with AI (later)
 

@@ -5,9 +5,10 @@ import { useTypewriter } from "../hooks/useTypewriter.js";
 // The text types out a few letters at a time. Screen readers get the
 // whole text at once, so they do not read it letter by letter.
 //
-// side: "left" or "right", which way the bubble leans.
-// children: anything to show under the text, like buttons.
-export default function SpeechBubble({ text, side = "left", onDone, children }) {
+// side: "left" or "right", which side of the screen the speaker is on.
+// label: a small title above the text, like "Benji tells Zazo".
+// children: anything to show under the text, like a translation or buttons.
+export default function SpeechBubble({ text, side = "left", label, onDone, children }) {
   const shown = useTypewriter(text, onDone);
 
   return (
@@ -16,10 +17,14 @@ export default function SpeechBubble({ text, side = "left", onDone, children }) 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 6, scale: 0.96 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className={`relative w-[min(78vw,22rem)] rounded-2xl border-2 border-ink/80 bg-parchment px-4 py-3 text-ink shadow-[4px_5px_0_rgba(0,0,0,0.35)] ${
+      className={`relative w-[min(80vw,24rem)] rounded-2xl border-2 border-ink/80 bg-parchment px-4 py-3 text-ink shadow-[4px_5px_0_rgba(0,0,0,0.3)] ${
         side === "left" ? "origin-bottom-left" : "origin-bottom-right"
       }`}
     >
+      {label && (
+        <p className="mb-1 text-[11px] font-medium uppercase tracking-widest text-ink-soft">{label}</p>
+      )}
+
       <p className="sr-only" aria-live="polite">
         {text}
       </p>
@@ -39,7 +44,7 @@ export default function SpeechBubble({ text, side = "left", onDone, children }) 
       <span
         aria-hidden="true"
         className={`absolute -bottom-[11px] h-5 w-5 rotate-45 border-b-2 border-r-2 border-ink/80 bg-parchment ${
-          side === "left" ? "left-10" : "right-10"
+          side === "left" ? "left-12" : "right-12"
         }`}
       />
     </motion.div>

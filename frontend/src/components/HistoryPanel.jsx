@@ -58,18 +58,22 @@ export default function HistoryPanel({ open, onClose, entries }) {
 
             <div data-lenis-prevent className="flex-1 overflow-y-auto px-5 py-4">
               {entries.length === 0 ? (
-                <p className="text-parchment/60">Nothing yet. Say something to the tribe!</p>
+                <p className="text-parchment/60">Nothing yet. Say something to Zazo!</p>
               ) : (
                 <ol className="space-y-4">
                   {entries.map((entry) => (
                     <li key={entry.id} className="rounded-xl border border-parchment/10 bg-parchment/[0.04] p-4">
-                      <p className="text-xs uppercase tracking-widest text-parchment/50">English</p>
+                      <p className="text-xs uppercase tracking-widest text-parchment/50">You said</p>
                       <p className="mb-3 whitespace-pre-wrap break-words">{entry.english}</p>
-                      <p className="text-xs uppercase tracking-widest text-ember/80">XYZ</p>
-                      <p className="mb-3 whitespace-pre-wrap break-words">{entry.xyz}</p>
-                      <p className="font-mono text-xs text-parchment/50">
+                      <p className="text-xs uppercase tracking-widest text-ember/80">Benji told Zazo</p>
+                      <p className="whitespace-pre-wrap break-words">{entry.xyz}</p>
+                      <p className="mb-3 font-mono text-xs text-parchment/50">
                         stack: {entry.pushes} pushes · {entry.pops} pops
                       </p>
+                      <p className="text-xs uppercase tracking-widest text-ember/80">Zazo said</p>
+                      <p className="mb-3 whitespace-pre-wrap break-words">{entry.replyXyz}</p>
+                      <p className="text-xs uppercase tracking-widest text-parchment/50">Which means</p>
+                      <p className="whitespace-pre-wrap break-words">{entry.reply}</p>
                     </li>
                   ))}
                 </ol>

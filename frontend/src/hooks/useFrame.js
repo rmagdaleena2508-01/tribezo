@@ -3,8 +3,9 @@ import { useReducedMotion } from "framer-motion";
 import { FRAMES_PER_SECOND } from "../lib/content.js";
 
 // A counter that goes up a set number of times each second.
-// Characters use it to pick which picture to show, like a flip book.
-// It stays at 0 for people who ask their device for less motion.
+// Characters use it to wobble a tiny bit on every frame, like a
+// stop-motion puppet. It stays at 0 for people who ask their device
+// for less motion.
 export function useFrame() {
   const [frame, setFrame] = useState(0);
   const reduceMotion = useReducedMotion();

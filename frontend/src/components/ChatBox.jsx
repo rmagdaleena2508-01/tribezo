@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { MAX_MESSAGE_LENGTH } from "../lib/content.js";
 
-// The box where you type English for the translator.
+// The liquid glass box where you type English for Benji.
 // Enter sends. Shift + Enter starts a new line.
 export default function ChatBox({ onSend, disabled }) {
   const [text, setText] = useState("");
@@ -28,10 +28,10 @@ export default function ChatBox({ onSend, disabled }) {
         event.preventDefault();
         send();
       }}
-      className="flex items-end gap-2 rounded-2xl border border-parchment/15 bg-night/80 p-2 shadow-2xl backdrop-blur-md"
+      className="glass flex items-end gap-2 rounded-[28px] p-2"
     >
       <label htmlFor="message" className="sr-only">
-        Message for the translator, in English
+        Message for Benji to pass on to Zazo, in English
       </label>
       <textarea
         id="message"
@@ -44,12 +44,12 @@ export default function ChatBox({ onSend, disabled }) {
         autoComplete="off"
         spellCheck="true"
         data-lenis-prevent
-        className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-parchment placeholder:text-parchment/45 focus:outline-none [field-sizing:content]"
+        className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-white placeholder:text-white/75 focus:outline-none [field-sizing:content]"
       />
 
       {/* Only show the count when getting close to the limit. */}
       {text.length > MAX_MESSAGE_LENGTH * 0.8 && (
-        <span className="self-center font-mono text-xs text-parchment/60">
+        <span className="self-center font-mono text-xs text-white/80">
           {text.length}/{MAX_MESSAGE_LENGTH}
         </span>
       )}
@@ -57,8 +57,8 @@ export default function ChatBox({ onSend, disabled }) {
       <button
         type="submit"
         disabled={!canSend}
-        aria-label="Send to the translator"
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ember text-night transition-colors ease-editorial hover:bg-[#e8894a] disabled:cursor-not-allowed disabled:bg-parchment/15 disabled:text-parchment/40"
+        aria-label="Send to Benji"
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/90 text-ink shadow-md transition-colors ease-editorial hover:bg-white disabled:cursor-not-allowed disabled:bg-white/25 disabled:text-white/60 disabled:shadow-none"
       >
         <SendHorizontal size={20} strokeWidth={2.2} />
       </button>

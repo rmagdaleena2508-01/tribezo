@@ -49,6 +49,52 @@
   }
 }
 
+@layer components {
+  /* Liquid glass: see-through, blurs what is behind it, with a soft
+     shine on the top edge. Used for the chat box and the buttons. */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.15),
+      0 12px 40px rgba(8, 24, 16, 0.28);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+  }
+
+  /* The shine: a soft light across the top left. */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(120% 70% at 15% 0%, rgba(255, 255, 255, 0.5), transparent 60%);
+    opacity: 0.55;
+  }
+
+  /* A light tint underneath, so white text stays easy to read on bright scenes. */
+  .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    pointer-events: none;
+    background: rgba(12, 30, 22, 0.22);
+  }
+
+  .glass-button {
+    @apply glass transition-transform duration-300 ease-editorial hover:-translate-y-0.5 active:translate-y-0;
+  }
+}
+
 /* Lenis needs these to work with the page. */
 html.lenis,
 html.lenis body {
