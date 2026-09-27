@@ -194,8 +194,8 @@ Here is what happens when you use Tribezo.
 | Phase | What | Status |
 |---|---|---|
 | 1 | The C core (stack and reverse) | Done |
-| 2 | The connection (HTTP server in C) | Next |
-| 3 | The frontend (with placeholders) | Not started |
+| 2 | The connection (HTTP server in C) | Done |
+| 3 | The frontend (with placeholders) | Next |
 | 4 | The art | Not started |
 | 5 | Natural conversation with AI | Not started |
 | 6 | Changing scenes and poses | Not started |
@@ -223,11 +223,12 @@ tribezo/
       stack.c / stack.h     the stack: push, pop, peek, is_empty
       reverse.c / reverse.h reverses each word, keeps punctuation in place
       demo.c                type English, see XYZ (for trying things by hand)
-      server.c              a small HTTP server (Phase 2)
+      server.c              a small HTTP server
     tests/
       test_stack.c          checks that the stack works
       test_reverse.c        checks that reversing works
-    Makefile              make test, make demo, make run
+      test_server.sh        starts the server and checks every answer
+    Makefile              make test, make test-server, make run, make demo
   frontend/             the website
     public/
       characters/           pose pictures for the tribe and the translator
@@ -287,7 +288,7 @@ Because punctuation stays in place, some words look a little different than you 
 | `one dollar` | `eno rallod` | No number next to `dollar`, so it is a normal word. |
 | `5 pounds of rice` | `5 pounds fo ecir` | `pounds` is kept as money, even when it means weight. |
 
-### Phase 2: The connection (backend to frontend)
+### Phase 2: The connection (backend to frontend) — Done
 
 1. **Build a small HTTP server in C** on port `8765`. It uses plain sockets, with no extra libraries.
 2. **Add two endpoints:**
@@ -301,8 +302,75 @@ Because punctuation stays in place, some words look a little different than you 
    - Text is limited to 10 KB.
    - Slow connections time out.
    - The server only listens on my own computer.
-4. **Connect it:** while building, Vite passes `/api` requests to the C server.
+4. **Connect it:** while building, Vite passes `/api` requests to the C server. This is set up in Phase 3, when the frontend is made.
 5. **Done when** a `curl` command gets back the reversed text.
+
+#### What Phase 2 built
+
+- **The server** (`server.c`). It uses plain sockets from C, with no extra libraries. It waits for a request, answers it, hangs up, and waits for the next one. One request at a time is plenty for one person using the website.
+- **How a request is read:**
+  1. Read until the blank line that ends the headers.
+  2. Read the first line, like `POST /api/reverse HTTP/1.1`, to get the method and the path.
+  3. Send the request to the right place: `/api/health` or `/api/reverse`. Anything else gets `404`.
+  4. Read `Content-Length` to know how long the text is, then read the text.
+  5. Run `reverse_words` from Phase 1 and send back JSON.
+- **JSON answers.** Quotes, backslashes, new lines, and other special characters in the text are written the way JSON needs them (`\"`, `\\`, `\n`), so the answer is always proper JSON.
+- **Safety checks:**
+
+  | Check | Answer if it fails |
+  |---|---|
+  | Wrong path | `404 {"error":"not found"}` |
+  | Wrong method, like `GET /api/reverse` | `405 {"error":"use POST"}` |
+  | Text longer than 10 KB | `413 {"error":"text is longer than 10 KB"}` |
+  | Text that is not UTF-8 | `400 {"error":"text must be UTF-8"}` |
+  | Text sent in pieces (`Transfer-Encoding`) | `411` |
+  | Headers bigger than 8 KB | `400 {"error":"headers too large"}` |
+  | Client takes more than 5 seconds | the server hangs up |
+
+  - The server only listens on `127.0.0.1`, so only my own computer can reach it.
+  - If a client leaves in the middle of an answer, the server keeps running instead of crashing.
+- **Tests** (`tests/test_server.sh`). The script:
+  1. Starts the server on a spare port (`18765`).
+  2. Sends 11 requests with `curl`: health, reversing, money and numbers, quotes and new lines, letters like `é`, empty text, wrong path, wrong method, text that is too long, bad UTF-8, and one last health check to make sure the server still works after all the errors.
+  3. Checks every status code and answer.
+  4. Stops the server.
+
+  The server used by the tests is built with the same memory checkers as the Phase 1 tests.
+
+#### The API
+
+**`GET /api/health`**
+
+```bash
+curl http://127.0.0.1:8765/api/health
+```
+```json
+{"ok":true}
+```
+
+**`POST /api/reverse`**
+
+Send the English as plain text in the body.
+
+```bash
+curl -X POST --data-binary 'Welcome, friend! It costs $5.' http://127.0.0.1:8765/api/reverse
+```
+```json
+{"english":"Welcome, friend! It costs $5.","xyz":"emocleW, dneirf! tI stsoc $5.","pushes":20,"pops":20}
+```
+
+| Field | What it is |
+|---|---|
+| `english` | the text that was sent |
+| `xyz` | the same text in XYZ |
+| `pushes` | how many letters went onto the stack |
+| `pops` | how many letters came off the stack |
+
+#### Things I noticed while building Phase 2
+
+- **A bug the tests caught.** When `Content-Length` was the last header, the server could not read its number, because the end of that line looked different from the other lines. The empty-text test found it, and it is fixed.
+- **Hanging up too early.** When the text was too long, the server answered `413` and hung up right away. The client was still sending, so it sometimes never saw the answer. Now the server finishes by reading and throwing away what the client is still sending (up to 64 KB) before it hangs up.
+- **Letters outside plain English stay in place.** `café` becomes `facé`, because `é` takes more than one byte to store and is not reversed. This is the same as in Phase 1.
 
 ### Phase 3: The frontend (with placeholders)
 
@@ -381,6 +449,34 @@ make test
 ```
 
 You should see `all passed` twice.
+
+To test the server too:
+
+```bash
+cd backend
+make test-server
+```
+
+### Start the server
+
+```bash
+cd backend
+make run
+```
+
+You should see `Tribezo server is listening on http://127.0.0.1:8765`. Press `Ctrl+C` to stop it.
+
+To use a different port:
+
+```bash
+PORT=9000 make run
+```
+
+In a second terminal, try it:
+
+```bash
+curl -X POST --data-binary 'hello, world!' http://127.0.0.1:8765/api/reverse
+```
 
 ### Try it yourself
 
