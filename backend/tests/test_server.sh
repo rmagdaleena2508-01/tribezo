@@ -82,6 +82,22 @@ check "bad UTF-8" \
     '400 {"error":"text must be UTF-8"}' \
     "$(request -X POST --data-binary "$(printf 'bad \377 byte')" "$URL/api/reverse")"
 
+check "request sent to another name (Host)" \
+    '403 {"error":"not allowed"}' \
+    "$(request -H 'Host: evil.example' "$URL/api/health")"
+
+check "Host that only starts with localhost" \
+    '403 {"error":"not allowed"}' \
+    "$(request -H 'Host: localhost.evil.example' "$URL/api/health")"
+
+check "request from another website (Origin)" \
+    '403 {"error":"not allowed"}' \
+    "$(request -X POST -H 'Origin: https://evil.example' --data-binary 'hi' "$URL/api/reverse")"
+
+check "request from our own website (Origin)" \
+    '200 {"english":"hi","xyz":"ih","pushes":2,"pops":2}' \
+    "$(request -X POST -H 'Origin: http://localhost:8766' --data-binary 'hi' "$URL/api/reverse")"
+
 check "server still works after errors" \
     '200 {"ok":true}' \
     "$(request "$URL/api/health")"

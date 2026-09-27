@@ -57,6 +57,7 @@ static const char *status_text(int status) {
     switch (status) {
     case 200: return "OK";
     case 400: return "Bad Request";
+    case 403: return "Forbidden";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
     case 411: return "Length Required";
@@ -257,6 +258,53 @@ static long body_length_from(const char *headers) {
     return length;
 }
 
+/* ---------- Who is asking ---------- */
+
+/*
+ * True if the value starts with one of the given names, followed by
+ * a port (":8766"), a path ("/"), or the end of the line.
+ * So "localhost:8766" matches "localhost", but "localhost.evil.com" does not.
+ */
+static bool starts_with_name(const char *value, const char *const names[], size_t count) {
+    for (size_t k = 0; k < count; k++) {
+        size_t length = strlen(names[k]);
+        if (strncasecmp(value, names[k], length) == 0) {
+            char next = value[length];
+            if (next == ':' || next == '/' || next == '\r' || next == '\0') {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/*
+ * Only answer requests that come from this computer.
+ *
+ * Host is the address the request was sent to. It must be this computer.
+ * This stops a trick where another website points its own name at
+ * 127.0.0.1 to reach our server.
+ *
+ * Origin is the website that sent the request. Browsers add it. If it is
+ * there, it must be a page on this computer, like our own website.
+ * Tools like curl do not send Origin, and that is fine.
+ */
+static bool is_from_this_computer(const char *headers) {
+    static const char *const hosts[] = {"localhost", "127.0.0.1"};
+    static const char *const origins[] = {"http://localhost", "http://127.0.0.1"};
+
+    const char *host = find_header(headers, "Host");
+    if (host == NULL || !starts_with_name(host, hosts, 2)) {
+        return false;
+    }
+
+    const char *origin = find_header(headers, "Origin");
+    if (origin != NULL && !starts_with_name(origin, origins, 2)) {
+        return false;
+    }
+    return true;
+}
+
 static void handle_client(int client) {
     /* One buffer holds the headers and the body, plus room for a final '\0'. */
     static char buffer[MAX_HEADERS + MAX_BODY + 1];
@@ -290,7 +338,14 @@ static void handle_client(int client) {
     printf("%s %s\n", method, path);
     fflush(stdout);
 
-    /* Step 3: send the request to the right place. */
+    /* Step 3: only answer requests from this computer. */
+    *header_end = '\0'; /* so header searches stop at the end of the headers */
+    if (!is_from_this_computer(buffer)) {
+        send_error(client, 403, "not allowed");
+        return;
+    }
+
+    /* Step 4: send the request to the right place. */
     if (strcmp(path, "/api/health") == 0) {
         if (strcmp(method, "GET") != 0) {
             send_json(client, 405, "{\"error\":\"use GET\"}", "Allow: GET\r\n");
@@ -309,8 +364,7 @@ static void handle_client(int client) {
         return;
     }
 
-    /* Step 4: find out how long the body is, and check it is not too big. */
-    *header_end = '\0'; /* so the header search stops at the headers */
+    /* Step 5: find out how long the body is, and check it is not too big. */
     long body_length = body_length_from(buffer);
     if (body_length < 0) {
         send_error(client, 411, "send the text with a Content-Length");
@@ -321,7 +375,7 @@ static void handle_client(int client) {
         return;
     }
 
-    /* Step 5: some of the body may have come in with the headers.
+    /* Step 6: some of the body may have come in with the headers.
        Move it to the start of the buffer, then read the rest. */
     char *body_start = header_end + 4;
     size_t have = received - (size_t)(body_start - buffer);

@@ -1,0 +1,47 @@
+import { motion } from "framer-motion";
+import { useTypewriter } from "../hooks/useTypewriter.js";
+
+// A speech bubble above a character.
+// The text types out a few letters at a time. Screen readers get the
+// whole text at once, so they do not read it letter by letter.
+//
+// side: "left" or "right", which way the bubble leans.
+// children: anything to show under the text, like buttons.
+export default function SpeechBubble({ text, side = "left", onDone, children }) {
+  const shown = useTypewriter(text, onDone);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 6, scale: 0.96 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      className={`relative w-[min(78vw,22rem)] rounded-2xl border-2 border-ink/80 bg-parchment px-4 py-3 text-ink shadow-[4px_5px_0_rgba(0,0,0,0.35)] ${
+        side === "left" ? "origin-bottom-left" : "origin-bottom-right"
+      }`}
+    >
+      <p className="sr-only" aria-live="polite">
+        {text}
+      </p>
+
+      {/* data-lenis-prevent lets long text scroll inside the bubble. */}
+      <p
+        aria-hidden="true"
+        data-lenis-prevent
+        className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-[15px] font-normal leading-snug sm:text-base"
+      >
+        {shown}
+      </p>
+
+      {children}
+
+      {/* The little tail pointing down at the speaker */}
+      <span
+        aria-hidden="true"
+        className={`absolute -bottom-[11px] h-5 w-5 rotate-45 border-b-2 border-r-2 border-ink/80 bg-parchment ${
+          side === "left" ? "left-10" : "right-10"
+        }`}
+      />
+    </motion.div>
+  );
+}

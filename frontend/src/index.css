@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Forest colors */
+  --night: #0f1a14;
+  --canopy: #1d3326;
+  --leaf: #3f6b45;
+  --moss: #7c9a6a;
+  --bark: #5a3d2b;
+  --parchment: #f6f1e4;
+  --ink: #1d231e;
+  --ink-soft: #4d574f;
+  --ember: #d9793a;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    /* Lenis handles smooth scrolling; keep the browser's own off. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--parchment);
+    font-family: "Outfit", system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--ember);
+    color: var(--night);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ember);
+    outline-offset: 3px;
+  }
+}
+
+/* Lenis needs these to work with the page. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

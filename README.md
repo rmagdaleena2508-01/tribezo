@@ -195,8 +195,8 @@ Here is what happens when you use Tribezo.
 |---|---|---|
 | 1 | The C core (stack and reverse) | Done |
 | 2 | The connection (HTTP server in C) | Done |
-| 3 | The frontend (with placeholders) | Next |
-| 4 | The art | Not started |
+| 3 | The frontend (with placeholders) | Done |
+| 4 | The art | Next |
 | 5 | Natural conversation with AI | Not started |
 | 6 | Changing scenes and poses | Not started |
 
@@ -231,12 +231,28 @@ tribezo/
     Makefile              make test, make test-server, make run, make demo
   frontend/             the website
     public/
-      characters/           pose pictures for the tribe and the translator
-      scenes/               background pictures
+      characters/           pose pictures for the tribe and the translator (Phase 4)
+      scenes/               background pictures (Phase 4)
     src/
-      lib/content.js        all the text, poses, scenes, and picture paths in one place
-      components/           ForestScene, Character, SpeechBubble, ChatBox
-      pages/Home.jsx        the main page
+      lib/
+        content.js            all the text, poses, scenes, and picture paths in one place
+        api.js                talks to the C server
+      hooks/
+        useFrame.js           the flip-book counter for stop-motion
+        useTypewriter.js      types speech out a few letters at a time
+        useLenis.js           smooth scrolling
+      components/
+        ForestScene.jsx       the forest background with parallax
+        Character.jsx         shows a character in a pose
+        PlaceholderFigure.jsx the drawn characters used until the real art is ready
+        SpeechBubble.jsx      a speech bubble
+        ChatBox.jsx           the box where you type
+        HistoryPanel.jsx      the list of everything said
+      pages/
+        Home.jsx              the main page
+        NotFound.jsx          the page for a wrong address
+    index.html
+    vite.config.js        ports, the /api pass-through, and the security rules
   .gitignore            keeps built files and secrets off GitHub
   README.md
 ```
@@ -326,12 +342,13 @@ Because punctuation stays in place, some words look a little different than you 
   | Text sent in pieces (`Transfer-Encoding`) | `411` |
   | Headers bigger than 8 KB | `400 {"error":"headers too large"}` |
   | Client takes more than 5 seconds | the server hangs up |
+  | `Host` is not this computer, or `Origin` is another website (added in Phase 3) | `403 {"error":"not allowed"}` |
 
   - The server only listens on `127.0.0.1`, so only my own computer can reach it.
   - If a client leaves in the middle of an answer, the server keeps running instead of crashing.
 - **Tests** (`tests/test_server.sh`). The script:
   1. Starts the server on a spare port (`18765`).
-  2. Sends 11 requests with `curl`: health, reversing, money and numbers, quotes and new lines, letters like `é`, empty text, wrong path, wrong method, text that is too long, bad UTF-8, and one last health check to make sure the server still works after all the errors.
+  2. Sends 15 requests with `curl`: health, reversing, money and numbers, quotes and new lines, letters like `é`, empty text, wrong path, wrong method, text that is too long, bad UTF-8, requests from other websites (added in Phase 3), and one last health check to make sure the server still works after all the errors.
   3. Checks every status code and answer.
   4. Stops the server.
 
@@ -372,7 +389,7 @@ curl -X POST --data-binary 'Welcome, friend! It costs $5.' http://127.0.0.1:8765
 - **Hanging up too early.** When the text was too long, the server answered `413` and hung up right away. The client was still sending, so it sometimes never saw the answer. Now the server finishes by reading and throwing away what the client is still sending (up to 64 KB) before it hangs up.
 - **Letters outside plain English stay in place.** `café` becomes `facé`, because `é` takes more than one byte to store and is not reversed. This is the same as in Phase 1.
 
-### Phase 3: The frontend (with placeholders)
+### Phase 3: The frontend (with placeholders) — Done
 
 1. **Set it up** with the same tools as my portfolio: Vite, React 19, Tailwind 3, Framer Motion, Lenis, Lucide React, and React Router. It runs on port `8766`.
 2. **Forest scene:** the background is split into layers. The layers move a little when the mouse moves, which gives a feeling of depth (parallax).
@@ -384,6 +401,62 @@ curl -X POST --data-binary 'Welcome, friend! It costs $5.' http://127.0.0.1:8765
    4. **Error message:** if the C server is off, the translator says "I can't reach the tribe right now."
 5. **Phones:** on small screens, the characters stack on top of each other and the chat sits at the bottom.
 6. **Done when** the whole flow works in the browser.
+
+#### What Phase 3 built
+
+- **The website** with the same tools as my portfolio. It runs on port `8766`. Vite passes every `/api` request to the C server on port `8765`.
+- **The forest** (`ForestScene.jsx`). It is drawn with shapes: sky, far trees, beams of light, near trees, the ground, fireflies, and big leaves in the front corners. Each layer moves a different amount when the mouse moves, so the forest feels deep. The trees are placed by a "random" formula that always gives the same answer, so the forest looks the same every time.
+- **The characters** (`Character.jsx` and `PlaceholderFigure.jsx`). Until the real art is ready, both characters are drawn with shapes that match the character descriptions: the translator's glasses, beard, mustard hoodie, and bag, and the tribe member's curly hair, leaf, face dots, beads, sash, and green wrap. They move like stop-motion:
+  - 10 frames per second
+  - a tiny wobble on every frame
+  - the mouth opens and closes while talking
+  - the eyes blink now and then
+  - a small hop when the pose changes
+- **Poses.** The arms and head move for each pose: `idle`, `talking`, `welcome`, `pointing`, `laughing`, `confused`, `explaining`, and `listening`. When the translator explains, he points at the tribe member.
+- **Real art needs no code changes.** When the real pictures are ready, their file names go into `content.js`. The website then flips through them instead of showing the drawings.
+- **The flow** (`Home.jsx`):
+  1. The translator explains the tribe in 4 speech bubbles, with "Next" and "Skip" buttons.
+  2. On "Start talking", the tribe member waves with both arms and the chat box appears.
+  3. You type English and press Enter or the send button. Shift + Enter makes a new line.
+  4. The translator says "Let me tell them…" while the C server reverses your words.
+  5. The tribe member speaks the XYZ, typed out a few letters at a time. Under the bubble, it shows how many pushes and pops the stack did.
+  6. When the tribe member finishes, you can talk again.
+- **History panel.** It lists every message in English and XYZ with the push and pop counts. It opens from the "History" button and closes with the X button, the Escape key, or a click outside it.
+- **Replay button** to hear the introduction again.
+- **Error message.** If the C server is off or too slow (more than 8 seconds), the translator says "I can't reach the tribe right now. Please try again in a moment."
+- **Phones.** Both characters stay side by side but get smaller, and the chat box sits at the bottom.
+- **Accessibility:**
+  - Screen readers hear each speech bubble all at once, not letter by letter.
+  - Every button has a name a screen reader can read.
+  - The keyboard focus outline is easy to see.
+  - People who ask their device for less motion get no wobble, no fireflies, no parallax, and text that appears all at once.
+
+#### Security
+
+The website is kept small and closed, so people cannot poke at parts they are not meant to see.
+
+| What | How |
+|---|---|
+| The C server is hidden | The browser only talks to the website. The website passes `/api` requests to the C server. |
+| Only this computer | The website (`8766`), the preview (`8767`), and the C server (`8765`) all listen on `127.0.0.1` only. |
+| Other websites are blocked | The C server now checks two headers. `Host` must be `localhost` or `127.0.0.1`. `Origin`, if there is one, must be a page on this computer. Anything else gets `403 {"error":"not allowed"}`. This stops other websites from using the server through someone's browser. |
+| Content Security Policy | The built website tells the browser to only run its own code, only load fonts from Google Fonts, only talk to its own address, and never load plugins. Anything else is blocked. |
+| No source maps | The built website does not include the original source code. |
+| No secrets in the website | There are no keys or passwords in the frontend. `.env` files are kept off GitHub. |
+| Text is shown as text | Everything people type is shown as plain text, never as HTML, so no one can sneak code into the page. |
+| Limits on both sides | The chat box stops at 2,000 characters. The C server still checks for 10 KB, in case someone skips the website. |
+| Answers are checked | The website only uses the four fields it expects from the server, and checks each one is the right type. |
+| Friendly errors | People see a friendly message, never server details. |
+| No outside links | The page sends no referrer, and has no tracking or ads. |
+
+One honest note: anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the C server, not only in the website.
+
+#### Things I noticed while building Phase 3
+
+- **Phones:** the plan said the characters would stack on top of each other on phones. Side by side and smaller looked better and kept both characters in view, so I kept them side by side.
+- **Stuck fireflies:** at first, all the fireflies sat on the left edge. The "random" formula gives tiny numbers for its first few answers, so now it skips them.
+- **Old answers:** if you restart the intro while a message is on its way, the late answer is now ignored instead of popping up in the middle of the intro.
+- **The translator pointed the wrong way** at first, away from the tribe. Fixed.
 
 ### Phase 4: The art
 
@@ -492,5 +565,38 @@ Type some English and press Enter. Press `Ctrl+D` to stop.
 XYZ: olleh, dlrow!
 (stack: 10 pushes, 10 pops)
 ```
+
+### Start the website
+
+You need [Node.js](https://nodejs.org) 20 or newer.
+
+1. Start the C server in one terminal:
+
+   ```bash
+   cd backend
+   make run
+   ```
+
+2. Start the website in a second terminal:
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Open http://127.0.0.1:8766 in your browser.
+
+### Try the built website
+
+This is the version with all the security rules turned on. Keep the C server running, then:
+
+```bash
+cd frontend
+npm run build
+npm run preview
+```
+
+Open http://127.0.0.1:8767.
 
 More steps will be added here as each phase is finished.
