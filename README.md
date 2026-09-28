@@ -197,12 +197,11 @@ These are the same tools as my portfolio, plus howler.js and new fonts.
 | 2 | The C server | Done |
 | 3 | The website | Done |
 | 4 | The art, the story, and the music system | Done |
-| 5 | Talking with AI | Built. Waiting for a real Gemini key to try it. |
+| 5 | Talking with AI | Done. Tested with real Gemini. |
 | 6 | Moving around the island | Done |
 
 ### What is left
 
-- **Try the AI with a real key.** Everything else about the AI is built and tested.
 - **Add music files.** The music system works, but there are no songs in the project yet, so the game is quiet for now.
 - **Try it on a real phone,** turned sideways, with the keyboard open.
 - **More stop motion pictures.** Right now each pose has 1 picture. Real stop motion uses 2 or 3 small changes of each pose.
@@ -223,7 +222,11 @@ tribezo/
     Makefile                commands to build, test, and run
   ai/                   the AI helper
     server.js               asks Gemini what Zazo says and checks every answer
-    prompt.js               who Zazo is, what he knows, and his rules
+    prompt.js               puts Zazo's files together for Gemini
+    zazo/
+      character.md          who Zazo is: his life, his family, his island, and Benji
+      rules.md              how Zazo answers, and the safety rules
+      examples.md           example answers that show his voice
     test/                   tests that use a pretend Gemini
     .env.example            a blank settings file
     .env                    your real key (only on your computer)
@@ -348,16 +351,41 @@ The pictures of the characters and the backgrounds come from different styles. T
   4. Benji tells you what it means.
   5. If Zazo takes you somewhere, the place changes. His pose matches what he says.
 - **The AI never flips any words.** The stack does all the flipping, so the stack stays the most important part of the project.
-- **Zazo's rules.** Gemini is told who Zazo is, what he knows, and the 7 places on the island. Zazo must:
+- **Zazo's files.** Everything Gemini knows about Zazo is in three plain text files in the `ai/zazo` folder. You can change them without touching any code.
+  - `character.md` says who Zazo is. He is 34 summers old. His mother Nala weaves rugs, his little sister Kiki swims fast, and his grandfather Old Tumo tells stories. It lists his favorite food, his day, the animals, the 7 places, how he met Benji, and a few words in XYZ.
+  - `rules.md` says how he answers. He always answers the real question first. He gives correct answers to simple questions like math. He is curious about things he has never seen, like phones, and he never makes up facts. He is gentle when someone is sad. It also has the safety rules.
+  - `examples.md` has 12 example answers that show his voice, how long he talks, and when he changes the place or his pose.
+- **Zazo knows where he is.** The website tells the helper which place you are in, so his answers fit.
+- **Zazo's rules.** He must:
   - Use plain, simple English, in 1 to 3 short sentences.
   - Stay friendly and right for kids.
-  - Say he only knows about his island when a question is off topic, unkind, or unsafe.
+  - Kindly change the subject when a question is unkind, unsafe, or grown up.
+  - Never give medical, legal, or money advice.
   - Never ask for personal details.
+  - Only change the place when he is going there right now, and wait for a "yes" when he only offers.
   - Ignore any message that tries to change his rules.
-- **Every answer is checked again.** The place and the pose must come from the game's own lists. Very long answers are cut short.
+- **Gemini's own safety filter** is set to its strictest level. If it blocks a message, Zazo kindly changes the subject.
+- **Every answer is checked again.** The place and the pose must come from the game's own lists. Stars and other marks are removed, and very long answers are cut short.
 - **Zazo remembers** the last 6 things that were said.
-- **A backup plan.** If the AI helper is off, has no key, is too slow, or fails, Zazo uses his fixed answers. The game always works.
-- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 10 tests check good answers, bad answers, bad requests, requests from other websites, and the limit on how many messages can be sent.
+- **Two models.** The fast model (`gemini-flash-lite-latest`) answers first, in about 3 seconds. It sometimes gets stuck, so it gets a second try. If it is still busy, the backup model (`gemini-3.8-flash`) answers. Each try gets 5 seconds, and all tries together get 14 seconds.
+- **A backup plan.** If the AI helper is off, has no key, or every model fails, Zazo uses his fixed answers. The game always works.
+- **The history panel shows who wrote each answer,** Gemini or a fixed answer. This makes testing easy.
+- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 19 tests check good answers, the backup model, the second try, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
+
+#### Why Zazo gave poor answers at first, and the fixes
+
+When I tried it with a real key, Zazo gave odd answers to many questions. I checked the helper's log and found four problems.
+
+| Problem | Fix |
+|---|---|
+| The key had an extra letter at the start, so Google said the key was not valid. Every answer came from the fixed list. | Take the extra letter out of `.env`. The helper now warns you when the key does not look like a Gemini key. |
+| `gemini-2.5-flash` is closed to new users. | The helper now uses newer models, and the backup takes over if a model is gone or busy. |
+| The model "thinks" before it answers, and the thinking used up all the space for the answer. The answer got cut off. | The model is asked to think only a little, and the answer has more space. |
+| The instructions said "you only know about the island", so Zazo dodged normal questions. | Zazo now has a full life story in `character.md`, clear rules in `rules.md`, and example answers in `examples.md`. |
+
+#### A real test
+
+After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 in his own voice, like his age ("34 summers old"), his family, his favorite food, a math question, what an iPhone is, how to say "friend" in XYZ, and a joke. He was kind when told "I'm feeling lonely", and he changed the subject for an unsafe question and for a trick that asked him to show his instructions. One answer took too long on both models, so a fixed answer covered it. After that, the fast model got a second try.
 
 ### Phase 6: Moving around the island
 
@@ -403,7 +431,7 @@ Do this in the Terminal on your own computer. **Never** put the key on the GitHu
    open -e .env
    ```
 
-4. Paste your key right after `GEMINI_API_KEY=`. Do not add spaces or quotes. Save and close the file.
+4. Paste your key right after `GEMINI_API_KEY=`. Do not add spaces, quotes, or any extra letters. A Gemini key starts with `AIza` or `AQ.`. Leave the two model lines as they are. Save and close the file.
 5. Check that Git will never upload the file.
 
    ```bash
@@ -417,7 +445,7 @@ Do this in the Terminal on your own computer. **Never** put the key on the GitHu
    npm start
    ```
 
-   It should say which Gemini model it is using. If it says it found no key, check step 4.
+   It should say which Gemini models it is using. If it says it found no key, or that the key does not look like a Gemini key, check step 4.
 
 If the key is ever shared by mistake, delete it in Google AI Studio and make a new one.
 

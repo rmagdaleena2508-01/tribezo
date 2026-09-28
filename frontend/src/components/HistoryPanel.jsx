@@ -74,6 +74,10 @@ export default function HistoryPanel({ open, onClose, entries }) {
                       <p className="mb-3 whitespace-pre-wrap break-words">{entry.replyXyz}</p>
                       <p className="text-xs uppercase tracking-widest text-parchment/50">Which means</p>
                       <p className="whitespace-pre-wrap break-words">{entry.reply}</p>
+                      {/* Shows whether Gemini wrote the answer, or Zazo used a fixed one. */}
+                      <p className="mt-2 font-mono text-[11px] text-parchment/40">
+                        {entry.source === "ai" ? "answer by Gemini" : "fixed answer (AI not available)"}
+                      </p>
                     </li>
                   ))}
                 </ol>

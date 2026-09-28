@@ -1,8 +1,11 @@
 // A small helper server that asks Gemini what Zazo should say.
 //
 //   GET  /api/chat/health   answers {"ok":true,"ai":true|false}
-//   POST /api/chat          send {"message", "name", "history"}, get back
-//                           {"reply", "scene", "pose"} in plain English
+//   POST /api/chat          send {"message", "name", "history", "scene"},
+//                           get back {"reply", "scene", "pose", "source"}
+//                           in plain English
+//
+// Who Zazo is and the rules he follows are in the zazo/ folder.
 //
 // The C server still does all the reversing. This helper only writes
 // Zazo's answer in normal English.
@@ -14,19 +17,26 @@
 // Run with: npm start
 
 import { createServer } from "node:http";
-import { ANSWER_SCHEMA, POSES, SCENES, systemPrompt } from "./prompt.js";
+import { ANSWER_SCHEMA, POSES, SAFE_REPLY, SCENES, systemPrompt } from "./prompt.js";
 
 const PORT = Number(process.env.PORT ?? 8764);
 const API_KEY = process.env.GEMINI_API_KEY ?? "";
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const GEMINI_URL = process.env.GEMINI_API_URL || "https://generativelanguage.googleapis.com/v1beta";
+
+// The fast model is tried first. It sometimes hangs for no reason, so it
+// gets a second try. Then the backup model gets a turn. Both models can
+// be changed in .env.
+const FAST_MODEL = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
+const BACKUP_MODEL = process.env.GEMINI_BACKUP_MODEL || "gemini-3.8-flash";
+const TRIES = [FAST_MODEL, FAST_MODEL, BACKUP_MODEL];
 
 const MAX_BODY = 8 * 1024; // bytes
 const MAX_MESSAGE = 2000; // characters
 const MAX_NAME = 20;
 const MAX_HISTORY = 6; // earlier turns sent along, so Zazo remembers the chat
 const MAX_REPLY = 400;
-const TIMEOUT_MS = 10_000;
+const TRY_TIMEOUT_MS = 5_000; // one try (the fast model usually answers in about 3 seconds)
+const TOTAL_TIMEOUT_MS = 14_000; // every try together, so the visitor never waits too long
 
 // No more than this many AI calls per minute, so the free quota lasts.
 const CALLS_PER_MINUTE = 20;
@@ -86,21 +96,55 @@ function underRateLimit() {
 // Check what the website sent. Returns the clean values, or null.
 function checkRequest(data) {
   if (typeof data !== "object" || data === null) return null;
-  const { message, name, history = [] } = data;
+  const { message, name, history = [], scene = "village" } = data;
   if (typeof message !== "string" || message.trim().length === 0 || message.length > MAX_MESSAGE) return null;
   if (typeof name !== "string" || name.length === 0 || name.length > MAX_NAME) return null;
+  if (typeof scene !== "string" || !SCENES.includes(scene)) return null;
   if (!Array.isArray(history) || history.length > MAX_HISTORY) return null;
   for (const turn of history) {
     if (typeof turn !== "object" || turn === null) return null;
     if (typeof turn.you !== "string" || typeof turn.zazo !== "string") return null;
     if (turn.you.length > MAX_MESSAGE || turn.zazo.length > MAX_REPLY) return null;
   }
-  return { message: message.trim(), name, history };
+  return { message: message.trim(), name, history, scene };
 }
 
 // ---------- Asking Gemini ----------
 
-async function askGemini({ message, name, history }) {
+// Ask Gemini to block anything unsafe for children, even at a low chance.
+const SAFETY_SETTINGS = [
+  "HARM_CATEGORY_HARASSMENT",
+  "HARM_CATEGORY_HATE_SPEECH",
+  "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+  "HARM_CATEGORY_DANGEROUS_CONTENT",
+].map((category) => ({ category, threshold: "BLOCK_LOW_AND_ABOVE" }));
+
+// Some models do not take the "think a little" setting. They are
+// remembered here, so the setting is left out for them next time.
+const noThinkingSetting = new Set();
+
+class GeminiError extends Error {
+  constructor(message, { retry = false } = {}) {
+    super(message);
+    this.retry = retry; // true if another try (or another model) might work
+  }
+}
+
+// Pull the JSON object out of Gemini's text, even if it added extra words
+// or wrapped it in a code block.
+function readJson(text) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end <= start) throw new GeminiError("Gemini sent no JSON", { retry: true });
+  return JSON.parse(text.slice(start, end + 1));
+}
+
+// Clean up Zazo's words: no stars, hashes, or backticks, and not too long.
+function cleanReply(text) {
+  return text.replace(/[*#`_]/g, "").replace(/\s+/g, " ").trim().slice(0, MAX_REPLY);
+}
+
+async function askOnce(model, { message, name, history, scene }, timeLeft) {
   // Earlier turns first, so Gemini knows what was already said.
   const contents = [];
   for (const turn of history) {
@@ -109,43 +153,97 @@ async function askGemini({ message, name, history }) {
   }
   contents.push({ role: "user", parts: [{ text: message }] });
 
-  const response = await fetch(`${GEMINI_URL}/models/${encodeURIComponent(MODEL)}:generateContent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // The key goes in a header, not the address, so it never shows up in logs.
-      "x-goog-api-key": API_KEY,
-    },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt(name) }] },
-      contents,
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: ANSWER_SCHEMA,
-        temperature: 0.8,
-        maxOutputTokens: 300,
-      },
-    }),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
+  const generationConfig = {
+    responseMimeType: "application/json",
+    responseSchema: ANSWER_SCHEMA,
+    temperature: 0.9,
+    // Thinking uses up the answer's space, and Zazo's answers are short,
+    // so the model is asked to think only a little.
+    maxOutputTokens: 1024,
+  };
+  if (!noThinkingSetting.has(model)) generationConfig.thinkingConfig = { thinkingLevel: "low" };
 
-  if (!response.ok) {
-    throw new Error(`Gemini answered ${response.status}`);
+  let response;
+  try {
+    response = await fetch(`${GEMINI_URL}/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // The key goes in a header, not the address, so it never shows up in logs.
+        "x-goog-api-key": API_KEY,
+      },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt(name, scene) }] },
+        contents,
+        generationConfig,
+        safetySettings: SAFETY_SETTINGS,
+      }),
+      signal: AbortSignal.timeout(Math.min(TRY_TIMEOUT_MS, timeLeft)),
+    });
+  } catch {
+    throw new GeminiError("Gemini took too long or could not be reached", { retry: true });
   }
 
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (typeof text !== "string") throw new Error("Gemini sent no text");
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const reason = data?.error?.message ?? "";
+    // This model does not take the thinking setting: try it again without.
+    if (response.status === 400 && /thinking/i.test(reason) && !noThinkingSetting.has(model)) {
+      noThinkingSetting.add(model);
+      return askOnce(model, { message, name, history, scene }, timeLeft);
+    }
+    // Busy, rate limited, or down: another try or model might work.
+    const retry = response.status === 429 || response.status >= 500 || response.status === 404;
+    throw new GeminiError(`Gemini answered ${response.status}: ${reason.slice(0, 160)}`, { retry });
+  }
+
+  // Blocked for safety: Zazo kindly changes the subject.
+  const candidate = data?.candidates?.[0];
+  if (data?.promptFeedback?.blockReason || ["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII"].includes(candidate?.finishReason)) {
+    return { ...SAFE_REPLY, note: "blocked for safety" };
+  }
+
+  const text = candidate?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
+  if (!text) throw new GeminiError(`Gemini sent no text (${candidate?.finishReason ?? "no reason"})`, { retry: true });
 
   // Double-check everything, even though Gemini was told the shape.
-  const answer = JSON.parse(text);
-  const reply = typeof answer.reply === "string" ? answer.reply.trim().slice(0, MAX_REPLY) : "";
-  if (!reply) throw new Error("Gemini sent an empty reply");
+  let answer;
+  try {
+    answer = readJson(text);
+  } catch (error) {
+    if (error instanceof GeminiError) throw error;
+    throw new GeminiError(`Gemini sent broken JSON (${candidate?.finishReason ?? "no reason"})`, { retry: true });
+  }
+  const reply = typeof answer.reply === "string" ? cleanReply(answer.reply) : "";
+  if (!reply) throw new GeminiError("Gemini sent an empty reply", { retry: true });
   return {
     reply,
     scene: SCENES.includes(answer.scene) ? answer.scene : "stay",
     pose: POSES.includes(answer.pose) ? answer.pose : "talking",
   };
+}
+
+// Try the fast model twice, then the backup model, until one answers or
+// the time runs out.
+async function askGemini(request) {
+  const started = Date.now();
+  let lastError;
+  for (const model of TRIES) {
+    const timeLeft = TOTAL_TIMEOUT_MS - (Date.now() - started);
+    if (timeLeft < 1500) break;
+    try {
+      const answer = await askOnce(model, request, timeLeft);
+      console.log(`AI answered with ${model} in ${Date.now() - started} ms${answer.note ? ` (${answer.note})` : ""}`);
+      delete answer.note;
+      return answer;
+    } catch (error) {
+      lastError = error;
+      console.error(`AI try with ${model} failed: ${error.message}`);
+      if (!(error instanceof GeminiError) || !error.retry) break;
+    }
+  }
+  throw lastError ?? new Error("no time left");
 }
 
 // ---------- The server ----------
@@ -195,15 +293,23 @@ const server = createServer(async (req, res) => {
   }
 
   try {
-    send(res, 200, await askGemini(request));
+    send(res, 200, { ...(await askGemini(request)), source: "ai" });
   } catch (error) {
-    // Log a short reason for the developer. Never log the key or the message.
-    console.error(`AI call failed: ${error.message}`);
+    // The reason was already logged above. Never log the key or the message.
     send(res, 502, { error: "the AI did not answer" });
   }
 });
 
 server.listen(PORT, "127.0.0.1", () => {
   console.log(`Tribezo AI helper is listening on http://127.0.0.1:${PORT}`);
-  console.log(API_KEY ? `Using ${MODEL}.` : "No GEMINI_API_KEY found, so Zazo will use his fixed answers.");
+  if (!API_KEY) {
+    console.log("No GEMINI_API_KEY found, so Zazo will use his fixed answers.");
+    return;
+  }
+  console.log(`Using ${FAST_MODEL}, with ${BACKUP_MODEL} as the backup.`);
+  // Gemini keys start with "AIza" or "AQ.". Anything else is usually a
+  // copy and paste slip, like an extra letter at the start.
+  if (!/^(AIza|AQ\.)/.test(API_KEY)) {
+    console.log("Warning: the key does not look like a Gemini key. Check GEMINI_API_KEY in .env for extra letters.");
+  }
 });

@@ -230,17 +230,20 @@ export default function Home() {
   // running and has a key. If not, Zazo uses his fixed answers instead.
   async function thinkOfReply(english) {
     try {
-      const ai = await askZazo(english, name, recentTurns.current);
+      // "hero-meadow" is only the title screen, so it counts as the village.
+      const here = scene === "hero-meadow" ? "village" : scene;
+      const ai = await askZazo(english, name, recentTurns.current, here);
       recentTurns.current = [...recentTurns.current, { you: english, zazo: ai.reply }].slice(-6);
       return {
         says: ai.reply,
         pose: characters.zazo.poses[ai.pose] ? ai.pose : "talking",
         scene: scenes[ai.scene] ? ai.scene : undefined, // "stay" is not a scene, so he stays put
+        source: "ai",
       };
     } catch {
       const reply = zazoReply(english, name, memory.current);
       memory.current = reply.memory;
-      return reply;
+      return { ...reply, source: "fixed" };
     }
   }
 
@@ -275,6 +278,7 @@ export default function Home() {
           pops: told.pops,
           reply: reply.says,
           replyXyz: answer.xyz,
+          source: reply.source,
         },
       ]);
     } catch {

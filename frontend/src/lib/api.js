@@ -42,14 +42,16 @@ export async function reverseText(text) {
 
 // Ask the AI helper what Zazo says back, in plain English.
 // history is a few earlier turns, [{ you, zazo }], so Zazo remembers the chat.
+// scene is where Zazo and the visitor are standing right now.
 // Returns { reply, scene, pose }, or throws if the AI is off or fails.
 // The caller then uses Zazo's fixed answers instead.
-export async function askZazo(message, name, history) {
+export async function askZazo(message, name, history, scene) {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, name, history }),
-    signal: AbortSignal.timeout(12000),
+    body: JSON.stringify({ message, name, history, scene }),
+    // The helper may try a second model, so give it a little extra time.
+    signal: AbortSignal.timeout(16000),
   });
 
   if (!response.ok) {
