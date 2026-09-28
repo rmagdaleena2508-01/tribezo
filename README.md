@@ -1,10 +1,10 @@
 # Tribezo
 
-**Talk to Zazo, the friendly leader of an island where every word comes out backwards.**
+**Talk to Zazo, the kind leader of an island where every word comes out backwards.**
 
-Tribezo is a website. You type words in English. Benji, the translator, turns your words around. Then Zazo talks back to you in his own language.
+Tribezo is a game you play in a web browser. You type in English. Benji, the translator, flips your words around. Then Zazo talks back to you in his own language.
 
-Their language is called **XYZ**. XYZ is English with every word reversed.
+His language is called **XYZ**. XYZ is English with the letters of every word turned around.
 
 ---
 
@@ -12,11 +12,11 @@ Their language is called **XYZ**. XYZ is English with every word reversed.
 
 I was sitting in class, thinking about my DSA project and what to build for it.
 
-I kept coming back to the **stack**. I knew a stack can reverse a word. On its own, though, reversing words felt too plain for a whole project.
+I kept coming back to the **stack**. I knew a stack can turn a word around. On its own, that felt too small for a whole project.
 
-Then I remembered that some movies have tribes who speak in reverse. Their words sound strange, but they make sense once you reverse them.
+Then I remembered that some movies have tribes who speak in reverse. Their words sound strange, but they make sense once you flip them.
 
-*What if I made a forest tribe that only speaks in reverse, and a stack was what lets you talk to them?*
+*What if I made an island tribe that only speaks in reverse, and a stack was what lets you talk to them?*
 
 That is how Tribezo started, right there in class.
 
@@ -24,20 +24,20 @@ That is how Tribezo started, right there in class.
 
 ## What Is This Project About?
 
-In Tribezo, you visit a far-away island and meet two characters:
+You visit a faraway island and meet two people.
 
-1. **Zazo.** He is the leader of the islands. He is warm, kind, and always happy to see a visitor. But he does not know English. He only speaks XYZ, which is reversed English. Right now the rest of his people are away on a 3-day trip to another island to see their families, so Zazo is looking after everything by himself.
-2. **Benji.** He is the translator. He wears modern clothes, and he knows English and XYZ.
+1. **Zazo.** He is the leader of the islands. He is warm, kind, and always happy to see a visitor. He does not know English. He only speaks XYZ. Right now his people are away for 3 days, visiting their families on another island, so Zazo is looking after everything by himself.
+2. **Benji.** He is the translator. He wears a yellow hoodie, and he knows both English and XYZ.
 
-You talk to Benji in English. He reverses your words with a stack and tells Zazo. Zazo answers in XYZ, and Benji tells you what he said. Zazo can even show you around the island.
+You talk to Benji in English. He flips your words with a stack and tells Zazo. Zazo answers in XYZ. Benji tells you what he said. Zazo can even show you around the island.
 
 ---
 
 ## Why I Am Building It
 
-- **To learn.** This is my DSA project (DSA means Data Structures and Algorithms). I want to understand how a **stack** works.
-- **To make the idea easy to see.** Reversing words is a simple idea. A forest, a tribe, and a translator make it more interesting to watch.
-- **To build a full project.** I want to build both parts of a real app: the part you see (frontend) and the part that does the work (backend).
+- **To learn.** This is my DSA project. DSA means Data Structures and Algorithms. I want to understand how a **stack** works.
+- **To make the idea easy to see.** Flipping words is a simple idea. An island, a leader, and a translator make it fun to watch.
+- **To build a real app.** It has a part you see (the website), a part that does the work (the C server), and a helper that lets Zazo talk in a natural way (the AI helper).
 
 ---
 
@@ -50,12 +50,12 @@ A stack works like a pile of plates.
 
 The last plate you put on is the first plate you take off. This is called **LIFO**, which means **Last In, First Out**.
 
-### How a stack reverses a word
+### How a stack flips a word
 
-Here is how the word `hello` gets reversed.
+Here is how the word `hello` gets flipped.
 
 1. Push each letter onto the stack: `h`, then `e`, then `l`, then `l`, then `o`.
-2. The stack now looks like this, with `o` on top.
+2. Now the stack looks like this, with `o` on top.
 
    ```
    | o |  <- top
@@ -71,20 +71,18 @@ Here is how the word `hello` gets reversed.
 
 ---
 
-## How XYZ Language Works
+## How XYZ Works
 
-These are the rules for turning English into XYZ:
+These are the rules for turning English into XYZ.
 
-1. **The letters in each word are reversed.**
+1. **The letters in each word are flipped.**
 2. **The words stay in the same order.**
 3. **Punctuation stays in the same place.** Commas, periods, and marks like `!` and `?` do not move.
 4. **Numbers stay the same.** `123` stays `123`.
-5. **Money stays the same,** so the amount means the same thing in both languages. This covers:
-   - money signs: `$`, `€`, `£`, `¥`, `₹` (like `$100.50` or `₹500`)
-   - money names next to a number: `100 dollars`, `Rs 500`, `USD 20`, `50 cents`
-   - money names joined to a number: `Rs500`, `20usd`
-
-   The money names are: dollar, buck, cent, rupee, Rs, paise, euro, pound, yen, USD, INR, EUR, GBP, and JPY.
+5. **Money stays the same,** so the amount means the same thing in both languages.
+   - Money signs: `$`, `€`, `£`, `¥`, `₹` (like `$100.50` or `₹500`)
+   - Money names next to a number: `100 dollars`, `Rs 500`, `USD 20`, `50 cents`
+   - Money names stuck to a number: `Rs500`, `20usd`
 
 ### Examples
 
@@ -93,101 +91,101 @@ These are the rules for turning English into XYZ:
 | `hello` | `olleh` |
 | `hello world` | `olleh dlrow` |
 | `hello, world!` | `olleh, dlrow!` |
-| `you are kind.` | `uoy era dnik.` |
 | `how are you?` | `woh era uoy?` |
 | `it costs $20.` | `ti stsoc $20.` |
 | `I have 3 cats` | `I evah 3 stac` |
 | `it is Rs 500` | `ti si Rs 500` |
-| `only 100 dollars` | `ylno 100 dollars` |
+
+### Words that look a little funny
+
+| English | XYZ | Why |
+|---|---|---|
+| `don't` | `tno'd` | The `'` stays in its spot. |
+| `You` | `uoY` | A capital letter moves with its letter. |
+| `café` | `facé` | Letters from other languages, like `é`, stay in their spot. |
+| `5 pounds of rice` | `5 pounds fo ecir` | `pounds` is kept as money, even when it means weight. |
 
 ---
 
-## How It Works (The User Flow)
+## How to Play
 
-Here is what happens when you use Tribezo.
+1. **The title screen.** A mountain meadow. The title shows up backwards as `ozebirT`, then the letters slide into `Tribezo`. You press **Begin**.
+2. **The story.** It takes about 40 seconds. You tap once for each step.
+   1. A beach. *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
+   2. A jungle path. Zazo walks in and waves. He says `olleH, relevart! emocleW!`
+   3. The village. Zazo looks puzzled. He says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out backwards."*
+   4. Benji walks in and explains how he will help.
+3. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The box starts empty. The game asks for your name every time you visit.
+4. **The first flip.** Your name goes to the C server. Zazo laughs and greets you backwards. Tap, and Benji tells you what he said.
+5. **Talk to Zazo.** Only one person talks at a time. Each tap moves the talk along.
+   1. You type in English. Benji says *"Let me tell him."*
+   2. The stack flips your words. Benji says them to Zazo in XYZ.
+   3. Zazo answers. The stack flips his answer too. Zazo says it in XYZ, in a bubble over his head.
+   4. Benji tells you what Zazo said, in English, in a bubble over **his** head.
+6. **The tour.** Ask *"Where are the other people?"* Zazo tells you they went to see their families for 3 days, and he offers to show you around. Say *"yes"* or *"show me around"*, and the place changes. You visit his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
 
-1. **The title screen.** A mountain meadow. The title shows up backwards, `ozebirT`, and then its letters slide into `Tribezo`. You press **Begin**.
-
-2. **The splash story (about 40 seconds).** It introduces Zazo, the problem, and Benji. One tap per step:
-   1. A beach: *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
-   2. A jungle path: Zazo walks in and waves. *"Meet Zazo, leader of the islands."* He says `olleH, relevart! emocleW!`
-   3. The village: Zazo looks puzzled and says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."*
-   4. Benji walks in: *"Hi, I'm Benji! Zazo speaks XYZ, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you."*
-
-3. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The name box starts empty, with no hint text. It asks every time you visit.
-
-4. **The first reverse.** Your name goes to the C server. Zazo laughs and greets you backwards, like `olleH, anilegnavE! emocleW ot ym sdnalsi!` Tap, and Benji tells you what he said.
-
-5. **Talk to Zazo.** Only one person speaks at a time. Each tap moves the talk along; nothing else on the screen changes.
-   1. You type English. Benji says *"Let me tell him…"*
-   2. The C server reverses your words. Benji says them to Zazo in XYZ. *(tap)*
-   3. Zazo picks an answer, and the C server reverses it too. Zazo says it in XYZ, in a bubble over his head. *(tap)*
-   4. Benji translates it for you in English, in a bubble over **his** head. Then you can type again.
-
-6. **The tour.** Ask *"Where are the other people?"* and Zazo explains they went on a 3-day vacation, and offers to show you around. Say *"yes"* or *"show me around"* and the place changes: his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
-
-On a phone, the game is played sideways (the wide way), like most games. If the phone is held upright, the game asks you to turn it.
+On a phone, you play with the phone turned sideways, like most games. If the phone is upright, the game asks you to turn it.
 
 ### The flow in a picture
 
 ```
-   You (type English)
+   You type English
         |
         v
-   Website (frontend)
-        |
-        |  sends your words
-        v
-   C server (backend)
-        |
-        |  uses a stack to reverse each word
-        v
-   Website (frontend)
+   The website
         |
         v
-   Benji tells Zazo
+   C server        (the stack flips your words)
         |
         v
-   Zazo answers in XYZ (reversed by the same stack), and Benji translates
+   AI helper       (writes what Zazo says, in English)
+        |
+        v
+   C server        (the stack flips Zazo's answer)
+        |
+        v
+   Zazo speaks XYZ, then Benji tells you what it means
 ```
 
 ---
 
-## Tech Stack (The Tools I Use)
+## The Tools I Use
 
-### Frontend (the part you see)
+### The website (the part you see)
 
 | Tool | What it does |
 |---|---|
 | **React 19** | Builds the parts of the page, like the chat box and the characters. |
-| **Vite** | Runs the website on my computer while I build it, and packs it up when it is done. |
-| **React Router** | Lets the website have different pages. |
-| **Tailwind CSS** | Styles the page: colors, sizes, and spacing. |
-| **Framer Motion** | Animates the characters. |
+| **Vite** | Runs the website while I build it, and packs it up when it is done. |
+| **React Router** | Lets the website have more than one page. |
+| **Tailwind CSS** | Adds colors, sizes, and spacing. |
+| **Framer Motion** | Makes things move and fade. |
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
-| **Google Fonts** | Fredoka for titles, Nunito for dialogue. |
-| **howler.js** | Plays the background music and fades between songs when the place changes. |
+| **howler.js** | Plays music and fades between songs. |
+| **Google Fonts** | Fredoka for titles and Nunito for talking. |
 
-### Backend (the part that does the work)
+These are the same tools as my portfolio, plus howler.js and new fonts.
+
+### The backend (the part that does the work)
 
 | Tool | What it does |
 |---|---|
 | **C** | The main language for the backend. |
-| **Stack** | The data structure that reverses each word. |
-| **HTTP server in C** | Lets the website send words to the C program and get the reversed words back. |
+| **Stack** | The data structure that flips each word. |
+| **A web server written in C** | Lets the website send words to the C program and get the flipped words back. |
 
-### Art
-
-- **Zazo and Benji.** Made with AI image tools, in a clay and felt stop-motion style. Each one has 6 poses: idle, talking, welcome, pointing, laughing, and confused.
-- **8 backgrounds.** Made with AI image tools, in a voxel style (built from little blocks) with a tilt-shift look: a mountain meadow, a beach, a jungle path, the village, a family hut, a waterfall, a lookout hill, and a campfire at night.
-
-### AI helper (Phase 5)
+### The AI helper
 
 | Tool | What it does |
 |---|---|
-| **Node.js** | A small helper server that asks the AI what Zazo should say. It uses only what comes with Node, so there is nothing extra to install. |
-| **Google Gemini API** (free tier) | Writes Zazo's answers in a natural way. |
+| **Node.js** | Runs a small helper that asks the AI what Zazo should say. It uses only what comes with Node, so there is nothing extra to install. |
+| **Google Gemini** (free) | Writes Zazo's answers so he sounds natural. |
+
+### The art
+
+- **Zazo and Benji.** Made with AI image tools, in a clay and felt style, like a stop motion movie. Each one has 6 poses: standing, talking, welcoming, pointing, laughing, and confused.
+- **8 backgrounds.** Made with AI image tools. The world is built from little blocks, with a blurry front and back like a tiny model: a mountain meadow, a beach, a jungle path, the village, a family hut, a waterfall, a lookout hill, and a campfire at night.
 
 ---
 
@@ -195,664 +193,278 @@ On a phone, the game is played sideways (the wide way), like most games. If the 
 
 | Phase | What | Status |
 |---|---|---|
-| 1 | The C core (stack and reverse) | Done |
-| 2 | The connection (HTTP server in C) | Done |
-| 3 | The frontend (with placeholders) | Done |
+| 1 | The stack and the flipping (C) | Done |
+| 2 | The C server | Done |
+| 3 | The website | Done |
 | 4 | The art, the story, and the music system | Done |
-| 5 | Natural conversation with AI | Built (waiting for a real Gemini key to try it) |
-| 6 | Changing scenes and poses | Done (as part of Phase 5) |
+| 5 | Talking with AI | Built. Waiting for a real Gemini key to try it. |
+| 6 | Moving around the island | Done |
 
-The plan for each phase is below.
+### What is left
+
+- **Try the AI with a real key.** Everything else about the AI is built and tested.
+- **Add music files.** The music system works, but there are no songs in the project yet, so the game is quiet for now.
+- **Try it on a real phone,** turned sideways, with the keyboard open.
+- **More stop motion pictures.** Right now each pose has 1 picture. Real stop motion uses 2 or 3 small changes of each pose.
 
 ---
 
-## Build Plan
-
-### The order I am building in
-
-**Backend first, then the connection, then the frontend.**
-
-1. The **stack** is the main DSA part of this project, so I build it and test it first.
-2. Next comes the **connection**: a small server that lets the website talk to the C program.
-3. Then the **frontend**. It only needs to know what the server sends back, so it can start with placeholder pictures until the real art is ready.
-
-### Folder structure
+## Folder Map
 
 ```
 tribezo/
   backend/              the C part
     src/
       stack.c / stack.h     the stack: push, pop, peek, is_empty
-      reverse.c / reverse.h reverses each word, keeps punctuation in place
-      demo.c                type English, see XYZ (for trying things by hand)
-      server.c              a small HTTP server
-    tests/
-      test_stack.c          checks that the stack works
-      test_reverse.c        checks that reversing works
-      test_server.sh        starts the server and checks every answer
-    Makefile              make test, make test-server, make run, make demo
+      reverse.c / reverse.h flips each word with the stack
+      server.c              the C web server
+      demo.c                type English, see XYZ
+    tests/                  tests for the stack, the flipping, and the server
+    Makefile                commands to build, test, and run
+  ai/                   the AI helper
+    server.js               asks Gemini what Zazo says and checks every answer
+    prompt.js               who Zazo is, what he knows, and his rules
+    test/                   tests that use a pretend Gemini
+    .env.example            a blank settings file
+    .env                    your real key (only on your computer)
   frontend/             the website
     public/
-      characters/           Zazo's and Benji's poses (zazo-idle.webp, benji-talking.webp, ...)
+      characters/           Zazo's and Benji's poses
       scenes/               the 8 backgrounds
-      textures/grain.png    film grain laid over the whole scene
-      music/                background music (add your own, see Phase 4)
+      textures/             a fine grain laid over the scene
     src/
-      lib/
-        content.js            all the words, the story, poses, scenes, and music in one place
-        api.js                talks to the C server
-        zazo.js               picks what Zazo says back
-        visitor.js            checks the visitor's name
-        music.js              plays music and fades between songs
-      hooks/
-        useTypewriter.js      types speech out a few letters at a time
-        useKeyboard.js        keeps the chat box above the phone keyboard
-        useLenis.js           smooth scrolling
-      components/
-        Scene.jsx             the background, plus the front flowers and grain
-        Hero.jsx              the title screen
-        NameScreen.jsx        the name box, shown after the story
-        StoryCard.jsx         the story captions, dots, Next, and Skip
-        Character.jsx         shows Zazo or Benji, lit to match the scene
-        RotateNotice.jsx      asks phone users to turn the phone sideways
-        SpeechBubble.jsx      a speech bubble
-        ChatBox.jsx           the liquid glass box where you type
-        HistoryPanel.jsx      the list of everything said
-      pages/
-        Home.jsx              the main page
-        NotFound.jsx          the page for a wrong address
-    index.html
-    vite.config.js        ports, the /api pass-through, and the security rules
-  ai/                   the AI helper (Phase 5)
-    server.js             asks Gemini what Zazo says, checks every answer
-    prompt.js             who Zazo is, what he knows, and his rules
-    test/server.test.js   tests that use a fake Gemini (no key needed)
-    .env.example          a blank copy of the settings file
-    .env                  your real key (only on your computer, never on GitHub)
-  tools/
-    cut_out_characters.py cuts the poses out of a character sheet with clean edges
-  .gitignore            keeps built files and secrets off GitHub
+      lib/                  the words, the story, talking to the servers, and the music
+      hooks/                typing effect, the phone keyboard, smooth scrolling
+      components/           the scene, the characters, speech bubbles, the chat box, and more
+      pages/                the main page and the "lost" page
+  tools/                a script that cut the characters out of their picture sheets
   README.md
 ```
 
-### Phase 1: The C core (the DSA part) — Done
+---
 
-1. **Build the stack.** It uses an array that grows when it gets full. `push`, `pop`, `peek`, and `is_empty` each take the same short time, no matter how big the stack is (O(1)).
-2. **Build the reverse function.** For each word:
-   - Push only the letters onto the stack.
-   - Go through the word again. Where there was a letter, pop from the stack. Numbers and punctuation stay where they are.
-   - Example: `hello, world!` becomes `olleh, dlrow!`
-   - Money, like `$100.50` or `100 dollars`, is skipped and stays the same.
-3. **Write tests** for:
-   - empty input
-   - one word
-   - extra spaces between words
-   - punctuation inside a word, like `don't`, which becomes `tno'd`
-   - numbers
-   - money signs and money names
-   - a long paragraph
-4. **Done when** `make test` passes.
+## What I Built, Step by Step
 
-#### What Phase 1 built
+### Phase 1: The stack and the flipping (C)
 
-- **The stack** (`stack.c`). It keeps characters in an array. When the array is full, it doubles in size. Because it doubles, it only needs to grow once in a while, so pushing stays fast. `push`, `pop`, `peek`, and `is_empty` all take O(1) time.
-- **The reverse function** (`reverse.c`). It makes one copy of the text. Spaces, numbers, and punctuation are already in the right spots in the copy, so only the letters need to change. It goes over each word twice: once to push, once to pop. One stack is reused for every word, because the stack is empty again at the end of each word.
-  - **Time:** O(n). Each character is pushed at most once and popped at most once.
-  - **Space:** O(n) for the new text, plus a stack as big as the longest word.
-- **Money check.** Before reversing a word, the function checks if it is money. A word is money if it has a number and a money sign (`$100`) or a money name (`Rs500`). A money name with no number (`dollars`) also counts when the word just before or just after it has a number (`100 dollars`, `Rs 500`). Money is left as it is and is never pushed or popped.
-- **Push and pop counts.** The function also counts how many pushes and pops it did, so the website can show them later.
-- **Tests.** 2 test files check:
-  - the stack: empty stack, last in first out, growing past 1,000 items
-  - reversing: words, punctuation, extra spaces, new lines, tabs, numbers, money signs, money names, capital letters, a long paragraph, and that reversing twice gives back the original English
-  - Tests are built with memory checkers (AddressSanitizer and UndefinedBehaviorSanitizer). These catch memory mistakes, like reading past the end of an array.
-- **A demo program** (`demo.c`). Type English, see XYZ and the push and pop counts.
+- **The stack.** It keeps letters in a list. When the list is full, it grows to twice its size. Push, pop, peek, and is_empty all take the same short time, no matter how big the stack is. This is called O(1).
+- **The flip.** It goes over each word two times.
+  1. The first time, it pushes only the letters onto the stack.
+  2. The second time, every spot that had a letter gets the top letter popped off the stack. Numbers, punctuation, and spaces are never touched, so they stay in place.
+- **Money check.** A word with a money sign or a money name next to a number is left as it is.
+- **Speed.** The whole flip takes time that grows with the length of the text. This is called O(n).
+- **Counts.** It counts how many pushes and pops it did, so the game can show them.
+- **Tests.** They check the stack, words, punctuation, spaces, numbers, money, capital letters, and a long paragraph. They also check that flipping twice gives back the English. The tests run with memory checkers that catch mistakes like reading past the end of a list.
 
-#### Things I noticed while building Phase 1
+### Phase 2: The C server
 
-Because punctuation stays in place, some words look a little different than you might guess:
+- **What it does.** The website sends English to the C server, and the server sends back the XYZ.
+  - `GET /api/health` answers `{"ok":true}`, so you can see the server is on.
+  - `POST /api/reverse` takes plain text and answers with the English, the XYZ, and the push and pop counts.
+- **How it reads a message.**
+  1. It reads the request line to learn which page is wanted.
+  2. It checks that the request came from this computer.
+  3. It reads how long the text is, then reads the text.
+  4. It flips the text with the stack and sends back the answer.
+- **Tests.** A script starts the server and sends it 15 requests, good ones and bad ones, and checks every answer.
+- **Two bugs the tests found and I fixed.**
+  1. When the text length was the last line of the request, the server could not read it.
+  2. When the text was too long, the server hung up too fast, so the answer sometimes got lost. Now it waits for the rest of the message before hanging up.
 
-| English | XYZ | Why |
-|---|---|---|
-| `don't` | `tno'd` | The `'` stays in spot 4. |
-| `well-known` | `nwon-kllew` | The `-` stays in spot 5. |
-| `You` | `uoY` | Capital letters move with their letter. |
-| `$100.50` | `$100.50` | Money is never reversed. |
-| `123` | `123` | Numbers never move. |
-| `2nd` | `2dn` | The number stays. Only the letters flip. |
-| `one dollar` | `eno rallod` | No number next to `dollar`, so it is a normal word. |
-| `5 pounds of rice` | `5 pounds fo ecir` | `pounds` is kept as money, even when it means weight. |
+### Phase 3: The website
 
-### Phase 2: The connection (backend to frontend) — Done
+- Built with the same tools as my portfolio.
+- The website passes every `/api` request to the servers, so the browser never talks to them directly.
+- It started with drawn characters and a drawn forest, so I could build everything before the real art was ready.
+- It has a chat box, a history panel of everything said, a replay button, and a kind message if the server is off.
+- It works with a keyboard and a screen reader, and people who ask their device for less motion get less movement.
 
-1. **Build a small HTTP server in C** on port `8765`. It uses plain sockets, with no extra libraries.
-2. **Add two endpoints:**
-   - `GET /api/health` answers `{"ok":true}` so I can check the server is on.
-   - `POST /api/reverse` takes the text and answers with:
-     ```json
-     { "english": "hello, world!", "xyz": "olleh, dlrow!", "pushes": 10, "pops": 10 }
-     ```
-     `pushes` and `pops` show how much work the stack did. The website can show these numbers.
-3. **Keep it safe:**
-   - Text is limited to 10 KB.
-   - Slow connections time out.
-   - The server only listens on my own computer.
-4. **Connect it:** while building, Vite passes `/api` requests to the C server. This is set up in Phase 3, when the frontend is made.
-5. **Done when** a `curl` command gets back the reversed text.
+### Phase 4: The art, the story, and the music system
 
-#### What Phase 2 built
+- **The characters.** A script cut the 6 poses out of each character sheet and took away the grey background. Every pose has the same size, and the feet are always on the same line, so nobody jumps when the pose changes. Benji's pictures are flipped so he faces Zazo.
+- **Zazo stands in the bottom left corner. Benji stands in the bottom right corner.**
+- **The backgrounds.** When the place changes, the new picture slowly fades in over the old one. Each picture drifts a little and moves with the mouse.
+- **The story.** It follows ideas from apps that are known for a good start. A guide character talks to you (like Pokémon GO). The game shows the problem first and then the fix (like Opal). You try the main idea right away (like Duolingo). It stays short, and you can always skip it.
+- **Zazo's fixed answers.** Before the AI, Zazo picked his answer from a list. He still uses this list if the AI is not working.
+- **The tour.** Say "yes" or "show me around" to go to the next place: the family hut, the Singing Falls, the lookout hill, the campfire at night, and back to the village.
+- **Liquid glass.** The chat box, the name box, the story card, and the buttons at the top are clear like glass. They blur the scene behind them and have a soft shine.
+- **The music system.** Each place has a song. When you move to a place with a different song, the old one fades out while the new one fades in. A button turns music on and off.
 
-- **The server** (`server.c`). It uses plain sockets from C, with no extra libraries. It waits for a request, answers it, hangs up, and waits for the next one. One request at a time is plenty for one person using the website.
-- **How a request is read:**
-  1. Read until the blank line that ends the headers.
-  2. Read the first line, like `POST /api/reverse HTTP/1.1`, to get the method and the path.
-  3. Send the request to the right place: `/api/health` or `/api/reverse`. Anything else gets `404`.
-  4. Read `Content-Length` to know how long the text is, then read the text.
-  5. Run `reverse_words` from Phase 1 and send back JSON.
-- **JSON answers.** Quotes, backslashes, new lines, and other special characters in the text are written the way JSON needs them (`\"`, `\\`, `\n`), so the answer is always proper JSON.
-- **Safety checks:**
+### Changes after trying the game
 
-  | Check | Answer if it fails |
-  |---|---|
-  | Wrong path | `404 {"error":"not found"}` |
-  | Wrong method, like `GET /api/reverse` | `405 {"error":"use POST"}` |
-  | Text longer than 10 KB | `413 {"error":"text is longer than 10 KB"}` |
-  | Text that is not UTF-8 | `400 {"error":"text must be UTF-8"}` |
-  | Text sent in pieces (`Transfer-Encoding`) | `411` |
-  | Headers bigger than 8 KB | `400 {"error":"headers too large"}` |
-  | Client takes more than 5 seconds | the server hangs up |
-  | `Host` is not this computer, or `Origin` is another website (added in Phase 3) | `403 {"error":"not allowed"}` |
-
-  - The server only listens on `127.0.0.1`, so only my own computer can reach it.
-  - If a client leaves in the middle of an answer, the server keeps running instead of crashing.
-- **Tests** (`tests/test_server.sh`). The script:
-  1. Starts the server on a spare port (`18765`).
-  2. Sends 15 requests with `curl`: health, reversing, money and numbers, quotes and new lines, letters like `é`, empty text, wrong path, wrong method, text that is too long, bad UTF-8, requests from other websites (added in Phase 3), and one last health check to make sure the server still works after all the errors.
-  3. Checks every status code and answer.
-  4. Stops the server.
-
-  The server used by the tests is built with the same memory checkers as the Phase 1 tests.
-
-#### The API
-
-**`GET /api/health`**
-
-```bash
-curl http://127.0.0.1:8765/api/health
-```
-```json
-{"ok":true}
-```
-
-**`POST /api/reverse`**
-
-Send the English as plain text in the body.
-
-```bash
-curl -X POST --data-binary 'Welcome, friend! It costs $5.' http://127.0.0.1:8765/api/reverse
-```
-```json
-{"english":"Welcome, friend! It costs $5.","xyz":"emocleW, dneirf! tI stsoc $5.","pushes":20,"pops":20}
-```
-
-| Field | What it is |
-|---|---|
-| `english` | the text that was sent |
-| `xyz` | the same text in XYZ |
-| `pushes` | how many letters went onto the stack |
-| `pops` | how many letters came off the stack |
-
-#### Things I noticed while building Phase 2
-
-- **A bug the tests caught.** When `Content-Length` was the last header, the server could not read its number, because the end of that line looked different from the other lines. The empty-text test found it, and it is fixed.
-- **Hanging up too early.** When the text was too long, the server answered `413` and hung up right away. The client was still sending, so it sometimes never saw the answer. Now the server finishes by reading and throwing away what the client is still sending (up to 64 KB) before it hangs up.
-- **Letters outside plain English stay in place.** `café` becomes `facé`, because `é` takes more than one byte to store and is not reversed. This is the same as in Phase 1.
-
-### Phase 3: The frontend (with placeholders) — Done
-
-1. **Set it up** with the same tools as my portfolio: Vite, React 19, Tailwind 3, Framer Motion, Lenis, Lucide React, and React Router. It runs on port `8766`.
-2. **Forest scene:** the background is split into layers. The layers move a little when the mouse moves, which gives a feeling of depth (parallax).
-3. **Characters:** each pose is a small set of pictures shown one after another, 8 to 12 pictures per second. This gives a stop-motion look. Simple placeholder drawings are used until the real art is ready. When the real pictures go into `public/characters/`, they replace the placeholders with no code changes.
-4. **Flow:**
-   1. **Intro:** the translator explains the tribe in speech bubbles. The user presses "Next", then "Start talking".
-   2. **Chat:** the user types English, and the translator says "Let me tell them…". The C server reverses the words. The tribe switches to its talking pose, and the reversed words appear in its speech bubble.
-   3. **History panel:** shows each English message next to its XYZ version, with the push and pop counts.
-   4. **Error message:** if the C server is off, the translator says "I can't reach the tribe right now."
-5. **Phones:** on small screens, the characters stack on top of each other and the chat sits at the bottom.
-6. **Done when** the whole flow works in the browser.
-
-#### What Phase 3 built
-
-- **The website** with the same tools as my portfolio. It runs on port `8766`. Vite passes every `/api` request to the C server on port `8765`.
-- **The forest** (`ForestScene.jsx`, replaced in Phase 4 by the real backgrounds). It is drawn with shapes: sky, far trees, beams of light, near trees, the ground, fireflies, and big leaves in the front corners. Each layer moves a different amount when the mouse moves, so the forest feels deep. The trees are placed by a "random" formula that always gives the same answer, so the forest looks the same every time.
-- **The characters** (`Character.jsx` and `PlaceholderFigure.jsx`, replaced in Phase 4 by the real art). Until the real art is ready, both characters are drawn with shapes that match the character descriptions: the translator's glasses, beard, mustard hoodie, and bag, and the tribe member's curly hair, leaf, face dots, beads, sash, and green wrap. They move like stop-motion:
-  - 10 frames per second
-  - a tiny wobble on every frame
-  - the mouth opens and closes while talking
-  - the eyes blink now and then
-  - a small hop when the pose changes
-- **Poses.** The arms and head move for each pose: `idle`, `talking`, `welcome`, `pointing`, `laughing`, `confused`, `explaining`, and `listening`. When the translator explains, he points at the tribe member.
-- **Real art needs no code changes.** When the real pictures are ready, their file names go into `content.js`. The website then flips through them instead of showing the drawings.
-- **The flow** (`Home.jsx`):
-  1. The translator explains the tribe in 4 speech bubbles, with "Next" and "Skip" buttons.
-  2. On "Start talking", the tribe member waves with both arms and the chat box appears.
-  3. You type English and press Enter or the send button. Shift + Enter makes a new line.
-  4. The translator says "Let me tell them…" while the C server reverses your words.
-  5. The tribe member speaks the XYZ, typed out a few letters at a time. Under the bubble, it shows how many pushes and pops the stack did.
-  6. When the tribe member finishes, you can talk again.
-- **History panel.** It lists every message in English and XYZ with the push and pop counts. It opens from the "History" button and closes with the X button, the Escape key, or a click outside it.
-- **Replay button** to hear the introduction again.
-- **Error message.** If the C server is off or too slow (more than 8 seconds), the translator says "I can't reach the tribe right now. Please try again in a moment."
-- **Phones.** Both characters stay side by side but get smaller, and the chat box sits at the bottom.
-- **Accessibility:**
-  - Screen readers hear each speech bubble all at once, not letter by letter.
-  - Every button has a name a screen reader can read.
-  - The keyboard focus outline is easy to see.
-  - People who ask their device for less motion get no wobble, no fireflies, no parallax, and text that appears all at once.
-
-#### Security
-
-The website is kept small and closed, so people cannot poke at parts they are not meant to see.
-
-| What | How |
-|---|---|
-| The C server is hidden | The browser only talks to the website. The website passes `/api` requests to the C server. |
-| Only this computer | The website (`8766`), the preview (`8767`), and the C server (`8765`) all listen on `127.0.0.1` only. |
-| Other websites are blocked | The C server now checks two headers. `Host` must be `localhost` or `127.0.0.1`. `Origin`, if there is one, must be a page on this computer. Anything else gets `403 {"error":"not allowed"}`. This stops other websites from using the server through someone's browser. |
-| Content Security Policy | The built website tells the browser to only run its own code, only load fonts from Google Fonts, only talk to its own address, and never load plugins. Anything else is blocked. |
-| No source maps | The built website does not include the original source code. |
-| No secrets in the website | There are no keys or passwords in the frontend. `.env` files are kept off GitHub. |
-| Text is shown as text | Everything people type is shown as plain text, never as HTML, so no one can sneak code into the page. |
-| Limits on both sides | The chat box stops at 2,000 characters. The C server still checks for 10 KB, in case someone skips the website. |
-| Answers are checked | The website only uses the four fields it expects from the server, and checks each one is the right type. |
-| Friendly errors | People see a friendly message, never server details. |
-| No outside links | The page sends no referrer, and has no tracking or ads. |
-
-One honest note: anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the C server, not only in the website.
-
-#### Things I noticed while building Phase 3
-
-- **Phones:** the plan said the characters would stack on top of each other on phones. Side by side and smaller looked better and kept both characters in view, so I kept them side by side.
-- **Stuck fireflies:** at first, all the fireflies sat on the left edge. The "random" formula gives tiny numbers for its first few answers, so now it skips them.
-- **Old answers:** if you restart the intro while a message is on its way, the late answer is now ignored instead of popping up in the middle of the intro.
-- **The translator pointed the wrong way** at first, away from the tribe. Fixed.
-
-### Phase 4: The art, the story, and the music system — Done
-
-1. **Make the characters in order:** first a master picture of each character, then each pose, then 2 to 3 small changes of each pose for the stop-motion frames.
-2. **Clean up the pictures:** remove the backgrounds, and check that every picture is the same size and that the feet sit on the same line.
-3. **Connect them** in `content.js`.
-4. **Make the backgrounds:** `forest-entry` first, then the others.
-5. **Tell the story:** a short onboarding story that introduces the island, Zazo, the problem, and Benji, and then asks for your name.
-6. **Add music** that changes with the place.
-
-#### What Phase 4 built
-
-- **Characters.** Zazo stands in the bottom left corner. Benji stands in the bottom right corner.
-  - A small script cut the 6 poses out of each character sheet. It removed the grey background, including the small grey gaps between an arm and the head.
-  - Every pose sits on the same size canvas with the feet on the bottom edge, so a character does not jump when the pose changes.
-  - Benji's pictures are flipped so he faces Zazo, and his pointing pose points at Zazo.
-  - There is only one picture per pose, so the stop-motion look comes from a tiny wobble 8 times per second, a small bob while talking, and a hop when the pose changes.
-- **Backgrounds.** All 8 pictures are in `public/scenes/`. When the place changes, the new picture fades in over the old one. Each picture also drifts very slowly and moves a little with the mouse. The hut picture had a small mark in its top left corner from the image tool, so it was trimmed a little.
-- **Start screen** (`Hero.jsx`). The meadow picture, with the title flipping from `ozebirT` to `Tribezo`.
-- **The story** (about 40 seconds). It follows the research below: show the problem first, let a guide character ask your name inside the story, and make the first reverse happen right away.
-
-  | Step | Place | What happens |
-  |---|---|---|
-  | Name | Mountain meadow | *"Welcome, traveler. What's your name?"* (added in round 2) |
-  | Start | Mountain meadow | The title flips from backwards to forwards. **Begin**. |
-  | 1 | Beach | *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."* |
-  | 2 | Jungle path | Zazo walks in and waves: `olleH, relevart! emocleW!` *"Meet Zazo, leader of the islands. He is warm, kind, and always happy to see a visitor."* |
-  | 3 | Village | Zazo is puzzled: `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out… backwards."* |
-  | 4 | Village | Benji walks in and explains how he will help. *"Luckily, someone here speaks both languages."* |
-  | 5 | Village | Zazo greets you by name, backwards. Tap, and Benji translates. The chat starts. |
-
-  - One tap per step. **Next** has the keyboard focus, so Enter works too.
-  - **Skip** is always there. It goes straight to Zazo's greeting.
-  - Dots show how far along you are.
-  - The **replay** button at the top plays the story again.
-  - The Zazo lines in the story were made with the real C stack (`make demo`), so they match exactly.
-- **Talking to Zazo** (`zazo.js`). For now, Zazo picks his answer from a fixed list in `content.js`. In Phase 5 an AI model will write his answers instead.
-
-  | You say something like | Zazo says |
-  |---|---|
-  | "Where are the other people?" | They have gone on a 3-day vacation to another island to meet their families and relatives. I'm the only one taking care of the islands. Come, let me show you around! |
-  | "Yes", "show me around", "next" | The next stop on the tour, and the place changes |
-  | "I'm hungry" | Come to my hut! There is fresh fruit on the table. |
-  | "Who are you?" | I am Zazo, leader of these islands. Benji is my good friend. |
-  | "How are you?" | I am very happy today, because I have a visitor! |
-  | "Thank you" | You are always welcome here. |
-  | "Bye" | Goodbye! Come back soon. |
-  | "Hi" | Hello! It is so good to see you. |
-  | Anything else | One of 4 friendly answers, taking turns |
-
-  **The tour:**
-
-  | Stop | Place | Zazo says |
-  |---|---|---|
-  | 1 | Family hut | This is my family's hut. My mother wove these rugs herself. Sit down, have some fruit! |
-  | 2 | Waterfall | These are the Singing Falls. We drink this water, and the children swim here on hot days. |
-  | 3 | Lookout hill | From this hill you can see every island. The small one far away? That's where my people are now. |
-  | 4 | Campfire at night | Night comes fast here. When everyone is home, we sing around this fire until the moon is high. |
-  | 5 | Village | And we are back in the village! That's the whole island. |
-
-  Every message uses the stack twice: once for your words, and once for Zazo's answer. The history panel shows both, with Benji's translation.
-- **Liquid glass.** The chat box, the name box, the story card, and the buttons at the top right (music, replay, history) are now see-through glass: they blur the scene behind them and have a soft shine on the top edge. It is plain CSS (the `.glass` class in `index.css`), the same way as in my portfolio, so there is no extra library.
-- **Music system** (`music.js`), using **howler.js**:
-  - Music can only start after a tap, because browsers block sound until then. The **Begin** button is that tap.
-  - Each place has a track. When you move to a place with a different track, the old one fades out while the new one fades in (1.8 seconds).
-  - A music button at the top turns it on and off. The choice is remembered in this browser.
-  - Tracks are listed in `content.js`. No music files are in the project yet, so the site works quietly and the music button stays hidden until tracks are added.
-
-#### Onboarding research
-
-| App | What works | What Tribezo uses |
-|---|---|---|
-| Pokémon GO | A guide character (Professor Willow) teaches you by talking, asks your name, and then lets you play right away. | Benji asks your name inside the story, and Zazo greets you with it right after. |
-| Opal | Shows you the problem first, then how the app fixes it. | First the problem (Zazo speaks backwards), then the fix (Benji and his stack). |
-| Duolingo | Lets you try the main thing before asking for anything. | The first reverse happens during the story. There is no sign-up. |
-| Game onboarding studies | Get to the fun within about a minute. Make tutorials skippable, and keep them short. | About 40 seconds, one tap per step, and Skip is always there. |
-
-#### Music picks
-
-These fit the calm, sunny, handmade feel of the island. They need to be downloaded and put in `public/music/`, then listed in `content.js`.
-
-| Track slot | Places | Mood | Suggestion |
-|---|---|---|---|
-| `theme` | Start screen, beach | Gentle, curious, a little magical | Soft acoustic or marimba, like Pixabay's "tropical island" results |
-| `island` | Jungle, village, hut, waterfall, lookout | Happy, relaxed island daytime | "Island Meet and Greet" by Kevin MacLeod (Creative Commons Attribution 3.0, needs a credit line) |
-| `night` | Campfire at night | Calm, warm, quiet | Slow acoustic guitar or soft ambient, from Pixabay |
-
-Pixabay music can be used without a credit line. Kevin MacLeod's music can be used for free with a credit line like: *"Island Meet and Greet" Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 3.0.*
-
-#### Security in Phase 4
-
-- **Your name is not saved anywhere.** It is only kept while the page is open (since round 2). The C server reverses the greeting and forgets it.
-- **Names are checked.** 1 to 20 characters, letters from any language, spaces, dots, dashes, and apostrophes only. They are always shown as plain text.
-- **Music is local only.** The security rules now allow sound files, but only from this website (`media-src 'self'`).
-- **No new outside connections.** All pictures and music load from the website itself.
-
-#### Things I noticed while building Phase 4
-
-- **The crossfade got stuck at first.** The old song faded to a low volume but never paused. howler.js did not always send its "fade finished" signal when two fades ran at the same time. Now a timer pauses the old song once its fade time is over.
-- **One picture per pose.** Real stop-motion needs 2 to 3 small changes of each pose. More frames can be added later with no code changes to the story.
-- **Style.** The clay characters and the voxel backgrounds come from different styles, but the shadows and the tilt-shift blur help them sit together.
-- **"3-day" becomes "3-yad"**, because numbers stay in place and only the letters flip.
-
-#### Round 2 changes
-
-After trying Phase 4, I asked for these changes:
+After I played it, I asked for these changes.
 
 | What I asked for | What changed |
 |---|---|
-| Benji's translation above Benji's head | Zazo's bubble shows only what Zazo says, in XYZ. Benji's translation now has its own bubble above Benji. |
-| Only the dialogue changes on a tap | The talk is a list of lines shown one at a time. A tap (anywhere, or Enter, Space, or →) finishes the line being typed, or shows the next one. Nothing else moves. A **Tap to continue** button sits where the chat box is until the talk is done. |
-| No shaking | The wobble, the bob, and the hop are gone. Poses now fade into each other in a quarter of a second. |
-| No white lines around the characters | The poses were cut out again with a better script (`tools/cut_out_characters.py`, using Pillow and NumPy). It shrinks the edge by 2 pixels to drop the grey-white outline, fills the edge with the colors just inside it ("color bleed"), removes larger grey gaps between arms and bodies, and softens the edge. |
-| Characters sized for each background | Each scene has a `scale`, like 1.08 inside the hut and 0.95 at the village and the lookout. |
-| Laptop first | Characters are about two thirds of the screen height on a laptop (`--character-height` in `index.css`). Phones held upright get a smaller size. |
-| Phones upright only | *(Changed in round 3: phones are now played sideways.)* |
-| Always ask the name, with an empty box | The name box has no hint text. The name is asked on every visit and is not saved. *(Round 3 moved it to after the story.)* |
-| Make the characters blend with each background's light | See the table below. |
+| Benji's words above Benji's head | Zazo's bubble shows only XYZ. Benji's English has its own bubble above Benji. |
+| Only the talk changes when I tap | One line shows at a time. A tap shows the next line. Nothing else moves. |
+| No shaking | The characters stand still. New poses fade in softly. |
+| No white lines around the characters | A better script cut them out again with clean edges. |
+| Characters that fit each place | Each place has its own size for the characters. They are a bit bigger inside the hut. |
+| Characters that match the light | See the list below. |
+| The order: title, story, then name | The game opens on the title. Then the story. Then Benji asks your name in an empty box. |
+| Play sideways on phones | A phone held upright is asked to turn sideways. Small screens get a smaller layout. |
+| The phone keyboard should work well | See the list below. |
+| Fonts that fit the game | Fredoka for titles, Nunito for talking, in warm colors. |
 
-**How the characters blend in.** Everything is done with the browser's own CSS (filters, blend modes, and masks) through Tailwind, so no extra library is needed:
+**How the characters blend in with each place**
 
-| Trick | What it does |
+The pictures of the characters and the backgrounds come from different styles. These tricks help them look like they are in the same world.
+
+1. Each place has its own color and brightness for the characters. They are darker at night.
+2. The light of the place shines on them: gold in the hut, green in the jungle, and orange from the fire at night.
+3. At night, a soft blue moonlight is added.
+4. The side away from the light is a little darker.
+5. A thin line of light sits on the edge that faces the sun.
+6. A soft shadow sits under their feet.
+7. The blurry flowers at the bottom of the picture are drawn again in front of their feet, so they stand in the flowers.
+8. A fine grain covers everything, so the clay and the blocks look like one picture.
+
+**How the phone keyboard works**
+
+1. The whole game stays pinned to the screen, so nothing jumps or squashes when the keyboard opens.
+2. The game measures how much of the screen the keyboard covers.
+3. The chat box and the name box move up so they sit right above the keyboard.
+4. The speech bubbles step aside while you type and come back when you are done.
+5. The keyboard shows a **Send** key, and it closes after you send, so you can watch Zazo and Benji talk.
+
+**Fonts and colors**
+
+| Where | Font and color |
 |---|---|
-| Color filter per scene | Matches brightness and color. For example, darker and less colorful at night. |
-| Scene light over the character | A colored light (warm gold in the hut, green in the jungle, fire orange at night) is laid over the character. The character's own picture is used as a mask, so only the character is colored. |
-| Moonlight | At night, a blue shade is added too. |
-| Shade on the far side | The side away from the light is a little darker. |
-| Rim light | A thin line of light on the edge that faces the sun. At the campfire, both characters are lit from the fire between them. |
-| Ground shadow | A soft shadow under the feet, darker in shady scenes. |
-| Front flowers | The blurry flowers at the bottom of each background are drawn again in front of the feet, so the characters stand in the scene instead of on top of it. |
-| Film grain | A fine grain over the whole picture, characters included, so the clay and the voxel worlds share one texture. |
-| Soft edges | A gentle dark vignette around the screen, like a camera lens. |
+| Titles | Fredoka, in warm cream with a soft brown shadow |
+| Speech bubbles | Nunito, in cocoa brown on a cream bubble |
+| Zazo's labels | Burnt orange, like his sash |
+| Benji's labels | Dark mustard, like his hoodie |
+| Glass buttons and boxes | White |
 
-Each scene's settings live in `content.js`, under `scenes`, so they are easy to adjust.
+### Phase 5: Talking with AI
 
-#### Round 3 changes
-
-| What I asked for | What changed |
-|---|---|
-| The order: title, then splash story, then the name | The game now opens on the Tribezo title screen. **Begin** starts the story that introduces Zazo and Benji. After the story, Benji asks for your name in an empty box. Then Zazo greets you and the game starts. |
-| Play sideways on phones | People scroll with their phone upright, but games are played sideways. A phone held upright (a narrow touch screen) now sees *"Please turn your phone sideways"*. Laptops and tablets are not affected. |
-| A short-screen layout for phones held sideways | On screens shorter than 500 pixels, the characters, the speech bubbles, the story card, and the buttons get smaller, and the Tribezo word at the top is hidden to make room. |
-| The keyboard should work well on phones | See below. |
-| Fonts that fit the game | See below. |
-
-**How the phone keyboard works now**
-
-When a phone keyboard opens, the browser does not shrink the page. It only shrinks the part you can see (the "visual viewport"), so a box stuck to the bottom of the page ends up hidden behind the keyboard. Different browsers also handle this in different ways. So:
-
-1. The whole game is pinned to the screen (`position: fixed`), so the scene and the characters never jump or squash when the keyboard opens.
-2. `useKeyboard.js` uses the browser's `visualViewport` to work out how much of the screen the keyboard covers, and saves it in the CSS variable `--keyboard-inset`.
-3. The chat box and the name box sit that far up from the bottom, so they are always just above the keyboard.
-4. The page tells Chrome on Android to act the same way as Safari on iPhone (`interactive-widget=resizes-visual`), so there is one behavior to handle.
-5. While the keyboard is open, the speech bubbles step aside so they are not stuck behind the chat box. They come back when it closes.
-6. The keyboard shows a **Send** key, and sentences start with a capital letter. The name box starts names with capitals.
-7. After you send a message, the keyboard closes, so you can watch Zazo and Benji talk.
-8. Text in the boxes is 16 pixels, so iPhones do not zoom in when you tap them.
-
-I tested this by pretending the keyboard covered 190 pixels of a sideways phone screen. The chat box moved up above it and the scene stayed still. A real phone keyboard can't be opened in the desktop browser, so it still needs a try on a real phone.
-
-**Fonts**
-
-Tribezo looks like soft clay characters in a sunny, handmade island world. It is cozy and friendly, not serious. The research pointed to rounded fonts for this kind of game, with no more than two or three font families.
-
-| Use | Font | Why |
-|---|---|---|
-| Titles, captions, labels, buttons | **Fredoka** (Google Fonts) | Chunky and rounded, like the clay characters. It is the most-used free "bubbly" font, and it has many weights. |
-| Dialogue and chat | **Nunito** (Google Fonts) | Rounded like Fredoka, but calmer and very easy to read in longer text. The two fonts pair well. |
-| The stack counts | **JetBrains Mono** | A code font, for the DSA part. |
-
-The old fonts (Cormorant Garamond, a thin book serif, and Outfit) were from the portfolio and felt too formal for a game.
-
-**Font colors**
-
-| Where | Color |
-|---|---|
-| Big titles | Warm cream `#fff8ec` with a soft brown "clay" shadow under the letters |
-| Speech bubble text | Cocoa brown `#3a2618` on cream `#fbf4e4` (much easier on the eyes than black, with about 13 to 1 contrast) |
-| Zazo's labels | Burnt orange `#b9531f`, from his sash |
-| Benji's labels | Dark mustard `#8a5c0f`, from his hoodie |
-| Glass buttons and boxes | White with a light shadow |
-
-Text in the speech bubbles is semi-bold and at least 16 pixels on laptops, following game-UI advice on size and contrast.
-
-### Phase 5: Natural conversation with AI — Built
-
-1. **Flow:**
-   1. The user types English.
-   2. An AI model writes the tribe's reply in **normal English**, as JSON with three parts: `reply`, `scene`, and `pose`.
-   3. The **C stack** reverses the reply. The AI never does the reversing, so the stack stays the most important part.
-   4. The tribe says the reversed reply.
-2. **AI service:** the free tier of Google Gemini.
-3. **API key:** kept only on the backend, in a `.env` file. It is never put in the website code and never uploaded to GitHub.
-4. **Guardrails:** rules in the prompt keep the tribe friendly, on topic, and short. `scene` and `pose` can only be values from a fixed list. Anything else falls back to the `idle` pose.
-5. **Decided:** a small Node helper calls the AI. The C server still does all the reversing.
-
-#### What Phase 5 built
-
-- **The AI helper** (`ai/server.js`), on port `8764`. It uses only what comes with Node, so there are no extra packages.
-  - `GET /api/chat/health` says whether a key is set up.
-  - `POST /api/chat` takes your message, your name, and the last few turns of the chat, and answers `{"reply", "scene", "pose"}` in plain English.
-- **How a message goes now:**
-  1. You type English.
-  2. The C stack reverses it, and Benji tells Zazo.
-  3. The AI helper asks Gemini what Zazo says, in plain English.
-  4. The C stack reverses Zazo's answer. Zazo says it in XYZ.
-  5. Benji translates it for you.
-  6. If Zazo takes you somewhere, the scene changes. His pose matches what he says.
-- **Zazo's rules** (`ai/prompt.js`). Gemini is told who Zazo is, what he knows (his people are on a 3-day vacation to see family, and he is the only one taking care of the islands), the 7 places on the island, and his rules:
-  - Plain, simple English, 1 to 3 short sentences.
-  - Never write words backwards (the stack does that).
-  - Friendly and suitable for children. Off-topic, unkind, unsafe, or grown-up questions get a kind "I only know about my island".
+- **The AI helper** is a small Node program in the `ai` folder. It asks Gemini what Zazo should say.
+- **What happens when you send a message.**
+  1. The stack flips your words, and Benji tells Zazo.
+  2. The AI helper asks Gemini for Zazo's answer, in plain English.
+  3. The stack flips Zazo's answer. Zazo says it in XYZ.
+  4. Benji tells you what it means.
+  5. If Zazo takes you somewhere, the place changes. His pose matches what he says.
+- **The AI never flips any words.** The stack does all the flipping, so the stack stays the most important part of the project.
+- **Zazo's rules.** Gemini is told who Zazo is, what he knows, and the 7 places on the island. Zazo must:
+  - Use plain, simple English, in 1 to 3 short sentences.
+  - Stay friendly and right for kids.
+  - Say he only knows about his island when a question is off topic, unkind, or unsafe.
   - Never ask for personal details.
-  - Ignore any message that tries to change these rules.
-- **Answers are checked, even though Gemini was told the shape.** `scene` must be one of the island's places (or `stay`), and `pose` must be one of the 6 poses. Anything else falls back to safe values. Replies longer than 400 characters are cut short.
-- **Zazo remembers the chat.** The last 6 turns are sent along with each message.
-- **A backup plan.** If the helper is not running, has no key, is too slow (10 seconds), or Gemini fails, Zazo uses his fixed answers from Phase 4. The game always works.
-- **Tests** (`ai/test/server.test.js`). A fake Gemini runs on this computer, so the tests are free and need no key. 10 tests check normal answers, that the key is sent in a header and never in the address, that the name and earlier turns are sent, fallbacks for bad scenes and poses, long replies, no key, bad requests, requests from other websites, and the rate limit.
-- **End-to-end check.** With the fake Gemini, a message went all the way through: the C stack reversed the question, the helper returned an answer that moved the scene to the waterfall, and the C stack reversed the answer too. With the helper switched off, Zazo used his fixed answers.
+  - Ignore any message that tries to change his rules.
+- **Every answer is checked again.** The place and the pose must come from the game's own lists. Very long answers are cut short.
+- **Zazo remembers** the last 6 things that were said.
+- **A backup plan.** If the AI helper is off, has no key, is too slow, or fails, Zazo uses his fixed answers. The game always works.
+- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 10 tests check good answers, bad answers, bad requests, requests from other websites, and the limit on how many messages can be sent.
 
-#### Security in Phase 5
+### Phase 6: Moving around the island
+
+When Zazo invites you somewhere, the background changes to that place. His pose changes to match what he says, like open arms to welcome you or a finger to point. The fixed tour did this first, and now the AI can do it too.
+
+---
+
+## Keeping It Safe
 
 | What | How |
 |---|---|
-| The key stays on this computer | It is only in `ai/.env`. `.gitignore` keeps it off GitHub. The website never sees it. |
-| The key never shows up in logs | It is sent to Google in a header (`x-goog-api-key`), not in the web address, and the helper never prints it. |
-| Only this computer can use the helper | It listens on `127.0.0.1` only, and checks `Host` and `Origin` the same way as the C server. |
-| The free quota is protected | No more than 20 AI calls a minute. More than that gets `429`. |
-| Small requests only | Up to 8 KB, a 2,000-character message, a 20-character name, and 6 earlier turns. |
-| Friendly errors | People never see error details. The developer sees a short reason in the helper's terminal, without the key or the message. |
-| Zazo stays safe | His rules are in the system prompt, and every answer is checked again in code. |
+| Only this computer can use the servers | The C server and the AI helper only listen to this computer. They also turn away requests that come from other websites. |
+| The servers stay hidden | The browser only talks to the website. The website passes requests on to the servers. |
+| The Gemini key stays secret | It lives only in the `ai/.env` file on your computer. That file is never uploaded to GitHub, and the website never sees it. The key is sent to Google in a hidden header, never in a web address, and it is never printed in the logs. |
+| Limits on size | Messages can be up to 2,000 letters, names up to 20 letters, and the C server takes up to 10 KB. |
+| Limits on speed | The AI helper allows 20 messages a minute, so the free quota lasts. Slow connections are cut off. |
+| Text stays text | Everything people type is shown as plain text, so nobody can sneak code into the page. |
+| Answers are checked | The website and the AI helper only use the parts of an answer they expect, and check each part. |
+| Kind errors | People see a friendly message, never the details of an error. |
+| Rules for the browser | The finished website tells the browser to only run its own code, only load fonts from Google Fonts, and only talk to its own address. |
+| No source code in the finished website | The finished website does not ship the original code. |
+| Your name is not saved | The name is only kept while the page is open. |
 
-#### Setting up the Gemini key
+Anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the servers.
 
-Do this in your own terminal, on your own computer. **Never** put the key on the GitHub website, in a commit, in a chat, or in the frontend code.
+---
 
-1. Go to [Google AI Studio](https://aistudio.google.com/apikey), sign in, and click **Create API key**. Copy it.
-2. In a terminal, make your own settings file from the example:
+## Setting Up the Gemini Key
+
+Do this in the Terminal on your own computer. **Never** put the key on the GitHub website, in a commit, in a chat, or in the website code.
+
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey), sign in, and click **Create API key**. Copy the key.
+2. Make your own settings file from the blank one.
 
    ```bash
    cd tribezo/ai
    cp .env.example .env
    ```
 
-3. Open the new file in a text editor:
+3. Open the new file.
 
    ```bash
    open -e .env
    ```
 
-4. Paste your key right after `GEMINI_API_KEY=`, with no spaces or quotes, like `GEMINI_API_KEY=AIza...`. Save and close.
-5. Check that Git will never upload it:
+4. Paste your key right after `GEMINI_API_KEY=`. Do not add spaces or quotes. Save and close the file.
+5. Check that Git will never upload the file.
 
    ```bash
    git check-ignore -v .env
    ```
 
-   It should print a line that ends with `.env`. If it prints nothing, stop and do not commit.
-6. Start the helper:
+   It should print a line that ends with `.env`. If it prints nothing, stop and do not commit anything.
+6. Start the AI helper.
 
    ```bash
    npm start
    ```
 
-   It should say `Using gemini-2.5-flash.` If it says `No GEMINI_API_KEY found`, check step 4.
+   It should say which Gemini model it is using. If it says it found no key, check step 4.
 
 If the key is ever shared by mistake, delete it in Google AI Studio and make a new one.
-
-### Phase 6: Changing scenes and poses — Done
-
-1. **Scenes:** when the tribe invites you somewhere, like their village, `scene` changes the background.
-2. **Poses:** `pose` changes how the character stands, for example arms open to welcome you.
-3. **Changes between scenes and poses:** a quick stop-motion cut or a soft fade.
-
-This was built along the way: the tour in Phase 4 already changed scenes and poses with soft fades, and in Phase 5 the AI's `scene` and `pose` drive them too.
-
-### After each phase
-
-- The work is saved and pushed to GitHub.
-- This README is updated with how to run the new parts.
-
----
-
-## I Will Keep Iterating
-
-This project will grow step by step. As I build it, I will:
-
-- Try things out.
-- See what works and what does not.
-- Fix things and make them better.
-- Add new ideas as I think of them.
-
-This README will change along with the project.
-
-### Ideas I might add later
-
-- Sounds for the forest and for the tribe talking.
-- More tribe members.
-- Typing in XYZ and getting English back.
-- A mode that shows the stack pushing and popping, letter by letter.
 
 ---
 
 ## How to Run It
 
-You need a C compiler (`cc`, `gcc`, or `clang`) and `make`. On a Mac, running `xcode-select --install` gets both.
+You need a C compiler and `make`. On a Mac, this command gets both.
+
+```bash
+xcode-select --install
+```
+
+You also need [Node.js](https://nodejs.org) version 22.9 or newer.
 
 ### Run the tests
 
 ```bash
 cd backend
 make test
-```
-
-You should see `all passed` twice.
-
-To test the server too:
-
-```bash
-cd backend
 make test-server
 ```
 
-### Start the server
-
 ```bash
-cd backend
-make run
+cd ai
+npm test
 ```
 
-You should see `Tribezo server is listening on http://127.0.0.1:8765`. Press `Ctrl+C` to stop it.
+### Start the game
 
-To use a different port:
+Use three Terminal windows.
 
-```bash
-PORT=9000 make run
-```
-
-In a second terminal, try it:
-
-```bash
-curl -X POST --data-binary 'hello, world!' http://127.0.0.1:8765/api/reverse
-```
-
-### Try it yourself
-
-```bash
-cd backend
-make demo
-```
-
-Type some English and press Enter. Press `Ctrl+D` to stop.
-
-```
-> hello, world!
-XYZ: olleh, dlrow!
-(stack: 10 pushes, 10 pops)
-```
-
-### Start the website
-
-You need [Node.js](https://nodejs.org) 22.9 or newer.
-
-1. Start the C server in one terminal:
+1. Start the C server.
 
    ```bash
    cd backend
    make run
    ```
 
-2. Start the AI helper in a second terminal (optional; without it, Zazo uses his fixed answers). See "Setting up the Gemini key" in Phase 5 first.
+2. Start the AI helper. This step is optional. Without it, Zazo uses his fixed answers. Set up the Gemini key first.
 
    ```bash
    cd ai
    npm start
    ```
 
-3. Start the website in a third terminal:
+3. Start the website.
 
    ```bash
    cd frontend
@@ -862,18 +474,24 @@ You need [Node.js](https://nodejs.org) 22.9 or newer.
 
 4. Open http://127.0.0.1:8766 in your browser.
 
-### Test the AI helper
-
-No key is needed. The tests use a fake Gemini.
+### Try the flip by itself
 
 ```bash
-cd ai
-npm test
+cd backend
+make demo
 ```
 
-### Try the built website
+Type some English and press Enter. Press Control and D together to stop.
 
-This is the version with all the security rules turned on. Keep the C server running, then:
+```
+> hello, world!
+XYZ: olleh, dlrow!
+(stack: 10 pushes, 10 pops)
+```
+
+### Try the finished website
+
+This version has all the safety rules turned on. Keep the servers running, then run these.
 
 ```bash
 cd frontend
@@ -883,4 +501,15 @@ npm run preview
 
 Open http://127.0.0.1:8767.
 
-More steps will be added here as each phase is finished.
+---
+
+## I Will Keep Changing This
+
+This project grows step by step. As I build it, I try things out, see what works, fix what does not, and add new ideas. This README changes along with the project.
+
+### Ideas I might add later
+
+- Sounds for the island, like waves and birds.
+- More people from the tribe, once they come back from their trip.
+- Typing in XYZ and getting English back.
+- A mode that shows the stack pushing and popping, one letter at a time.
