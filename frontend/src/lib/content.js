@@ -176,6 +176,36 @@ export const replies = [
     pose: "pointing",
   },
   {
+    match: /\bbenji\b/,
+    says: "Benji came to our island by boat 2 summers ago to learn new languages. He loved it so much that he stayed. Now he is my good friend, and the only one who speaks both English and XYZ.",
+    pose: "talking",
+  },
+  {
+    match: /\b(how old|your age)\b/,
+    says: "I am 34 summers old! On my island we count our age in summers.",
+    pose: "laughing",
+  },
+  {
+    match: /\b(family|mother|mom|sister|brother|grandfather|grandpa|parents)\b/,
+    says: "My mother Nala weaves our rugs, my little sister Kiki swims faster than anyone, and my grandfather Old Tumo tells the best stories.",
+    pose: "welcome",
+  },
+  {
+    match: /\b(favou?rite food|like to eat|what do you eat)\b/,
+    says: "Roasted sweet potato with honey! I also love mangoes and coconut bread.",
+    pose: "laughing",
+  },
+  {
+    match: /\b(every ?day|morning|what do you do)\b/,
+    says: "Every morning I walk the beach, check the canoes, and say hello to the sea turtles.",
+    pose: "talking",
+  },
+  {
+    match: /\b(language|xyz|teach me|a word)\b/,
+    says: "In my language, the letters of every word are turned around. Here is a word for you: dneirf means friend!",
+    pose: "laughing",
+  },
+  {
     match: /\b(show|tour|around|explore|let'?s go|come on|yes|yeah|sure|okay|ok|next|go on)\b/,
     tour: true,
   },
@@ -242,11 +272,13 @@ export const tour = [
 ];
 
 // When nothing matches, Zazo takes turns saying these.
+// These are only used when the AI is not available, so they should fit
+// any question and point the visitor to things Zazo can answer.
 export const fallbackReplies = [
-  { says: "Ha! You talk in a funny way, {name}. I like it!", pose: "laughing" },
-  { says: "Tell me more, friend.", pose: "talking" },
-  { says: "Hmm… Benji, what does that mean?", pose: "confused" },
-  { says: "The islands are happy you are here.", pose: "welcome" },
+  { says: "Hmm, the sea is very loud today and I did not catch that. Ask me about my family, my food, or Benji!", pose: "confused" },
+  { says: "That is a good question, {name}. Shall I show you around the island while I think about it?", pose: "talking" },
+  { says: "Benji, can you help me? I think our visitor asked something new. Ask me how old I am, or where my people went!", pose: "laughing" },
+  { says: "I am not sure about that one, friend. But I know every corner of this island. Want to see it?", pose: "welcome" },
 ];
 
 // ---------- Music ----------

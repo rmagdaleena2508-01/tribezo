@@ -288,7 +288,7 @@ tribezo/
 - **Zazo stands in the bottom left corner. Benji stands in the bottom right corner.**
 - **The backgrounds.** When the place changes, the new picture slowly fades in over the old one. Each picture drifts a little and moves with the mouse.
 - **The story.** It follows ideas from apps that are known for a good start. A guide character talks to you (like Pokémon GO). The game shows the problem first and then the fix (like Opal). You try the main idea right away (like Duolingo). It stays short, and you can always skip it.
-- **Zazo's fixed answers.** Before the AI, Zazo picked his answer from a list. He still uses this list if the AI is not working.
+- **Zazo's fixed answers.** Before the AI, Zazo picked his answer from a list. He still uses this list if the AI is not working. It covers his age, his family, his food, his mornings, how he met Benji, a word in XYZ, where his people went, and the tour. For anything else, he kindly says he did not catch it and suggests something he can answer.
 - **The tour.** Say "yes" or "show me around" to go to the next place: the family hut, the Singing Falls, the lookout hill, the campfire at night, and back to the village.
 - **Liquid glass.** The chat box, the name box, the story card, and the buttons at the top are clear like glass. They blur the scene behind them and have a soft shine.
 - **The music system.** Each place has a song. When you move to a place with a different song, the old one fades out while the new one fades in. A button turns music on and off.
