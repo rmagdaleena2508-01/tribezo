@@ -11,7 +11,7 @@ import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
-import { reverseText } from "../lib/api.js";
+import { askZazo, reverseText } from "../lib/api.js";
 import { zazoReply } from "../lib/zazo.js";
 import { hasMusic, isMuted, playForScene, setMuted, startMusic } from "../lib/music.js";
 
@@ -61,6 +61,9 @@ export default function Home() {
 
   // Where Zazo's tour is, and which fallback answer is next.
   const memory = useRef({ tourStop: 0, fallback: 0 });
+
+  // The last few turns of the chat, sent to the AI so Zazo remembers them.
+  const recentTurns = useRef([]);
 
   // Goes up each time something new starts. If a server answer comes back
   // after that, it is old, so we ignore it.
@@ -223,6 +226,24 @@ export default function Home() {
 
   // ---------- Talking to Zazo ----------
 
+  // Zazo's answer, in English. The AI writes it when the AI helper is
+  // running and has a key. If not, Zazo uses his fixed answers instead.
+  async function thinkOfReply(english) {
+    try {
+      const ai = await askZazo(english, name, recentTurns.current);
+      recentTurns.current = [...recentTurns.current, { you: english, zazo: ai.reply }].slice(-6);
+      return {
+        says: ai.reply,
+        pose: characters.zazo.poses[ai.pose] ? ai.pose : "talking",
+        scene: scenes[ai.scene] ? ai.scene : undefined, // "stay" is not a scene, so he stays put
+      };
+    } catch {
+      const reply = zazoReply(english, name, memory.current);
+      memory.current = reply.memory;
+      return reply;
+    }
+  }
+
   async function sendMessage(english) {
     const thisRound = ++round.current;
     setBusy(true);
@@ -234,8 +255,7 @@ export default function Home() {
       if (thisRound !== round.current) return;
 
       // 2. Zazo thinks of an answer, and the stack flips it into XYZ too.
-      const reply = zazoReply(english, name, memory.current);
-      memory.current = reply.memory;
+      const reply = await thinkOfReply(english);
       const answer = await reverseText(reply.says);
       if (thisRound !== round.current) return;
 

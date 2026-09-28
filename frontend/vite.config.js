@@ -1,12 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The C server from Phase 2.
+// The C server from Phase 2, and the AI helper from Phase 5.
 const API_SERVER = "http://127.0.0.1:8765";
+const AI_HELPER = "http://127.0.0.1:8764";
 
-// Send every /api request to the C server. The browser only ever talks to
-// this website, so the C server never has to be opened up to other sites.
+// Send /api requests on to the servers. The browser only ever talks to
+// this website, so the servers never have to be opened up to other sites.
+// /api/chat is listed first, so it goes to the AI helper, and everything
+// else under /api goes to the C server.
 const proxy = {
+  "/api/chat": { target: AI_HELPER, changeOrigin: true },
   "/api": { target: API_SERVER, changeOrigin: true },
 };
 
