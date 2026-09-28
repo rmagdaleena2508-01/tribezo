@@ -51,7 +51,7 @@ export async function askZazo(message, name, history, scene) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, name, history, scene }),
     // The helper may try a second model, so give it a little extra time.
-    signal: AbortSignal.timeout(16000),
+    signal: AbortSignal.timeout(17000),
   });
 
   if (!response.ok) {

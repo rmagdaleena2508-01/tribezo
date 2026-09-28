@@ -367,10 +367,11 @@ The pictures of the characters and the backgrounds come from different styles. T
 - **Gemini's own safety filter** is set to its strictest level. If it blocks a message, Zazo kindly changes the subject.
 - **Every answer is checked again.** The place and the pose must come from the game's own lists. Stars and other marks are removed, and very long answers are cut short.
 - **Zazo remembers** the last 6 things that were said.
-- **Two models.** The fast model (`gemini-flash-lite-latest`) answers first, in about 3 seconds. It sometimes gets stuck, so it gets a second try. If it is still busy, the backup model (`gemini-3.8-flash`) answers. Each try gets 5 seconds, and all tries together get 14 seconds.
+- **A line of models.** On the free plan, Google often says a model is busy or has used up its free quota. So the helper keeps a line of 5 models and tries them in order: `gemini-flash-lite-latest`, `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.1-flash-lite`, and `gemini-3.5-flash`. Each try gets 6 seconds, and all tries together get 15 seconds.
+- **Busy models take a rest.** When a model says it is busy, it rests for 30 seconds. When it is out of quota, it rests for 1 minute. The next message skips it and goes straight to a model that is ready.
 - **A backup plan.** If the AI helper is off, has no key, or every model fails, Zazo uses his fixed answers. The game always works.
 - **The history panel shows who wrote each answer,** Gemini or a fixed answer. This makes testing easy.
-- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 19 tests check good answers, the backup model, the second try, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
+- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 20 tests check good answers, the line of models, resting models, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
 
 #### Why Zazo gave poor answers at first, and the fixes
 
@@ -379,13 +380,14 @@ When I tried it with a real key, Zazo gave odd answers to many questions. I chec
 | Problem | Fix |
 |---|---|
 | The key had an extra letter at the start, so Google said the key was not valid. Every answer came from the fixed list. | Take the extra letter out of `.env`. The helper now warns you when the key does not look like a Gemini key. |
-| `gemini-2.5-flash` is closed to new users. | The helper now uses newer models, and the backup takes over if a model is gone or busy. |
+| `gemini-2.5-flash` is closed to new users. | The helper now uses newer models. |
+| Google often said the newer models were busy, or out of free quota. | The helper now has a line of 5 models, and busy models rest for a while. |
 | The model "thinks" before it answers, and the thinking used up all the space for the answer. The answer got cut off. | The model is asked to think only a little, and the answer has more space. |
 | The instructions said "you only know about the island", so Zazo dodged normal questions. | Zazo now has a full life story in `character.md`, clear rules in `rules.md`, and example answers in `examples.md`. |
 
 #### A real test
 
-After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 in his own voice, like his age ("34 summers old"), his family, his favorite food, a math question, what an iPhone is, how to say "friend" in XYZ, and a joke. He was kind when told "I'm feeling lonely", and he changed the subject for an unsafe question and for a trick that asked him to show his instructions. One answer took too long on both models, so a fixed answer covered it. After that, the fast model got a second try.
+After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 in his own voice, like his age ("34 summers old"), his family, his favorite food, a math question, what an iPhone is, how to say "friend" in XYZ, and a joke. He was kind when told "I'm feeling lonely", and he changed the subject for an unsafe question and for a trick that asked him to show his instructions. One answer took too long on every model, so a fixed answer covered it. After that, more models were added to the line.
 
 ### Phase 6: Moving around the island
 

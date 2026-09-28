@@ -23,20 +23,36 @@ const PORT = Number(process.env.PORT ?? 8764);
 const API_KEY = process.env.GEMINI_API_KEY ?? "";
 const GEMINI_URL = process.env.GEMINI_API_URL || "https://generativelanguage.googleapis.com/v1beta";
 
-// The fast model is tried first. It sometimes hangs for no reason, so it
-// gets a second try. Then the backup model gets a turn. Both models can
-// be changed in .env.
-const FAST_MODEL = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
-const BACKUP_MODEL = process.env.GEMINI_BACKUP_MODEL || "gemini-3.8-flash";
-const TRIES = [FAST_MODEL, FAST_MODEL, BACKUP_MODEL];
+// The models to try, in order. On the free plan, Google often says a
+// model is busy (503) or over its quota (429), so there are several.
+// The first two can be changed in .env, and GEMINI_EXTRA_MODELS can
+// replace the rest (a comma separated list).
+const MODELS = [
+  process.env.GEMINI_MODEL || "gemini-flash-lite-latest",
+  process.env.GEMINI_BACKUP_MODEL || "gemini-3.8-flash",
+  ...(process.env.GEMINI_EXTRA_MODELS || "gemini-3.6-flash,gemini-3.1-flash-lite,gemini-3.5-flash").split(","),
+]
+  .map((model) => model.trim())
+  .filter((model, i, all) => model && all.indexOf(model) === i);
+
+// When a model says it is busy or out of quota, it rests for a while and
+// the next models answer instead, so the visitor does not wait for a
+// model that will say no again.
+const REST_SECONDS = { 503: 30, 429: 60, 404: 3600, timeout: 20 };
+const restUntil = new Map(); // model name, time it can be tried again
+function rest(model, reason) {
+  const seconds = process.env.GEMINI_REST_SECONDS !== undefined ? Number(process.env.GEMINI_REST_SECONDS) : REST_SECONDS[reason] ?? 0;
+  if (seconds > 0) restUntil.set(model, Date.now() + seconds * 1000);
+}
+const isResting = (model) => (restUntil.get(model) ?? 0) > Date.now();
 
 const MAX_BODY = 8 * 1024; // bytes
 const MAX_MESSAGE = 2000; // characters
 const MAX_NAME = 20;
 const MAX_HISTORY = 6; // earlier turns sent along, so Zazo remembers the chat
 const MAX_REPLY = 400;
-const TRY_TIMEOUT_MS = 5_000; // one try (the fast model usually answers in about 3 seconds)
-const TOTAL_TIMEOUT_MS = 14_000; // every try together, so the visitor never waits too long
+const TRY_TIMEOUT_MS = 6_000; // one try at one model (they usually answer in 2 to 5 seconds)
+const TOTAL_TIMEOUT_MS = 15_000; // every try together, so the visitor never waits too long
 
 // No more than this many AI calls per minute, so the free quota lasts.
 const CALLS_PER_MINUTE = 20;
@@ -124,9 +140,10 @@ const SAFETY_SETTINGS = [
 const noThinkingSetting = new Set();
 
 class GeminiError extends Error {
-  constructor(message, { retry = false } = {}) {
+  constructor(message, { retry = false, rest = null } = {}) {
     super(message);
-    this.retry = retry; // true if another try (or another model) might work
+    this.retry = retry; // true if another model might work
+    this.rest = rest; // why this model should rest for a while, if it should
   }
 }
 
@@ -181,7 +198,7 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
       signal: AbortSignal.timeout(Math.min(TRY_TIMEOUT_MS, timeLeft)),
     });
   } catch {
-    throw new GeminiError("Gemini took too long or could not be reached", { retry: true });
+    throw new GeminiError("Gemini took too long or could not be reached", { retry: true, rest: "timeout" });
   }
 
   const data = await response.json().catch(() => ({}));
@@ -193,9 +210,10 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
       noThinkingSetting.add(model);
       return askOnce(model, { message, name, history, scene }, timeLeft);
     }
-    // Busy, rate limited, or down: another try or model might work.
+    // Busy, over quota, or gone: another model might work.
     const retry = response.status === 429 || response.status >= 500 || response.status === 404;
-    throw new GeminiError(`Gemini answered ${response.status}: ${reason.slice(0, 160)}`, { retry });
+    const restReason = response.status >= 500 ? 503 : response.status;
+    throw new GeminiError(`Gemini answered ${response.status}: ${reason.slice(0, 160)}`, { retry, rest: retry ? restReason : null });
   }
 
   // Blocked for safety: Zazo kindly changes the subject.
@@ -224,22 +242,27 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
   };
 }
 
-// Try the fast model twice, then the backup model, until one answers or
-// the time runs out.
+// Try each model in order, skipping the ones that are resting, until one
+// answers or the time runs out. If every model is resting, try them all
+// anyway, because one of them may be ready again.
 async function askGemini(request) {
   const started = Date.now();
+  const ready = MODELS.filter((model) => !isResting(model));
+  const order = ready.length > 0 ? ready : MODELS;
   let lastError;
-  for (const model of TRIES) {
+  for (const model of order) {
     const timeLeft = TOTAL_TIMEOUT_MS - (Date.now() - started);
     if (timeLeft < 1500) break;
     try {
       const answer = await askOnce(model, request, timeLeft);
+      restUntil.delete(model);
       console.log(`AI answered with ${model} in ${Date.now() - started} ms${answer.note ? ` (${answer.note})` : ""}`);
       delete answer.note;
       return answer;
     } catch (error) {
       lastError = error;
       console.error(`AI try with ${model} failed: ${error.message}`);
+      if (error instanceof GeminiError && error.rest) rest(model, error.rest);
       if (!(error instanceof GeminiError) || !error.retry) break;
     }
   }
@@ -306,7 +329,7 @@ server.listen(PORT, "127.0.0.1", () => {
     console.log("No GEMINI_API_KEY found, so Zazo will use his fixed answers.");
     return;
   }
-  console.log(`Using ${FAST_MODEL}, with ${BACKUP_MODEL} as the backup.`);
+  console.log(`Models, in order: ${MODELS.join(", ")}.`);
   // Gemini keys start with "AIza" or "AQ.". Anything else is usually a
   // copy and paste slip, like an extra letter at the start.
   if (!/^(AIza|AQ\.)/.test(API_KEY)) {

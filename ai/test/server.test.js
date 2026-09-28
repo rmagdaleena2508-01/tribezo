@@ -34,16 +34,21 @@ const fakeGemini = createServer((req, res) => {
 const helpers = [];
 
 // Start the helper on a port, with or without a key.
-function startHelper(port, key) {
+// restSeconds: how long a busy model rests. 0 turns resting off, so the
+// tests do not affect each other. Leave it out to use the normal times.
+function startHelper(port, key, restSeconds = "0") {
+  const env = {
+    PATH: process.env.PATH,
+    PORT: String(port),
+    GEMINI_API_KEY: key,
+    GEMINI_MODEL: "fast-model",
+    GEMINI_BACKUP_MODEL: "backup-model",
+    GEMINI_EXTRA_MODELS: "third-model",
+    GEMINI_API_URL: `http://127.0.0.1:${FAKE_PORT}/v1beta`,
+  };
+  if (restSeconds !== null) env.GEMINI_REST_SECONDS = restSeconds;
   const child = spawn(process.execPath, [SERVER], {
-    env: {
-      PATH: process.env.PATH,
-      PORT: String(port),
-      GEMINI_API_KEY: key,
-      GEMINI_MODEL: "fast-model",
-      GEMINI_BACKUP_MODEL: "backup-model",
-      GEMINI_API_URL: `http://127.0.0.1:${FAKE_PORT}/v1beta`,
-    },
+    env,
     stdio: ["ignore", "pipe", "pipe"],
   });
   helpers.push(child);
@@ -62,6 +67,7 @@ before(async () => {
   await new Promise((resolve) => fakeGemini.listen(FAKE_PORT, "127.0.0.1", resolve));
   await startHelper(18764, "AIzaTestKey");
   await startHelper(18765, "");
+  await startHelper(18766, "AIzaTestKey", null); // normal resting times
 });
 
 after(() => {
@@ -132,15 +138,24 @@ test("a busy fast model hands over to the backup model", async () => {
   behavior["backup-model"] = ok({ reply: "Hello from the backup!", scene: "stay", pose: "welcome" });
   const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
   assert.equal(answer.reply, "Hello from the backup!");
-  assert.deepEqual(requests.map((r) => r.model), ["fast-model", "fast-model", "backup-model"]);
+  assert.deepEqual(requests.map((r) => r.model), ["fast-model", "backup-model"]);
 });
 
-test("the fast model gets a second try before the backup", async () => {
-  let calls = 0;
-  behavior["fast-model"] = () => (++calls === 1 ? [503, { error: { message: "busy" } }] : ok({ reply: "Second try!", scene: "stay", pose: "idle" })());
+test("when two models are busy or out of quota, the third one answers", async () => {
+  behavior["fast-model"] = () => [503, { error: { message: "busy" } }];
+  behavior["backup-model"] = () => [429, { error: { message: "quota" } }];
+  behavior["third-model"] = ok({ reply: "Third time lucky!", scene: "stay", pose: "laughing" });
   const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
-  assert.equal(answer.reply, "Second try!");
-  assert.deepEqual(requests.map((r) => r.model), ["fast-model", "fast-model"]);
+  assert.equal(answer.reply, "Third time lucky!");
+});
+
+test("a busy model rests, so the next message skips it", async () => {
+  behavior["fast-model"] = () => [503, { error: { message: "busy" } }];
+  behavior["backup-model"] = ok({ reply: "Backup here!", scene: "stay", pose: "idle" });
+  await post(18766, { message: "Hi", name: "Ann" });
+  requests = [];
+  await post(18766, { message: "Hi again", name: "Ann" });
+  assert.deepEqual(requests.map((r) => r.model), ["backup-model"]);
 });
 
 test("a model that does not take the thinking setting is asked again without it", async () => {
@@ -165,7 +180,7 @@ test("JSON wrapped in extra words or a code block is still read", async () => {
   assert.equal(answer.reply, "Hi there!"); // stars are removed too
 });
 
-test("an answer cut off in the middle goes to the backup model", async () => {
+test("an answer cut off in the middle goes to the next model", async () => {
   behavior["fast-model"] = () => [200, { candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"reply": "Hel' }] } }] }];
   behavior["backup-model"] = ok({ reply: "Hello!", scene: "stay", pose: "idle" });
   const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
@@ -195,6 +210,7 @@ test("very long replies are cut short", async () => {
 test("when every model fails, the website is told to use the fixed answers", async () => {
   behavior["fast-model"] = () => [503, { error: { message: "busy" } }];
   behavior["backup-model"] = () => [503, { error: { message: "busy" } }];
+  behavior["third-model"] = () => [503, { error: { message: "busy" } }];
   const response = await post(18764, { message: "Hi", name: "Ann" });
   assert.equal(response.status, 502);
 });
