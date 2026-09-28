@@ -172,7 +172,7 @@ export const replies = [
   {
     // "Where are the other people?"
     match: /\bwhere\b.*\b(people|everyone|everybody|others?|tribe|family|families|anyone|villagers)\b/,
-    says: "They have gone on a 3-day vacation to another island to meet their families and relatives. I'm the only one taking care of the islands. Come, let me show you around!",
+    says: "They have gone on a 3 day vacation to Lune Island to meet their families and relatives, for my Grandmother Ama's 80th summer festival. I'm the only one taking care of the islands. Come, let me show you around!",
     pose: "pointing",
   },
   {
@@ -272,6 +272,22 @@ export const tour = [
 ];
 
 // When nothing matches, Zazo takes turns saying these.
+// Questions to suggest in the chat box. Zazo's AI suggests a fitting next
+// question after each answer. These are used at the start, and whenever
+// the AI has no suggestion. Each one is only suggested once.
+export const suggestedQuestions = [
+  "How did you meet Benji?",
+  "Where are the other people?",
+  "Tell me about your family",
+  "Why do you speak backwards?",
+  "How did you become the leader?",
+  "What is your favorite food?",
+  "Can you show me around?",
+  "What are you afraid of?",
+  "Teach me a word in your language",
+  "What do you do every morning?",
+];
+
 // These are only used when the AI is not available, so they should fit
 // any question and point the visitor to things Zazo can answer.
 export const fallbackReplies = [

@@ -2,12 +2,19 @@ import { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { MAX_MESSAGE_LENGTH } from "../lib/content.js";
 
+// On phones there is no Tab key, so the button says "Use" instead.
+const usesTouch = () => window.matchMedia("(pointer: coarse)").matches;
+
 // The liquid glass box where you type English for Benji.
 // Enter sends. Shift + Enter starts a new line.
-export default function ChatBox({ onSend, disabled }) {
+//
+// suggestion: a question to try. It shows inside the empty box, and the
+// Tab key (or the small button on phones) fills it in.
+export default function ChatBox({ onSend, disabled, suggestion }) {
   const [text, setText] = useState("");
   const trimmed = text.trim();
   const canSend = !disabled && trimmed.length > 0;
+  const canSuggest = Boolean(suggestion) && text.length === 0;
 
   function send() {
     if (!canSend) return;
@@ -15,13 +22,24 @@ export default function ChatBox({ onSend, disabled }) {
     setText("");
     // On phones and tablets, close the keyboard so the characters can
     // be seen while they talk.
-    if (window.matchMedia("(pointer: coarse)").matches) document.activeElement?.blur();
+    if (usesTouch()) document.activeElement?.blur();
+  }
+
+  function fillSuggestion() {
+    if (canSuggest) setText(suggestion);
   }
 
   function onKeyDown(event) {
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       send();
+      return;
+    }
+    // Tab fills in the suggestion, but only when the box is empty, so
+    // Tab still moves to the next button the rest of the time.
+    if (event.key === "Tab" && !event.shiftKey && canSuggest) {
+      event.preventDefault();
+      fillSuggestion();
     }
   }
 
@@ -43,7 +61,8 @@ export default function ChatBox({ onSend, disabled }) {
         maxLength={MAX_MESSAGE_LENGTH}
         onChange={(event) => setText(event.target.value.slice(0, MAX_MESSAGE_LENGTH))}
         onKeyDown={onKeyDown}
-        placeholder="Say something in English…"
+        placeholder={suggestion ? `Try: ${suggestion}` : "Say something in English…"}
+        aria-describedby={canSuggest ? "suggestion-hint" : undefined}
         autoComplete="off"
         autoCapitalize="sentences"
         enterKeyHint="send"
@@ -51,6 +70,21 @@ export default function ChatBox({ onSend, disabled }) {
         data-lenis-prevent
         className="max-h-32 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base font-semibold text-white placeholder:font-medium placeholder:text-white/80 focus:outline-none [field-sizing:content] short:max-h-20"
       />
+
+      {/* A small key that fills in the suggestion. It reads "Tab" on a
+          laptop and "Use" on a phone. */}
+      {canSuggest && (
+        <button
+          type="button"
+          onClick={fillSuggestion}
+          id="suggestion-hint"
+          aria-label={`Use the suggestion: ${suggestion}`}
+          tabIndex={-1}
+          className="mb-2 shrink-0 self-end rounded-md border border-white/60 bg-white/15 px-2 py-0.5 font-display text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/25"
+        >
+          {usesTouch() ? "Use" : "Tab"}
+        </button>
+      )}
 
       {/* Only show the count when getting close to the limit. */}
       {text.length > MAX_MESSAGE_LENGTH * 0.8 && (

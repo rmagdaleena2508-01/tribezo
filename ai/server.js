@@ -2,10 +2,13 @@
 //
 //   GET  /api/chat/health   answers {"ok":true,"ai":true|false}
 //   POST /api/chat          send {"message", "name", "history", "scene"},
-//                           get back {"reply", "scene", "pose", "source"}
-//                           in plain English
+//                           get back {"reply", "scene", "pose",
+//                           "suggestion", "source"} in plain English
 //
 // Who Zazo is and the rules he follows are in the zazo/ folder.
+// His full life story is in story/zazo-story.pdf. The PDF is uploaded to
+// Gemini and attached to every message, so Gemini looks things up in it
+// before it answers.
 //
 // The C server still does all the reversing. This helper only writes
 // Zazo's answer in normal English.
@@ -17,11 +20,13 @@
 // Run with: npm start
 
 import { createServer } from "node:http";
-import { ANSWER_SCHEMA, POSES, SAFE_REPLY, SCENES, systemPrompt } from "./prompt.js";
+import { readFileSync } from "node:fs";
+import { ANSWER_SCHEMA, POSES, SAFE_REPLY, SCENES, STORY_NOTE, systemPrompt } from "./prompt.js";
 
 const PORT = Number(process.env.PORT ?? 8764);
 const API_KEY = process.env.GEMINI_API_KEY ?? "";
 const GEMINI_URL = process.env.GEMINI_API_URL || "https://generativelanguage.googleapis.com/v1beta";
+const UPLOAD_URL = GEMINI_URL.replace(/\/v1beta$/, "/upload/v1beta");
 
 // The models to try, in order. On the free plan, Google often says a
 // model is busy (503) or over its quota (429), so there are several.
@@ -51,6 +56,7 @@ const MAX_MESSAGE = 2000; // characters
 const MAX_NAME = 20;
 const MAX_HISTORY = 6; // earlier turns sent along, so Zazo remembers the chat
 const MAX_REPLY = 400;
+const MAX_SUGGESTION = 80;
 const TRY_TIMEOUT_MS = 6_000; // one try at one model (they usually answer in 2 to 5 seconds)
 const TOTAL_TIMEOUT_MS = 15_000; // every try together, so the visitor never waits too long
 
@@ -161,6 +167,70 @@ function cleanReply(text) {
   return text.replace(/[*#`_]/g, "").replace(/\s+/g, " ").trim().slice(0, MAX_REPLY);
 }
 
+// ---------- The story book PDF ----------
+
+// The PDF is read once, when the helper starts.
+const STORY_PDF = readFileSync(new URL("./story/zazo-story.pdf", import.meta.url));
+
+// Once uploaded, Gemini keeps the file for 48 hours. We remember where it
+// is and upload it again shortly before it runs out.
+let storyFile = null; // { uri, expiresAt }
+
+async function uploadStory() {
+  // Step 1: tell Gemini a PDF is coming. It answers with a private
+  // address to send the file to.
+  const start = await fetch(`${UPLOAD_URL}/files`, {
+    method: "POST",
+    headers: {
+      "x-goog-api-key": API_KEY,
+      "Content-Type": "application/json",
+      "X-Goog-Upload-Protocol": "resumable",
+      "X-Goog-Upload-Command": "start",
+      "X-Goog-Upload-Header-Content-Length": String(STORY_PDF.length),
+      "X-Goog-Upload-Header-Content-Type": "application/pdf",
+    },
+    body: JSON.stringify({ file: { display_name: "The Zazo Story Book" } }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const sendTo = start.headers.get("x-goog-upload-url");
+  // Only ever send the file back to Gemini itself.
+  if (!start.ok || !sendTo || new URL(sendTo).origin !== new URL(UPLOAD_URL).origin) {
+    throw new Error(`the upload could not start (${start.status})`);
+  }
+
+  // Step 2: send the PDF.
+  const done = await fetch(sendTo, {
+    method: "POST",
+    headers: { "X-Goog-Upload-Offset": "0", "X-Goog-Upload-Command": "upload, finalize" },
+    body: STORY_PDF,
+    signal: AbortSignal.timeout(20_000),
+  });
+  const data = await done.json().catch(() => ({}));
+  if (!done.ok || typeof data?.file?.uri !== "string") throw new Error(`the upload failed (${done.status})`);
+
+  const expires = Date.parse(data.file.expirationTime ?? "") || Date.now() + 47 * 3600 * 1000;
+  storyFile = { uri: data.file.uri, expiresAt: expires };
+  console.log("Uploaded the Zazo Story Book PDF to Gemini.");
+}
+
+// The story book, ready to attach to a message. If uploading does not
+// work, the PDF is sent inside the message instead, so Zazo still has it.
+let uploading = null; // an upload that is already on its way, so it only happens once
+async function storyPart() {
+  if (!storyFile || storyFile.expiresAt - Date.now() < 10 * 60 * 1000) {
+    uploading ??= uploadStory().finally(() => (uploading = null));
+    try {
+      await uploading;
+    } catch (error) {
+      console.error(`Could not upload the story book, so it is sent inside the message: ${error.message}`);
+      return { inlineData: { mimeType: "application/pdf", data: STORY_PDF.toString("base64") } };
+    }
+  }
+  return { fileData: { mimeType: "application/pdf", fileUri: storyFile.uri } };
+}
+
+// ---------- One try at one model ----------
+
 async function askOnce(model, { message, name, history, scene }, timeLeft) {
   // Earlier turns first, so Gemini knows what was already said.
   const contents = [];
@@ -168,7 +238,9 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
     contents.push({ role: "user", parts: [{ text: turn.you }] });
     contents.push({ role: "model", parts: [{ text: turn.zazo }] });
   }
-  contents.push({ role: "user", parts: [{ text: message }] });
+  // The newest message comes with the story book, so Gemini can look
+  // things up in it.
+  contents.push({ role: "user", parts: [await storyPart(), { text: STORY_NOTE }, { text: message }] });
 
   const generationConfig = {
     responseMimeType: "application/json",
@@ -210,6 +282,12 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
       noThinkingSetting.add(model);
       return askOnce(model, { message, name, history, scene }, timeLeft);
     }
+    // The uploaded story book was not found (it may have run out). Upload
+    // it again on the next try.
+    if (/file/i.test(reason) && [400, 403, 404].includes(response.status)) {
+      storyFile = null;
+      throw new GeminiError(`Gemini could not open the story book: ${reason.slice(0, 120)}`, { retry: true });
+    }
     // Busy, over quota, or gone: another model might work.
     const retry = response.status === 429 || response.status >= 500 || response.status === 404;
     const restReason = response.status >= 500 ? 503 : response.status;
@@ -235,10 +313,14 @@ async function askOnce(model, { message, name, history, scene }, timeLeft) {
   }
   const reply = typeof answer.reply === "string" ? cleanReply(answer.reply) : "";
   if (!reply) throw new GeminiError("Gemini sent an empty reply", { retry: true });
+  // The next question to suggest to the visitor. Short and plain, or none.
+  const suggestion =
+    typeof answer.suggestion === "string" ? cleanReply(answer.suggestion).slice(0, MAX_SUGGESTION) : "";
   return {
     reply,
     scene: SCENES.includes(answer.scene) ? answer.scene : "stay",
     pose: POSES.includes(answer.pose) ? answer.pose : "talking",
+    suggestion,
   };
 }
 
@@ -330,6 +412,8 @@ server.listen(PORT, "127.0.0.1", () => {
     return;
   }
   console.log(`Models, in order: ${MODELS.join(", ")}.`);
+  // Upload the story book now, so the first message is fast.
+  storyPart().catch(() => {});
   // Gemini keys start with "AIza" or "AQ.". Anything else is usually a
   // copy and paste slip, like an extra letter at the start.
   if (!/^(AIza|AQ\.)/.test(API_KEY)) {

@@ -11,12 +11,16 @@ Zazo: Roasted sweet potato with honey! My mother makes the best one. Come to our
 scene: family-hut, pose: pointing
 
 Visitor: Where is everyone?
-Zazo: My people went on a 3 day vacation to another island to see their families. I am the only one taking care of the islands. Come, let me show you around!
+Zazo: My people went to Lune Island for 3 days, for Grandmother Ama's 80th summer festival! I am the only one taking care of the islands. Shall I show you around?
 scene: stay, pose: welcome
 
+Visitor: How did you meet Benji?
+Zazo: Two summers ago, after a big storm, I found him asleep on our beach, hugging a notebook! He worked out our words were his words turned around, and he never left.
+scene: stay, pose: laughing
+
 Visitor: Show me around
-Zazo: Follow me to the Singing Falls! Listen closely, the water hums like a song.
-scene: waterfall, pose: pointing
+Zazo: Follow me to my family hut! Mind the goats, they think they own the path.
+scene: family-hut, pose: pointing
 
 Visitor: What is 7 times 8?
 Zazo: 7 times 8 is 56! That is almost as many coconuts as Kiki can carry in one day.

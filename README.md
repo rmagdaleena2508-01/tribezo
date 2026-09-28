@@ -199,6 +199,7 @@ These are the same tools as my portfolio, plus howler.js and new fonts.
 | 4 | The art, the story, and the music system | Done |
 | 5 | Talking with AI | Done. Tested with real Gemini. |
 | 6 | Moving around the island | Done |
+| 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
 
 ### What is left
 
@@ -224,9 +225,12 @@ tribezo/
     server.js               asks Gemini what Zazo says and checks every answer
     prompt.js               puts Zazo's files together for Gemini
     zazo/
-      character.md          who Zazo is: his life, his family, his island, and Benji
+      character.md          a short summary of who Zazo is
       rules.md              how Zazo answers, and the safety rules
       examples.md           example answers that show his voice
+    story/
+      zazo-story.md         The Zazo Story Book (edit this one)
+      zazo-story.pdf        the same book as a PDF, which is sent to Gemini
     test/                   tests that use a pretend Gemini
     .env.example            a blank settings file
     .env                    your real key (only on your computer)
@@ -240,7 +244,9 @@ tribezo/
       hooks/                typing effect, the phone keyboard, smooth scrolling
       components/           the scene, the characters, speech bubbles, the chat box, and more
       pages/                the main page and the "lost" page
-  tools/                a script that cut the characters out of their picture sheets
+  tools/
+    cut_out_characters.py cut the characters out of their picture sheets
+    make_story_pdf.mjs    turns the story book into a PDF
   README.md
 ```
 
@@ -371,7 +377,7 @@ The pictures of the characters and the backgrounds come from different styles. T
 - **Busy models take a rest.** When a model says it is busy, it rests for 30 seconds. When it is out of quota, it rests for 1 minute. The next message skips it and goes straight to a model that is ready.
 - **A backup plan.** If the AI helper is off, has no key, or every model fails, Zazo uses his fixed answers. The game always works.
 - **The history panel shows who wrote each answer,** Gemini or a fixed answer. This makes testing easy.
-- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 20 tests check good answers, the line of models, resting models, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
+- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 23 tests check good answers, the story book PDF, the suggested questions, the line of models, resting models, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
 
 #### Why Zazo gave poor answers at first, and the fixes
 
@@ -393,6 +399,59 @@ After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 
 
 When Zazo invites you somewhere, the background changes to that place. His pose changes to match what he says, like open arms to welcome you or a finger to point. The fixed tour did this first, and now the AI can do it too.
 
+### Phase 7: Zazo's Story Book and suggested questions
+
+#### Why
+
+When I asked Zazo about his family or the history of his island, he sometimes made up a new answer each time. I wanted his answers to come from one true story, every time.
+
+#### The Zazo Story Book
+
+I wrote a full story for Zazo, like an animated movie, told by Zazo himself. It is made up, and it lives only in this game. It has 9 chapters:
+
+1. **How the islands learned to speak backwards.** Long ago, a girl named Tiri whispered hello to the sea, and the sea whispered back "olleH". The people started to speak backwards to be friends with the sea. That is how XYZ began.
+2. **His family.** His mother Nala weaves rugs. His father Koa builds canoes. His little sister Kiki, 9 summers old, swims faster than anyone. His grandfather Old Tumo tells stories and was the leader before Zazo. His grandmother Ama planted the first mango grove and lives on Lune Island. Pebble is a very old tortoise.
+3. **When he was a boy.** At 8 summers old, he took a canoe out in a storm and got lost. The humming of the Singing Falls led him home. That is why he loves the waterfall and is still scared of thunder.
+4. **How he became the leader.** In the Echo Challenge, he stopped to help a hurt boy and missed his turn. The strongest man, Mako, won, and then gave Zazo the leader's shell horn, the Conch of Echoes.
+5. **How he met Benji.** He found Benji asleep on the beach after a storm, hugging a notebook. Benji worked out that XYZ is English turned around, drew a pile of plates to flip words (a stack), and never left.
+6. **What he likes and does not like.** He loves sweet potato with honey, sunsets, drums, carving (212 wooden animals), stars, and jokes. He does not like thunderstorms, seaweed soup, litter, wasting food, or rushing.
+7. **How he shows a visitor around.** A guide to all 7 places: the beach, the jungle path, the village, his family hut, the Singing Falls, the lookout hill, and the campfire at night. Each place has what to see and a line he likes to say.
+8. **How the island changes while you talk.** Rules for when the background changes: only one place at a time, only when you are really going there, and always said out loud first. A table matches topics to places. For example, food goes to the hut, water goes to the falls, and stars go to the campfire. It also says how he stands for each kind of answer.
+9. **Words in XYZ.** A small list of words to learn.
+
+The book also explains where everyone is. His people went to Lune Island for 3 days, for Grandmother Ama's 80th summer festival. When they come back, there will be a welcome feast called Echo Night.
+
+#### How Gemini uses the book
+
+1. The story is written in `ai/story/zazo-story.md`, so it is easy to read and change.
+2. A script turns it into a PDF with Google Chrome: `node tools/make_story_pdf.mjs`.
+3. When the AI helper starts, it uploads the PDF to Gemini. Gemini keeps it for 48 hours, and the helper uploads it again before then.
+4. Every message to Gemini comes with the PDF and a note that says to look up the answer in the book first.
+5. Zazo's rules say to use the book's facts exactly and to never make up new family members, places, or history.
+6. If the upload does not work, the helper puts the PDF inside the message instead, so Zazo always has his book.
+
+#### Is this RAG?
+
+RAG means retrieval augmented generation. The AI is given the right facts from a document before it answers, so it does not have to guess. Big RAG systems cut a long document into small pieces, and for each question they find and send only the pieces that match.
+
+The Zazo Story Book is short, only 9 pages. So instead of picking pieces, Tribezo sends the whole book with every message. Gemini can read all of it at once, so it never misses a fact that sits in a piece that was not picked. It also means no extra step and no extra call to Google for each message. If the book ever grows very long, the next step would be to cut it into pieces and send only the matching ones.
+
+#### Suggested questions in the chat box
+
+- When the chat starts, the empty chat box shows a question to try, like *"Try: How did you meet Benji?"*
+- Press **Tab** and the question is filled in. Press **Enter** to send it.
+- On a phone there is no Tab key, so a small **Use** button fills it in instead.
+- After each answer, Gemini suggests a new question that fits the talk, about something in the story book you have not asked yet.
+- If the AI is busy, the next question comes from a list of 10 good starter questions in `content.js`.
+- A question is never suggested twice.
+- Tab only fills in the question when the box is empty. The rest of the time, Tab moves to the next button like normal, so the keyboard still works for everyone.
+
+#### Changing the story
+
+1. Edit `ai/story/zazo-story.md`.
+2. Make the new PDF: `node tools/make_story_pdf.mjs`
+3. Restart the AI helper, so it uploads the new PDF.
+
 ---
 
 ## Keeping It Safe
@@ -410,6 +469,7 @@ When Zazo invites you somewhere, the background changes to that place. His pose 
 | Rules for the browser | The finished website tells the browser to only run its own code, only load fonts from Google Fonts, and only talk to its own address. |
 | No source code in the finished website | The finished website does not ship the original code. |
 | Your name is not saved | The name is only kept while the page is open. |
+| The story book only goes to Google | The PDF is sent only to Gemini's own address, and the helper checks the upload address before it sends the file. The book has no personal details in it. |
 
 Anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the servers.
 

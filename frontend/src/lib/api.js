@@ -43,7 +43,7 @@ export async function reverseText(text) {
 // Ask the AI helper what Zazo says back, in plain English.
 // history is a few earlier turns, [{ you, zazo }], so Zazo remembers the chat.
 // scene is where Zazo and the visitor are standing right now.
-// Returns { reply, scene, pose }, or throws if the AI is off or fails.
+// Returns { reply, scene, pose, suggestion }, or throws if the AI is off or fails.
 // The caller then uses Zazo's fixed answers instead.
 export async function askZazo(message, name, history, scene) {
   const response = await fetch("/api/chat", {
@@ -62,5 +62,6 @@ export async function askZazo(message, name, history, scene) {
   if (typeof data.reply !== "string" || typeof data.scene !== "string" || typeof data.pose !== "string") {
     throw new Error("The AI helper's answer did not look right.");
   }
-  return { reply: data.reply, scene: data.scene, pose: data.pose };
+  const suggestion = typeof data.suggestion === "string" ? data.suggestion.slice(0, 80) : "";
+  return { reply: data.reply, scene: data.scene, pose: data.pose, suggestion };
 }

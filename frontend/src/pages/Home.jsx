@@ -9,7 +9,7 @@ import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
-import { benjiLines, characters, greeting, hero, nameScreen, scenes, story } from "../lib/content.js";
+import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
 import { askZazo, reverseText } from "../lib/api.js";
 import { zazoReply } from "../lib/zazo.js";
@@ -64,6 +64,18 @@ export default function Home() {
 
   // The last few turns of the chat, sent to the AI so Zazo remembers them.
   const recentTurns = useRef([]);
+
+  // The question suggested in the chat box. Tab fills it in.
+  const [suggestion, setSuggestion] = useState(suggestedQuestions[0]);
+  const asked = useRef(new Set()); // questions already asked, in lowercase
+
+  // The next suggestion: Zazo's own idea if it is new, or else the next
+  // question from the list that has not been asked yet.
+  function pickSuggestion(fromZazo) {
+    const isNew = (question) => question && !asked.current.has(question.toLowerCase().trim());
+    if (isNew(fromZazo)) return fromZazo;
+    return suggestedQuestions.find(isNew) ?? "";
+  }
 
   // Goes up each time something new starts. If a server answer comes back
   // after that, it is old, so we ignore it.
@@ -239,6 +251,7 @@ export default function Home() {
         pose: characters.zazo.poses[ai.pose] ? ai.pose : "talking",
         scene: scenes[ai.scene] ? ai.scene : undefined, // "stay" is not a scene, so he stays put
         source: "ai",
+        suggestion: ai.suggestion,
       };
     } catch {
       const reply = zazoReply(english, name, memory.current);
@@ -249,6 +262,7 @@ export default function Home() {
 
   async function sendMessage(english) {
     const thisRound = ++round.current;
+    asked.current.add(english.toLowerCase().trim());
     setBusy(true);
     say([{ who: "benji", text: benjiLines.relaying, pose: "talking" }]);
 
@@ -261,6 +275,7 @@ export default function Home() {
       const reply = await thinkOfReply(english);
       const answer = await reverseText(reply.says);
       if (thisRound !== round.current) return;
+      setSuggestion(pickSuggestion(reply.suggestion));
 
       // 3. Tap through: Benji tells Zazo, Zazo answers, Benji translates.
       say([
@@ -448,7 +463,7 @@ export default function Home() {
                 Tap to continue
               </button>
             ) : (
-              <ChatBox onSend={sendMessage} disabled={busy || (line !== null && !lineDone)} />
+              <ChatBox onSend={sendMessage} disabled={busy || (line !== null && !lineDone)} suggestion={suggestion} />
             ))}
         </div>
       </div>

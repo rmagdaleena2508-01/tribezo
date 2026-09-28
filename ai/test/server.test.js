@@ -17,11 +17,30 @@ const FAKE_PORT = 18763;
 const ok = (answer) => () => [200, { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify(answer) }] } }] }];
 let behavior = {};
 let requests = [];
+let uploads = 0;
+let uploadFails = false;
 
 const fakeGemini = createServer((req, res) => {
   let body = "";
   req.on("data", (chunk) => (body += chunk));
   req.on("end", () => {
+    // The story book upload: step 1 gives an address, step 2 takes the PDF.
+    if (req.url === "/upload/v1beta/files") {
+      if (uploadFails) {
+        res.writeHead(500).end();
+        return;
+      }
+      res.writeHead(200, { "x-goog-upload-url": `http://127.0.0.1:${FAKE_PORT}/upload/v1beta/session` }).end("{}");
+      return;
+    }
+    if (req.url === "/upload/v1beta/session") {
+      uploads++;
+      const expirationTime = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ file: { uri: "https://fake.example/files/zazo-story", expirationTime } }));
+      return;
+    }
+
     const model = decodeURIComponent(req.url.split("/models/")[1].split(":")[0]);
     const request = { model, headers: req.headers, url: req.url, body: JSON.parse(body) };
     requests.push(request);
@@ -95,6 +114,7 @@ test("a normal message gets Zazo's answer from the fast model", async () => {
     reply: "Come, I will show you the Singing Falls!",
     scene: "waterfall",
     pose: "pointing",
+    suggestion: "",
     source: "ai",
   });
   assert.deepEqual(requests.map((r) => r.model), ["fast-model"]);
@@ -234,6 +254,40 @@ test("requests from other websites are turned away", async () => {
   assert.equal(response.status, 403);
 });
 
+
+test("the story book PDF is uploaded once and attached to every message", async () => {
+  await post(18764, { message: "Who is your grandmother?", name: "Ann" });
+  await post(18764, { message: "And your father?", name: "Ann" });
+  for (const request of requests) {
+    const parts = request.body.contents.at(-1).parts;
+    assert.deepEqual(parts[0], { fileData: { mimeType: "application/pdf", fileUri: "https://fake.example/files/zazo-story" } });
+    assert.match(parts[1].text, /Zazo Story Book/);
+  }
+  assert.ok(uploads <= 4); // once per helper at start, never once per message
+});
+
+test("if uploading fails, the PDF is sent inside the message instead", async () => {
+  uploadFails = true;
+  const port = 18767;
+  await startHelper(port, "AIzaTestKey");
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  await post(port, { message: "Hi", name: "Ann" });
+  uploadFails = false;
+  const inline = requests.at(-1).body.contents.at(-1).parts[0].inlineData;
+  assert.equal(inline.mimeType, "application/pdf");
+  assert.ok(Buffer.from(inline.data, "base64").subarray(0, 5).toString() === "%PDF-");
+});
+
+test("Zazo sends back a suggested next question, short and clean", async () => {
+  behavior["fast-model"] = ok({ reply: "Hello!", scene: "stay", pose: "welcome", suggestion: "How did you *meet* Benji?" });
+  const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
+  assert.equal(answer.suggestion, "How did you meet Benji?");
+  behavior["fast-model"] = ok({ reply: "Hello!", scene: "stay", pose: "welcome", suggestion: "x".repeat(300) });
+  const long = await (await post(18764, { message: "Hi", name: "Ann" })).json();
+  assert.equal(long.suggestion.length, 80);
+});
+
+// This one fills up the per-minute limit, so it runs last.
 test("too many messages in a minute are slowed down", async () => {
   const statuses = [];
   for (let i = 0; i < 25; i++) {
