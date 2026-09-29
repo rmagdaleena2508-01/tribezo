@@ -103,7 +103,69 @@ static bool find_word(const char *text, size_t length, size_t from,
     return true;
 }
 
+/* The longest word (in letters) that is compared with the names to keep. */
+#define MAX_LETTERS 64
+
+/* Copy only the letters of a word, in small letters, into "out".
+   Returns how many letters there are, or 0 if the word is too long. */
+static size_t letters_of(const char *word, size_t length, char out[MAX_LETTERS + 1]) {
+    size_t count = 0;
+    for (size_t i = 0; i < length; i++) {
+        if (is_letter(word[i])) {
+            if (count == MAX_LETTERS) {
+                return 0;
+            }
+            out[count++] = (char)tolower((unsigned char)word[i]);
+        }
+    }
+    out[count] = '\0';
+    return count;
+}
+
+/* True if the word is one of the names in "keep" (words split by spaces).
+   "Mary's" counts as "Mary", so a name with 's after it is kept too. */
+static bool is_kept_name(const char *word, size_t length, const char *keep) {
+    if (keep == NULL) {
+        return false;
+    }
+    char letters[MAX_LETTERS + 1];
+    size_t count = letters_of(word, length, letters);
+    if (count == 0) {
+        return false;
+    }
+    bool has_apostrophe = false;
+    for (size_t i = 0; i < length; i++) {
+        if (word[i] == '\'') {
+            has_apostrophe = true;
+        }
+    }
+
+    size_t keep_length = strlen(keep);
+    size_t start, end;
+    size_t from = 0;
+    while (find_word(keep, keep_length, from, &start, &end)) {
+        from = end;
+        char name[MAX_LETTERS + 1];
+        size_t name_count = letters_of(keep + start, end - start, name);
+        if (name_count == 0) {
+            continue;
+        }
+        if (strcmp(letters, name) == 0) {
+            return true;
+        }
+        if (has_apostrophe && count == name_count + 1 && letters[name_count] == 's' &&
+            memcmp(letters, name, name_count) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 char *reverse_words(const char *text, ReverseStats *stats) {
+    return reverse_words_keeping(text, NULL, stats);
+}
+
+char *reverse_words_keeping(const char *text, const char *keep, ReverseStats *stats) {
     size_t length = strlen(text);
 
     /* Make a copy of the text. We change the copy, not the original.
@@ -158,6 +220,11 @@ char *reverse_words(const char *text, ReverseStats *stats) {
             }
         }
         last_word_had_number = this_word_has_number;
+
+        /* Names stay the way the player typed them. */
+        if (is_kept_name(word, word_length, keep)) {
+            continue;
+        }
 
         /* Step 1: push every letter in the word onto the stack.
            For "don't" the stack gets d, o, n, t (with t on top). */

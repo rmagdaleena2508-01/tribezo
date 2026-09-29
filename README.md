@@ -77,12 +77,29 @@ These are the rules for turning English into XYZ.
 
 1. **The letters in each word are flipped.**
 2. **The words stay in the same order.**
-3. **Punctuation stays in the same place.** Commas, periods, and marks like `!` and `?` do not move.
-4. **Numbers stay the same.** `123` stays `123`.
-5. **Money stays the same,** so the amount means the same thing in both languages.
-   - Money signs: `$`, `€`, `£`, `¥`, `₹` (like `$100.50` or `₹500`)
-   - Money names next to a number: `100 dollars`, `Rs 500`, `USD 20`, `50 cents`
-   - Money names stuck to a number: `Rs500`, `20usd`
+3. **Some things are never flipped.** These are the exceptions below.
+
+### Exceptions: things that are never flipped
+
+Some words and marks would stop making sense if they were flipped. The stack skips them and leaves them just as they are.
+
+| Exception | What stays the same | Example | Why |
+|---|---|---|---|
+| **Punctuation** | Commas, periods, `!`, `?`, and `'` stay in their spot. Only the letters around them move. | `hello, world!` becomes `olleh, dlrow!` | The sentence keeps its shape, so it is easy to follow. |
+| **Numbers** | Every number stays the same. | `I have 3 cats` becomes `I evah 3 stac` | `123` flipped would be `321`, which is a different number. |
+| **Money signs** | Money with `$`, `€`, `£`, `¥`, or `₹`. | `it costs $20.` becomes `ti stsoc $20.` | The amount must mean the same thing in both languages. |
+| **Money names next to a number** | Words like `dollars`, `Rs`, `USD`, `cents`, and `euros` when a number is beside them. | `it is Rs 500` becomes `ti si Rs 500` | `500 srallod` would not look like money anymore. |
+| **Money names stuck to a number** | Money written as one word with its number. | `Rs500` and `20usd` stay the same | Same reason as above. |
+| **The player's name** | The name the player types at the start, the way they typed it. | With the name `Mary`, `Hello, Mary!` becomes `olleH, Mary!` | A name belongs to a person. Zazo should say it right, even in XYZ. |
+| **Letters from other languages** | Letters like `é` stay in their spot. | `café` becomes `facé` | The stack only flips the plain English letters `a` to `z`. |
+
+**More about names.**
+
+- The name stays the same anywhere it shows up: in Zazo's hello, in Zazo's answers, and in your own messages when Benji tells them to Zazo.
+- Small and capital letters count as the same, so `Mary`, `mary`, and `MARY` are all kept.
+- A name with `'s` after it is kept too, so `Mary's hut` becomes `Mary's tuh`.
+- A name with two words, like `Mary Ann`, keeps both words.
+- Only the whole word counts. A longer word that starts with the name is still flipped, so `Maryland` becomes `dnalyraM`.
 
 ### Examples
 
@@ -273,9 +290,10 @@ tribezo/
   1. The first time, it pushes only the letters onto the stack.
   2. The second time, every spot that had a letter gets the top letter popped off the stack. Numbers, punctuation, and spaces are never touched, so they stay in place.
 - **Money check.** A word with a money sign or a money name next to a number is left as it is.
+- **Name check.** The flip can get a list of names to keep, the player's name. A word whose letters match a name is left as it is. This came later, after I noticed Zazo was saying my name backwards.
 - **Speed.** The whole flip takes time that grows with the length of the text. This is called O(n).
 - **Counts.** It counts how many pushes and pops it did, so the game can show them.
-- **Tests.** They check the stack, words, punctuation, spaces, numbers, money, capital letters, and a long paragraph. They also check that flipping twice gives back the English. The tests run with memory checkers that catch mistakes like reading past the end of a list.
+- **Tests.** They check the stack, words, punctuation, spaces, numbers, money, names, capital letters, and a long paragraph. They also check that flipping twice gives back the English. The tests run with memory checkers that catch mistakes like reading past the end of a list.
 
 ### Phase 2: The C server
 
@@ -718,6 +736,14 @@ The C server still works on its own, for class or for testing with `curl`.
 cd backend
 make run
 ```
+
+To keep a name the way it is, send it in the `X-Keep-Words` header:
+
+```bash
+curl -X POST -H 'X-Keep-Words: Mary' --data-binary 'hello, Mary!' http://127.0.0.1:8765/api/reverse
+```
+
+The answer has `"xyz":"olleh, Mary!"`.
 
 ### Try the flip by itself
 

@@ -39,6 +39,21 @@ for (const [english, expected] of cases) {
   }
 }
 
+// The player's name stays the way it was typed.
+const names = [
+  ["hello, Mary!", "Mary", "olleh, Mary!"],
+  ["Mary's hut", "Mary", "Mary's tuh"],
+  ["hi Mary Ann", "Mary Ann", "ih Mary Ann"],
+  ["Maryland", "Mary", "dnalyraM"],
+];
+for (const [english, keep, expected] of names) {
+  const { xyz } = flip(wasm, english, keep);
+  if (xyz !== expected) {
+    console.log(`  FAIL: "${english}" keeping "${keep}" gave "${xyz}", expected "${expected}"`);
+    failures++;
+  }
+}
+
 // Counts: "hi, you" has 5 letters.
 const counts = flip(wasm, "hi, you");
 if (counts.pushes !== 5 || counts.pops !== 5) {

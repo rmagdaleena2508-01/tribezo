@@ -213,7 +213,7 @@ export default function Home() {
     startChat(newName);
   }
 
-  // The story is over. Zazo greets you by name, backwards, and Benji
+  // The story is over. Zazo greets you in XYZ, and Benji
   // tells you what he said. This is the first time the stack is used.
   async function startChat(visitorName) {
     const thisRound = ++round.current;
@@ -226,7 +226,7 @@ export default function Home() {
 
     const english = greeting.zazo.replaceAll("{name}", visitorName);
     try {
-      const [answer] = await Promise.all([reverseText(english), wait(400)]);
+      const [answer] = await Promise.all([reverseText(english, visitorName), wait(400)]);
       if (thisRound !== round.current) return;
       say([
         { who: "zazo", text: answer.xyz, pose: "laughing" },
@@ -276,12 +276,12 @@ export default function Home() {
 
     try {
       // 1. Benji flips your words for Zazo.
-      const [told] = await Promise.all([reverseText(english), wait(600)]);
+      const [told] = await Promise.all([reverseText(english, name), wait(600)]);
       if (thisRound !== round.current) return;
 
       // 2. Zazo thinks of an answer, and the stack flips it into XYZ too.
       const reply = await thinkOfReply(english);
-      const answer = await reverseText(reply.says);
+      const answer = await reverseText(reply.says, name);
       if (thisRound !== round.current) return;
       setSuggestion(pickSuggestion(reply.suggestion));
 

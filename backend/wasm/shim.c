@@ -104,11 +104,17 @@ char *tribezo_input(size_t bytes) {
     return malloc(bytes + 1);
 }
 
-/* Flip the message with the stack. Returns the XYZ text, or 0 if there
-   was no memory. */
+/* Make room for the names to keep, after tribezo_input(). */
+__attribute__((export_name("tribezo_keep")))
+char *tribezo_keep(size_t bytes) {
+    return malloc(bytes + 1);
+}
+
+/* Flip the message with the stack, keeping the names in "keep" (which
+   can be 0). Returns the XYZ text, or 0 if there was no memory. */
 __attribute__((export_name("tribezo_reverse")))
-char *tribezo_reverse(const char *text) {
-    return reverse_words(text, &stats);
+char *tribezo_reverse(const char *text, const char *keep) {
+    return reverse_words_keeping(text, keep, &stats);
 }
 
 __attribute__((export_name("tribezo_pushes")))

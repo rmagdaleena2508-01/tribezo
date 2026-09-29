@@ -124,6 +124,28 @@ static void test_long_paragraph(void) {
     free(expected);
 }
 
+static void expect_keeping(const char *input, const char *keep, const char *expected) {
+    char *got = reverse_words_keeping(input, keep, NULL);
+    if (got == NULL || strcmp(got, expected) != 0) {
+        printf("  FAIL: \"%s\" keeping \"%s\"\n", input, keep ? keep : "(none)");
+        printf("        expected: \"%s\"\n", expected);
+        printf("        got:      \"%s\"\n", got ? got : "(null)");
+        failures++;
+    }
+    free(got);
+}
+
+static void test_names_stay(void) {
+    expect_keeping("hello, Mary!", "Mary", "olleh, Mary!");
+    expect_keeping("MARY and mary", "Mary", "MARY dna mary");
+    expect_keeping("Mary's hut", "Mary", "Mary's tuh");
+    expect_keeping("hi Mary Ann", "Mary Ann", "ih Mary Ann");
+    expect_keeping("Maryland", "Mary", "dnalyraM");
+    expect_keeping("hello Mary", "", "olleh yraM");
+    expect_keeping("hello Mary", NULL, "olleh yraM");
+    expect_keeping("Mary has $5", "Mary", "Mary sah $5");
+}
+
 static void test_reversing_twice_gives_back_english(void) {
     /* XYZ reversed again should be the original English. */
     const char *english = "Hi there, friend! Can I visit your village?";
@@ -149,6 +171,7 @@ int main(void) {
     test_counts();
     test_long_paragraph();
     test_reversing_twice_gives_back_english();
+    test_names_stay();
 
     if (failures == 0) {
         printf("  all passed\n");

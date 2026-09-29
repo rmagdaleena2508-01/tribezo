@@ -98,6 +98,14 @@ check "request from our own website (Origin)" \
     '200 {"english":"hi","xyz":"ih","pushes":2,"pops":2}' \
     "$(request -X POST -H 'Origin: http://localhost:8766' --data-binary 'hi' "$URL/api/reverse")"
 
+check "the player's name stays (X-Keep-Words)" \
+    '200 {"english":"hello, Mary!","xyz":"olleh, Mary!","pushes":5,"pops":5}' \
+    "$(request -X POST -H 'X-Keep-Words: Mary' --data-binary 'hello, Mary!' "$URL/api/reverse")"
+
+check "names to keep that are too long" \
+    '400 {"error":"X-Keep-Words is too long"}' \
+    "$(request -X POST -H "X-Keep-Words: $(printf 'a%.0s' $(seq 1 201))" --data-binary 'hi' "$URL/api/reverse")"
+
 check "server still works after errors" \
     '200 {"ok":true}' \
     "$(request "$URL/api/health")"

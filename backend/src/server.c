@@ -33,6 +33,7 @@
 #define DEFAULT_PORT 8765
 #define MAX_HEADERS (8 * 1024) /* the request line and headers */
 #define MAX_BODY (10 * 1024)   /* the text to reverse: 10 KB */
+#define MAX_KEEP 200           /* the names to keep (X-Keep-Words): 200 bytes */
 #define TIMEOUT_SECONDS 5      /* give up on clients that are too slow */
 
 /* ---------- Sending ---------- */
@@ -170,14 +171,14 @@ static void handle_health(int client) {
     send_json(client, 200, "{\"ok\":true}", NULL);
 }
 
-static void handle_reverse(int client, const char *body, size_t body_length) {
+static void handle_reverse(int client, const char *body, size_t body_length, const char *keep) {
     if (!is_valid_utf8((const unsigned char *)body, body_length)) {
         send_error(client, 400, "text must be UTF-8");
         return;
     }
 
     ReverseStats stats;
-    char *xyz = reverse_words(body, &stats);
+    char *xyz = reverse_words_keeping(body, keep, &stats);
     if (xyz == NULL) {
         send_error(client, 500, "out of memory");
         return;
@@ -375,6 +376,25 @@ static void handle_client(int client) {
         return;
     }
 
+    /* Step 5b: names to keep as they are, from the "X-Keep-Words" header,
+       like "X-Keep-Words: Mary Ann". This is copied now, because the body
+       is moved over the headers in step 6. */
+    char keep[MAX_KEEP + 1] = "";
+    const char *keep_value = find_header(buffer, "X-Keep-Words");
+    if (keep_value != NULL) {
+        size_t keep_length = strcspn(keep_value, "\r\n");
+        if (keep_length > MAX_KEEP) {
+            send_error(client, 400, "X-Keep-Words is too long");
+            return;
+        }
+        memcpy(keep, keep_value, keep_length);
+        keep[keep_length] = '\0';
+        if (!is_valid_utf8((const unsigned char *)keep, keep_length)) {
+            send_error(client, 400, "X-Keep-Words must be UTF-8");
+            return;
+        }
+    }
+
     /* Step 6: some of the body may have come in with the headers.
        Move it to the start of the buffer, then read the rest. */
     char *body_start = header_end + 4;
@@ -399,7 +419,7 @@ static void handle_client(int client) {
         return;
     }
 
-    handle_reverse(client, buffer, have);
+    handle_reverse(client, buffer, have, keep);
 }
 
 /* ---------- Starting the server ---------- */

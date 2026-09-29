@@ -7,8 +7,9 @@
 const MAX_BYTES = 10 * 1024; // the same limit as the C server
 
 // Flip text with the compiled stack. "wasm" is the loaded WebAssembly
-// module's exports. Returns { english, xyz, pushes, pops }.
-export function flip(wasm, text) {
+// module's exports. "keep" is the player's name: those words are not
+// flipped. Returns { english, xyz, pushes, pops }.
+export function flip(wasm, text, keep = "") {
   // A zero byte would end the text early in C, so it is taken out.
   const english = text.replaceAll("\0", "");
   const bytes = new TextEncoder().encode(english);
@@ -19,7 +20,16 @@ export function flip(wasm, text) {
   if (!input) throw new Error("The stack ran out of memory.");
   new Uint8Array(wasm.memory.buffer, input, bytes.length + 1).set([...bytes, 0]);
 
-  const output = wasm.tribezo_reverse(input);
+  // The same for the name to keep, if there is one.
+  let keepAt = 0;
+  const keepBytes = new TextEncoder().encode(keep.replaceAll("\0", "").slice(0, 200));
+  if (keepBytes.length > 0) {
+    keepAt = wasm.tribezo_keep(keepBytes.length);
+    if (!keepAt) throw new Error("The stack ran out of memory.");
+    new Uint8Array(wasm.memory.buffer, keepAt, keepBytes.length + 1).set([...keepBytes, 0]);
+  }
+
+  const output = wasm.tribezo_reverse(input, keepAt);
   if (!output) throw new Error("The stack ran out of memory.");
 
   // Read the flipped text back, up to its zero byte. The memory may have
@@ -40,11 +50,12 @@ function loadStack() {
   return loading;
 }
 
-// Send English, get XYZ back.
+// Send English, get XYZ back. The words in "keep" (the player's name)
+// stay the way they were typed.
 // Returns { english, xyz, pushes, pops }, or throws if anything goes wrong.
-export async function reverseText(text) {
+export async function reverseText(text, keep = "") {
   try {
-    return flip(await loadStack(), text);
+    return flip(await loadStack(), text, keep);
   } catch (error) {
     loading = null; // try loading again next time
     throw error;
