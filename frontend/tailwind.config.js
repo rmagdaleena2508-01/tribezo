@@ -23,6 +23,8 @@ export default {
         display: ["Fredoka", "Nunito", "system-ui", "sans-serif"],
         sans: ["Nunito", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
+        // Great Vibes: a free script close to "Tempting", for the word "builds" in the opening.
+        script: ["'Great Vibes'", "cursive"],
       },
       screens: {
         // Short screens, like a phone held sideways.

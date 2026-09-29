@@ -162,7 +162,8 @@ On a phone, you play with the phone turned sideways, like most games. If the pho
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
 | **howler.js** | Plays music and fades between songs. |
-| **Google Fonts** | Fredoka for titles and Nunito for talking. |
+| **GSAP** | Times the opening: the icon fade and the pixel reveal. |
+| **Google Fonts** | Fredoka for titles, Nunito for talking, and Great Vibes for the opening. |
 
 These are the same tools as my portfolio, plus howler.js and new fonts.
 
@@ -242,6 +243,7 @@ tribezo/
     public/
       characters/           Zazo's and Benji's poses
       scenes/               the 8 backgrounds
+      intro/icon.webp       my icon for the opening
       stack.wasm            the C stack, built for web browsers
     src/
       assets/               a fine grain laid over the scene
@@ -528,13 +530,21 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 
 #### The opening
 
-When someone opens the game, from the GitHub Pages link or the Vercel link, it starts the same way as my portfolio, and then turns into pixels.
+When someone opens the game, from the GitHub Pages link or the Vercel link, it plays a short opening.
 
-1. **A starry night sky.** About 180 stars twinkle, one shooting star flies across the top, and a small line fades in: *"a small island, far past the edge of every map"*. This part is the same as the opening of my portfolio.
-2. **The sky breaks into pixels, from the top to the bottom.** The screen is cut into square blocks, about 48 across. Row by row, starting at the top, each block first turns into one pixel of the island picture, then clears, so the real island shows through. The blocks in a row start a tiny bit apart, so the edge looks natural. This fits the island, which is built from blocks too.
-3. **Then the title starts.** Only after the last row clears does the title flip from `ozebirT` to `Tribezo`.
+1. **A starry night sky** for 2.8 seconds. About 180 stars twinkle and one shooting star flies across the top.
+2. **My icon and the word "builds".** They fade in softly, a little blurry at first, stay for a moment, and fade out again. "builds" is written in **Great Vibes**, a flowing script font. The style I wanted was Inter with "Tempting". Tempting is only free for personal use, and this game is public, so Great Vibes is used instead. It is the closest free script font and it is on Google Fonts.
+3. **The pixel reveal, from the top to the bottom.** This is the same method as the opening of my MagWorks portfolio:
+   - The screen is cut into square blocks, about 26 across the short side.
+   - Each block gets a turn based on its row, plus a small random extra, so the edge of the reveal is soft and uneven.
+   - **GSAP**, the animation library used by MagWorks, moves one number from the top to the bottom over 2.9 seconds, starting and ending gently.
+   - Each block fades away over a short time as its turn comes, so nothing disappears all at once. While a block fades, it shows a faint glass edge, so it reads as a pixel.
+   - The rest of the sky keeps twinkling while the reveal moves down.
+4. **Then the title starts.** When the last block has faded, the title flips from `ozebirT` to `Tribezo`.
 
-The sky stays for 1.8 seconds, and the pixel wipe takes about 2 seconds. Everything is drawn on one canvas. People who ask their device for less motion skip the opening. If the island picture is slow to load, the wipe waits up to 2 seconds for it, then goes on anyway.
+The opening follows the real clock, so it always takes the same time, even on a slow computer. People who ask their device for less motion skip it.
+
+**Why GSAP.** I looked at how others build pixel reveals. Codrops tutorials use GSAP with canvas, SVG masks, or WebGL shaders. React Bits has a pixel transition, but only for a card on hover. MagWorks already uses GSAP with a canvas, and it gives the smoothest control over timing and easing, so Tribezo uses the same. The site's safety rules block the way GSAP writes styles to the page, so Tribezo only uses the GSAP core: it moves plain numbers, and the page copies those numbers onto the canvas and the icon itself.
 
 #### The liquid glass buttons
 

@@ -449,7 +449,7 @@ export default function Home() {
       </header>
 
       {stage === "hero" && introDone && <Hero onBegin={begin} />}
-      {!introDone && <PixelIntro src={scenes[hero.scene].src} onDone={endIntro} />}
+      {!introDone && <PixelIntro onDone={endIntro} />}
       <LiquidGlassFilter />
 
       {/* The glass panel at the bottom: the story card, the name box, a

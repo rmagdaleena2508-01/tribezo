@@ -1,107 +1,69 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+// Only the GSAP core: it moves plain numbers. The part of GSAP that writes
+// styles is left out, because the site's security rules block how it works.
+import { gsap } from "gsap/gsap-core";
 
-// The opening of the game, in two parts.
+// The opening of the game.
 //
-// 1. A starry night sky with twinkling stars, one shooting star, and a
-//    small greeting. This is the same intro as in my portfolio.
-// 2. The sky breaks into pixel blocks, row by row, from the top to the
-//    bottom. Each block first shows a pixel of the island picture, then
-//    clears, so the real island shows through. It fits the island, which
-//    is built from blocks too.
+// 1. A starry night sky (twinkling stars and one shooting star). Your icon
+//    and the word "builds" fade in, stay for a moment, and fade out.
+// 2. After about 2.8 seconds, the sky dissolves into pixel blocks from the
+//    top to the bottom, showing the island underneath. This is the same
+//    method as the opening of my MagWorks portfolio:
+//      - The screen is cut into square blocks.
+//      - Each block gets a "turn" based on its row, plus a little random
+//        extra, so the edge of the reveal is soft and uneven, not a line.
+//      - GSAP moves one number, "progress", from the top to the bottom
+//        with a gentle start and end (sine.inOut).
+//      - Each block fades out over a short window as progress passes its
+//        turn, so nothing ever disappears all at once.
+//    While the reveal moves down, the rest of the sky keeps twinkling.
 //
-// When the last row has cleared, onDone lets the title animation start.
+// onDone runs when the last block has faded, so the title can start.
 
-const SKY_HOLD_MS = 1800; // how long the stars and greeting stay
-const ROW_DELAY_MS = 40; // time between one row starting and the next
-const ROW_SPREAD_MS = 70; // blocks in a row start a little apart, so it looks natural
-const BLOCK_MS = 260; // how long each block shows its pixel before it clears
+const SKY_SECONDS = 2.8; // the starry sky, before the reveal starts (at least 2.5)
+const REVEAL_SECONDS = 2.9; // the pixel reveal, top to bottom
+const SPREAD = 7; // how many rows a block's turn can be moved by, for a soft edge
+const FADE = 0.24; // how long each block takes to fade, as a share of the reveal
 
-// Makes the same "random" numbers every time.
-function seededRandom(seed) {
-  let value = seed;
-  return () => {
-    value = (value * 16807) % 2147483647;
-    return (value - 1) / 2147483646;
-  };
-}
-
-export default function PixelIntro({ src, onDone }) {
+export default function PixelIntro({ onDone }) {
   const canvasRef = useRef(null);
-  const [greetingGone, setGreetingGone] = useState(false);
+  const badgeRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    const random = seededRandom(7);
-    let width, height, ratio, stars, block, columns, rows, starts, colors;
-    let frame;
-    let startTime = null;
-    let finished = false;
-
-    // The island picture, shrunk to one color per block.
-    const image = new Image();
-    let imageReady = false;
-    image.onload = () => {
-      imageReady = true;
-      sampleColors();
-    };
-    image.src = src;
+    let width, height, stars, cell, columns, rows, turns;
+    const reveal = { progress: -FADE }; // GSAP moves this from -FADE to 1 + FADE
+    let revealing = false;
+    const startTime = performance.now();
 
     function build() {
-      ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = width * ratio;
-      canvas.height = height * ratio;
+      canvas.width = Math.ceil(width * ratio);
+      canvas.height = Math.ceil(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
       stars = Array.from({ length: 180 }, () => ({
-        x: random() * width,
-        y: random() * height,
-        size: random() * 1.3 + 0.3,
-        brightness: random() * 0.5 + 0.35,
-        speed: random() * 1.8 + 0.6,
-        phase: random() * Math.PI * 2,
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.3 + 0.3,
+        brightness: Math.random() * 0.5 + 0.35,
+        speed: Math.random() * 1.8 + 0.6,
+        phase: Math.random() * Math.PI * 2,
       }));
 
-      // Square blocks, about 48 across on a laptop.
-      block = Math.max(18, Math.ceil(width / 48));
-      columns = Math.ceil(width / block);
-      rows = Math.ceil(height / block);
-
-      // When each block starts, counted from the start of the wipe.
-      starts = Array.from({ length: rows }, (_, row) =>
-        Array.from({ length: columns }, () => row * ROW_DELAY_MS + random() * ROW_SPREAD_MS)
-      );
-      if (imageReady) sampleColors();
-    }
-
-    // Shrink the picture to one pixel per block, covering the screen the
-    // same way the background does, and keep each block's color.
-    function sampleColors() {
-      if (!columns) return;
-      const small = document.createElement("canvas");
-      small.width = columns;
-      small.height = rows;
-      const smallContext = small.getContext("2d");
-      const screenShape = (columns * block) / (rows * block);
-      const imageShape = image.width / image.height;
-      let sx = 0;
-      let sy = 0;
-      let sw = image.width;
-      let sh = image.height;
-      if (imageShape > screenShape) {
-        sw = image.height * screenShape;
-        sx = (image.width - sw) / 2;
-      } else {
-        sh = image.width / screenShape;
-        sy = (image.height - sh) / 2;
-      }
-      smallContext.drawImage(image, sx, sy, sw, sh, 0, 0, columns, rows);
-      const data = smallContext.getImageData(0, 0, columns, rows).data;
-      colors = [];
-      for (let i = 0; i < columns * rows; i++) {
-        colors.push(`rgb(${data[i * 4]}, ${data[i * 4 + 1]}, ${data[i * 4 + 2]})`);
+      // Square blocks, about 26 across the short side of the screen.
+      cell = Math.max(20, Math.round(Math.min(width, height) / 26));
+      columns = Math.ceil(width / cell);
+      rows = Math.ceil(height / cell);
+      turns = new Float32Array(columns * rows);
+      for (let row = 0; row < rows; row++) {
+        for (let column = 0; column < columns; column++) {
+          turns[row * columns + column] = (row + Math.random() * SPREAD) / (rows + SPREAD);
+        }
       }
     }
 
@@ -110,10 +72,11 @@ export default function PixelIntro({ src, onDone }) {
       glow.addColorStop(0, "#101a2e");
       glow.addColorStop(0.55, "#0a1120");
       glow.addColorStop(1, "#05070e");
+      context.globalCompositeOperation = "source-over";
+      context.globalAlpha = 1;
       context.fillStyle = glow;
       context.fillRect(0, 0, width, height);
 
-      // Twinkling stars.
       for (const star of stars) {
         context.globalAlpha = star.brightness * (0.5 + 0.5 * Math.sin(time * 0.001 * star.speed + star.phase));
         context.fillStyle = "#ffffff";
@@ -123,14 +86,14 @@ export default function PixelIntro({ src, onDone }) {
       }
       context.globalAlpha = 1;
 
-      // One shooting star across the top of the sky.
-      const shootStart = 550;
+      // One shooting star across the top.
+      const shootStart = 650;
       const shootLength = 900;
       if (time > shootStart && time < shootStart + shootLength) {
-        const progress = (time - shootStart) / shootLength;
-        const x = width * 0.08 + progress * width * 0.7;
-        const y = height * 0.14 + progress * height * 0.12;
-        const fade = Math.sin(progress * Math.PI);
+        const p = (time - shootStart) / shootLength;
+        const x = width * 0.08 + p * width * 0.7;
+        const y = height * 0.14 + p * height * 0.12;
+        const fade = Math.sin(p * Math.PI);
         const tail = context.createLinearGradient(x - 180, y - 50, x, y);
         tail.addColorStop(0, "rgba(255,255,255,0)");
         tail.addColorStop(1, `rgba(255,255,255,${0.9 * fade})`);
@@ -144,62 +107,91 @@ export default function PixelIntro({ src, onDone }) {
       }
     }
 
-    function draw(now) {
-      if (startTime === null) startTime = now;
-      const time = now - startTime;
-      drawSky(time);
-
-      // The wipe starts once the sky has been shown, and once the island
-      // picture has loaded (or after 2 more seconds, whichever comes first).
-      const wipeTime = time - SKY_HOLD_MS;
-      if (wipeTime > 0 && (colors || wipeTime > 2000)) {
-        let allClear = true;
-        for (let row = 0; row < rows; row++) {
-          for (let column = 0; column < columns; column++) {
-            const progress = (wipeTime - starts[row][column]) / BLOCK_MS;
-            const x = column * block;
-            const y = row * block;
-            if (progress >= 1) {
-              context.clearRect(x, y, block, block); // the real island shows through
-            } else {
-              allClear = false;
-              if (progress >= 0) {
-                context.fillStyle = colors ? colors[row * columns + column] : "#0f1a14";
-                context.fillRect(x, y, block, block);
-              }
-            }
+    // Take away the sky block by block. "cover" is how much of a block's
+    // sky is still there: 1 is all sky, 0 is gone (the island shows).
+    function drawReveal() {
+      const p = reveal.progress;
+      for (let row = 0; row < rows; row++) {
+        const y = row * cell;
+        for (let column = 0; column < columns; column++) {
+          const cover = (turns[row * columns + column] - p) / FADE;
+          if (cover >= 1) continue; // still fully sky
+          const x = column * cell;
+          if (cover <= 0) {
+            context.clearRect(x, y, cell, cell);
+            continue;
           }
-        }
-        if (allClear && !finished) {
-          finished = true;
-          onDone();
-          return;
+          // Part way: fade the sky out of this block...
+          context.globalCompositeOperation = "destination-out";
+          context.globalAlpha = 1 - cover;
+          context.fillRect(x, y, cell, cell);
+          // ...and give it a faint glass edge while it fades, so it reads as a pixel.
+          context.globalCompositeOperation = "source-over";
+          context.globalAlpha = cover * 0.5;
+          context.fillStyle = "rgba(255,255,255,0.16)";
+          context.fillRect(x, y, cell, 2);
+          context.globalAlpha = cover * 0.4;
+          context.strokeStyle = "rgba(255,255,255,0.1)";
+          context.lineWidth = 1;
+          context.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
         }
       }
-      frame = requestAnimationFrame(draw);
+      context.globalCompositeOperation = "source-over";
+      context.globalAlpha = 1;
+    }
+
+    function draw() {
+      drawSky(performance.now() - startTime);
+      if (revealing) drawReveal();
     }
 
     build();
-    frame = requestAnimationFrame(draw);
-    const greetingTimer = setTimeout(() => setGreetingGone(true), SKY_HOLD_MS - 200);
+    draw();
+    gsap.ticker.add(draw);
     window.addEventListener("resize", build);
 
+    // Follow the real clock, even if the browser draws slowly (for example
+    // in a background tab), so the opening always takes the same time.
+    gsap.ticker.lagSmoothing(0);
+
+    // The timeline: the icon and "builds" fade in and out over the sky,
+    // then the pixel reveal runs from the top to the bottom.
+    //
+    // GSAP moves plain numbers here, and the numbers are copied onto the
+    // icon's style. The site's security rules block some of the ways GSAP
+    // writes styles itself, but they allow this one.
+    const badge = { opacity: 0, y: 10, blur: 6 };
+    const showBadge = () => {
+      const style = badgeRef.current.style;
+      style.opacity = badge.opacity;
+      style.transform = `translateY(${badge.y}px)`;
+      style.filter = `blur(${badge.blur}px)`;
+    };
+    showBadge();
+
+    const timeline = gsap.timeline();
+    timeline
+      .to(badge, { opacity: 1, y: 0, blur: 0, duration: 0.9, ease: "power2.out", onUpdate: showBadge }, 0.35)
+      .to(badge, { opacity: 0, y: -8, blur: 4, duration: 0.7, ease: "power2.in", onUpdate: showBadge }, 1.95)
+      .add(() => {
+        revealing = true;
+      }, SKY_SECONDS)
+      .to(reveal, { progress: 1 + FADE, duration: REVEAL_SECONDS, ease: "sine.inOut", onComplete: onDone }, SKY_SECONDS);
+
     return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(greetingTimer);
+      timeline.kill();
+      gsap.ticker.remove(draw);
       window.removeEventListener("resize", build);
     };
-  }, [src, onDone]);
+  }, [onDone]);
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[90]">
       <canvas ref={canvasRef} className="h-full w-full" />
-      <div
-        className="absolute inset-x-0 bottom-[16vh] flex flex-col items-center px-6 text-center transition-opacity duration-500"
-        style={{ opacity: greetingGone ? 0 : 1 }}
-      >
-        <p className="font-display text-2xl font-medium text-white/90 sm:text-[28px]">a small island, far past the edge of every map</p>
-        <p className="mt-4 font-mono text-[11px] tracking-[0.35em] text-white/45">· Tribezo ·</p>
+      {/* Your icon, with "builds" beside it */}
+      <div ref={badgeRef} className="absolute inset-0 flex items-center justify-center gap-4 sm:gap-5" style={{ opacity: 0 }}>
+        <img src={`${import.meta.env.BASE_URL}intro/icon.webp`} alt="" className="h-16 w-auto sm:h-20" draggable="false" />
+        <span className="font-script text-6xl leading-none text-[#fbf5eb] sm:text-7xl">builds</span>
       </div>
     </div>
   );
