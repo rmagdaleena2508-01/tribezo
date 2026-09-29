@@ -14,7 +14,12 @@ export const MAX_NAME_LENGTH = 20;
 // Zazo, because Benji stands on the right and Zazo on the left.
 // "shape" is the width and height of every picture, so a character
 // keeps the same size when the pose changes.
-const pose = (who, name) => `/characters/${who}-${name}.webp`;
+// Every picture path starts with the site's base address. It is "/" on
+// Vercel and "/tribezo/" on GitHub Pages.
+const BASE = import.meta.env.BASE_URL;
+const asset = (path) => `${BASE}${path}`;
+
+const pose = (who, name) => asset(`characters/${who}-${name}.webp`);
 const posesFor = (who) =>
   Object.fromEntries(
     ["idle", "talking", "welcome", "pointing", "laughing", "confused"].map((name) => [name, pose(who, name)])
@@ -52,13 +57,13 @@ const day = {
 };
 
 export const scenes = {
-  "hero-meadow": { src: "/scenes/hero-meadow.webp", look: day },
+  "hero-meadow": { src: asset("scenes/hero-meadow.webp"), look: day },
   "island-arrival": {
-    src: "/scenes/island-arrival.webp",
+    src: asset("scenes/island-arrival.webp"),
     look: { ...day, tint: { color: "#fff0cc", blend: "soft-light", opacity: 0.35 } },
   },
   "jungle-path": {
-    src: "/scenes/jungle-path.webp",
+    src: asset("scenes/jungle-path.webp"),
     look: {
       ...day,
       filter: "brightness(0.96) saturate(1.05)",
@@ -67,9 +72,9 @@ export const scenes = {
       shadow: 0.5,
     },
   },
-  village: { src: "/scenes/village.webp", look: { ...day, scale: 0.95 } },
+  village: { src: asset("scenes/village.webp"), look: { ...day, scale: 0.95 } },
   "family-hut": {
-    src: "/scenes/family-hut.webp",
+    src: asset("scenes/family-hut.webp"),
     look: {
       ...day,
       scale: 1.08,
@@ -81,15 +86,15 @@ export const scenes = {
     },
   },
   waterfall: {
-    src: "/scenes/waterfall.webp",
+    src: asset("scenes/waterfall.webp"),
     look: { ...day, tint: { color: "#d8f2ff", blend: "soft-light", opacity: 0.32 }, rim: "rgba(236, 250, 255, 0.6)" },
   },
   lookout: {
-    src: "/scenes/lookout.webp",
+    src: asset("scenes/lookout.webp"),
     look: { ...day, scale: 0.95, filter: "brightness(1.05) saturate(1.05)", shadow: 0.36 },
   },
   "fire-camp": {
-    src: "/scenes/fire-camp.webp",
+    src: asset("scenes/fire-camp.webp"),
     look: {
       ...day,
       scale: 0.95,
@@ -303,9 +308,9 @@ export const fallbackReplies = [
 // null is skipped, so the site works fine with no music at all.
 export const music = {
   tracks: {
-    theme: null, // the start screen and the story, e.g. "/music/theme.mp3"
-    island: null, // daytime on the island, e.g. "/music/island.mp3"
-    night: null, // the campfire at night, e.g. "/music/night.mp3"
+    theme: null, // the start screen and the story, e.g. asset("music/theme.mp3")
+    island: null, // daytime on the island, e.g. asset("music/island.mp3")
+    night: null, // the campfire at night, e.g. asset("music/night.mp3")
   },
   // Which track plays in which scene.
   sceneTracks: {

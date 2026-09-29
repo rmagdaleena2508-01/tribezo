@@ -1,0 +1,9 @@
+{
+  "name": "tribezo",
+  "private": true,
+  "type": "module",
+  "description": "Root settings for Vercel. The website is in frontend/, the AI function is in api/.",
+  "engines": {
+    "node": ">=22.9"
+  }
+}

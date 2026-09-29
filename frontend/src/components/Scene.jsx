@@ -8,6 +8,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { scenes } from "../lib/content.js";
+import grain from "../assets/grain.png";
 
 // One copy of the background picture. The same picture is drawn twice:
 // once behind the characters, and once in front of their feet (only the
@@ -64,7 +65,7 @@ export default function Scene({ scene, layer }) {
 
       {/* Film grain over the whole picture, characters included, so the
           clay characters and the voxel world share the same texture. */}
-      <div className="absolute inset-0 bg-[url('/textures/grain.png')] opacity-[0.1] mix-blend-overlay" />
+      <div className="absolute inset-0 opacity-[0.1] mix-blend-overlay" style={{ backgroundImage: `url(${grain})` }} />
 
       {/* Soft dark edges, like a camera lens */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.35))]" />

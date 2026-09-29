@@ -132,16 +132,15 @@ On a phone, you play with the phone turned sideways, like most games. If the pho
    You type English
         |
         v
-   The website
-        |
-        v
-   C server        (the stack flips your words)
+   The C stack, running in your browser as WebAssembly
+                   (flips your words)
         |
         v
    AI helper       (writes what Zazo says, in English)
         |
         v
-   C server        (the stack flips Zazo's answer)
+   The C stack, again in your browser
+                   (flips Zazo's answer)
         |
         v
    Zazo speaks XYZ, then Benji tells you what it means
@@ -200,6 +199,7 @@ These are the same tools as my portfolio, plus howler.js and new fonts.
 | 5 | Talking with AI | Done. Tested with real Gemini. |
 | 6 | Moving around the island | Done |
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
+| 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
 
 ### What is left
 
@@ -219,10 +219,14 @@ tribezo/
       reverse.c / reverse.h flips each word with the stack
       server.c              the C web server
       demo.c                type English, see XYZ
-    tests/                  tests for the stack, the flipping, and the server
+    wasm/                   lets the same C code run in a browser as WebAssembly
+    tests/                  tests for the stack, the flipping, the server, and the browser version
     Makefile                commands to build, test, and run
+  api/
+    chat.js               the AI helper as a Vercel function, with limits for the public
   ai/                   the AI helper
-    server.js               asks Gemini what Zazo says and checks every answer
+    zazo-ai.js              asks Gemini what Zazo says and checks every answer
+    server.js               runs the AI helper on your own computer
     prompt.js               puts Zazo's files together for Gemini
     zazo/
       character.md          a short summary of who Zazo is
@@ -238,15 +242,20 @@ tribezo/
     public/
       characters/           Zazo's and Benji's poses
       scenes/               the 8 backgrounds
-      textures/             a fine grain laid over the scene
+      stack.wasm            the C stack, built for web browsers
     src/
-      lib/                  the words, the story, talking to the servers, and the music
+      assets/               a fine grain laid over the scene
+      lib/                  the words, the story, the stack, talking to the AI, and the music
       hooks/                typing effect, the phone keyboard, smooth scrolling
       components/           the scene, the characters, speech bubbles, the chat box, and more
       pages/                the main page and the "lost" page
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
     make_story_pdf.mjs    turns the story book into a PDF
+  .github/workflows/
+    pages.yml             puts the website on GitHub Pages after every push
+  vercel.json           settings for Vercel
+  package.json          tells Vercel the function uses modern JavaScript
   README.md
 ```
 
@@ -454,11 +463,73 @@ The Zazo Story Book is short, only 9 pages. So instead of picking pieces, Tribez
 
 ---
 
+### Phase 8: Putting Tribezo online
+
+#### The problem
+
+On my computer, Tribezo runs as three parts: the website, the C server, and the AI helper. Websites online are hosted in two very different ways.
+
+- **GitHub Pages** only hosts files. It cannot run any server.
+- **Vercel** hosts files and small functions that run for a moment when someone calls them. It cannot keep a C server running all the time.
+
+So the C server and the AI helper had to change shape.
+
+#### The C stack now runs in the browser
+
+The same `stack.c` and `reverse.c` are built a second time as **WebAssembly**. WebAssembly is a way to run C code inside a web browser, very fast. The C code did not change at all.
+
+- `backend/wasm/shim.c` gives the C code the few pieces of the C library it needs, like `malloc` and `strlen`, because a browser does not have a C library.
+- Memory works like a notepad. Every message starts on a clean page, which keeps it simple.
+- `make wasm` builds `stack.wasm` (only about 3.6 KB) and puts it in the website.
+- `frontend/src/lib/stack.js` loads it and calls it, the same way the website used to call the C server.
+- `make test-wasm` checks that the browser version flips every test sentence exactly like the C version.
+
+Now the words are flipped right on the player's own device. There is no waiting for a server, and the C server is not needed to play. It is still in the project, with all its tests, for learning and for class.
+
+Building it needs `clang` (which comes with the Mac) and the WebAssembly linker: `brew install lld`.
+
+#### The AI helper is a Vercel function
+
+- The Gemini part of the AI helper moved into `ai/zazo-ai.js`. Both the helper on my computer (`ai/server.js`) and the Vercel function (`api/chat.js`) use it, so they always act the same way.
+- On Vercel, the Gemini key is saved in the project settings. It is never in the code, on GitHub, or in the website.
+
+#### Guards for the public
+
+Online, anyone could try to use the AI function, so it has its own guards.
+
+| Guard | What it does |
+|---|---|
+| Only our websites | It only answers the Vercel site itself and the GitHub Pages site. Requests from other websites, or from no website at all, are turned away. |
+| A few messages each | Each visitor gets 8 messages a minute. |
+| A daily limit | 300 messages a day, so the free Gemini quota is not used up. |
+| Billing is off | The Gemini key has billing turned off. If someone uses up the free quota, Zazo switches to his fixed answers for the rest of the day. Nothing can be charged. |
+
+These limits are counted by each running copy of the function, and Vercel may run a few copies. So they are a safety net, not a perfect count.
+
+#### Two addresses
+
+| Where | Address | How it gets there |
+|---|---|---|
+| GitHub Pages | https://rmagdaleena2508-01.github.io/tribezo/ | A GitHub Action builds the website after every push to `main`. Zazo's AI answers come from the Vercel function. |
+| Vercel | The address Vercel gives the project, like `https://tribezo.vercel.app` | Vercel builds the website and the AI function after every push to `main`. |
+
+On GitHub Pages the site lives in a folder called `tribezo`, so every picture and page link now starts with the site's base address.
+
+#### Connecting Vercel (only once)
+
+1. Go to [vercel.com](https://vercel.com), sign in with GitHub, and click **Add New**, then **Project**.
+2. Pick the `tribezo` repository and click **Import**. Leave the settings as they are. `vercel.json` already tells Vercel how to build.
+3. Before you click **Deploy**, open **Environment Variables** and add `GEMINI_API_KEY` with your key. Use a key that has billing turned off.
+4. Click **Deploy**, and copy the address Vercel gives you.
+5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
+6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
+
 ## Keeping It Safe
 
 | What | How |
 |---|---|
-| Only this computer can use the servers | The C server and the AI helper only listen to this computer. They also turn away requests that come from other websites. |
+| Only this computer can use the servers | On your computer, the C server and the AI helper only listen to this computer. They also turn away requests that come from other websites. |
+| Online guards | The Vercel AI function only answers our two websites, allows 8 messages a minute for each visitor and 300 a day, and uses a key with billing turned off. |
 | The servers stay hidden | The browser only talks to the website. The website passes requests on to the servers. |
 | The Gemini key stays secret | It lives only in the `ai/.env` file on your computer. That file is never uploaded to GitHub, and the website never sees it. The key is sent to Google in a hidden header, never in a web address, and it is never printed in the logs. |
 | Limits on size | Messages can be up to 2,000 letters, names up to 20 letters, and the C server takes up to 10 KB. |
@@ -466,7 +537,7 @@ The Zazo Story Book is short, only 9 pages. So instead of picking pieces, Tribez
 | Text stays text | Everything people type is shown as plain text, so nobody can sneak code into the page. |
 | Answers are checked | The website and the AI helper only use the parts of an answer they expect, and check each part. |
 | Kind errors | People see a friendly message, never the details of an error. |
-| Rules for the browser | The finished website tells the browser to only run its own code, only load fonts from Google Fonts, and only talk to its own address. |
+| Rules for the browser | The finished website tells the browser to only run its own code (plus the WebAssembly stack), only load fonts from Google Fonts, and only talk to its own address and the Vercel AI function. |
 | No source code in the finished website | The finished website does not ship the original code. |
 | Your name is not saved | The name is only kept while the page is open. |
 | The story book only goes to Google | The PDF is sent only to Gemini's own address, and the helper checks the upload address before it sends the file. The book has no personal details in it. |
@@ -529,6 +600,7 @@ You also need [Node.js](https://nodejs.org) version 22.9 or newer.
 cd backend
 make test
 make test-server
+make test-wasm
 ```
 
 ```bash
@@ -538,23 +610,16 @@ npm test
 
 ### Start the game
 
-Use three Terminal windows.
+The words are flipped in the browser now, so the C server is not needed to play. Use two Terminal windows.
 
-1. Start the C server.
-
-   ```bash
-   cd backend
-   make run
-   ```
-
-2. Start the AI helper. This step is optional. Without it, Zazo uses his fixed answers. Set up the Gemini key first.
+1. Start the AI helper. This step is optional. Without it, Zazo uses his fixed answers. Set up the Gemini key first.
 
    ```bash
    cd ai
    npm start
    ```
 
-3. Start the website.
+2. Start the website.
 
    ```bash
    cd frontend
@@ -562,7 +627,26 @@ Use three Terminal windows.
    npm run dev
    ```
 
-4. Open http://127.0.0.1:8766 in your browser.
+3. Open http://127.0.0.1:8766 in your browser.
+
+### Rebuild the browser stack
+
+After changing `stack.c` or `reverse.c`, build the WebAssembly again.
+
+```bash
+cd backend
+make wasm
+make test-wasm
+```
+
+### Start the C server by itself
+
+The C server still works on its own, for class or for testing with `curl`.
+
+```bash
+cd backend
+make run
+```
 
 ### Try the flip by itself
 
@@ -581,7 +665,7 @@ XYZ: olleh, dlrow!
 
 ### Try the finished website
 
-This version has all the safety rules turned on. Keep the servers running, then run these.
+This version has all the safety rules turned on. Keep the AI helper running, then run these.
 
 ```bash
 cd frontend

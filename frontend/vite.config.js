@@ -1,29 +1,34 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The C server from Phase 2, and the AI helper from Phase 5.
-const API_SERVER = "http://127.0.0.1:8765";
-const AI_HELPER = "http://127.0.0.1:8764";
+// Where the site lives. "/" on your computer and on Vercel. The GitHub
+// Pages build sets VITE_BASE=/tribezo/ because the site is in that folder.
+const BASE = process.env.VITE_BASE || "/";
 
-// Send /api requests on to the servers. The browser only ever talks to
-// this website, so the servers never have to be opened up to other sites.
-// /api/chat is listed first, so it goes to the AI helper, and everything
-// else under /api goes to the C server.
+// Where Zazo's AI answers come from. Empty means this same site, which is
+// true on your computer and on Vercel. The GitHub Pages build sets it to
+// the Vercel address.
+const API_BASE = process.env.VITE_API_BASE || "";
+
+// The AI helper on your computer (ai/server.js). The words are flipped in
+// the browser now, so the C server is not needed to play.
+const AI_HELPER = "http://127.0.0.1:8764";
 const proxy = {
   "/api/chat": { target: AI_HELPER, changeOrigin: true },
-  "/api": { target: API_SERVER, changeOrigin: true },
 };
 
 // Rules for what the built website is allowed to load and talk to.
 // Anything not listed here is blocked by the browser.
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self'",
+  // 'wasm-unsafe-eval' lets the page run the C stack compiled to WebAssembly.
+  "script-src 'self' 'wasm-unsafe-eval'",
   "style-src 'self' https://fonts.googleapis.com",
   "font-src https://fonts.gstatic.com",
   "img-src 'self' data:",
   "media-src 'self'",
-  "connect-src 'self'",
+  // The page may only talk to itself, and to the Vercel AI function.
+  `connect-src 'self'${API_BASE ? ` ${new URL(API_BASE).origin}` : ""}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -46,6 +51,7 @@ function contentSecurityPolicy() {
 }
 
 export default defineConfig({
+  base: BASE,
   plugins: [react(), contentSecurityPolicy()],
 
   // Only this computer can open the website while building it.

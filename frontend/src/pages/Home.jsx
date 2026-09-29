@@ -11,7 +11,8 @@ import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
-import { askZazo, reverseText } from "../lib/api.js";
+import { askZazo } from "../lib/api.js";
+import { reverseText } from "../lib/stack.js";
 import { zazoReply } from "../lib/zazo.js";
 import { hasMusic, isMuted, playForScene, setMuted, startMusic } from "../lib/music.js";
 

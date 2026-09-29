@@ -4,6 +4,8 @@
 #   make test-server  start the server and check every endpoint
 #   make run          start the server on port 8765
 #   make demo         try reversing text by typing it in
+#   make wasm         build the stack for web browsers (frontend/public/stack.wasm)
+#   make test-wasm    check the browser version flips text the same way
 #   make clean        delete everything that was built
 
 CC ?= cc
@@ -18,7 +20,7 @@ HEADERS = src/stack.h src/reverse.h
 
 BUILD = build
 
-.PHONY: all test test-server run demo clean
+.PHONY: all test test-server run demo clean wasm test-wasm
 
 all: $(BUILD)/demo $(BUILD)/server
 
@@ -50,6 +52,21 @@ test-server: $(BUILD)/test_server
 
 run: $(BUILD)/server
 	./$(BUILD)/server
+
+# The same stack.c and reverse.c, built as WebAssembly for web browsers.
+# wasm/shim.c gives them the few C library pieces they need. This needs
+# clang and wasm-ld (on a Mac: brew install lld).
+WASM_LD ?= $(shell ls /opt/homebrew/opt/lld/bin/wasm-ld 2>/dev/null || echo wasm-ld)
+
+$(BUILD)/stack.wasm: wasm/shim.c $(CORE) $(HEADERS) | $(BUILD)
+	clang --target=wasm32 -O2 -std=c11 -ffreestanding -nostdlib -isystem wasm/include -Wall -Wextra \
+		-Wl,--no-entry -fuse-ld=$(WASM_LD) -o $@ wasm/shim.c $(CORE)
+
+wasm: $(BUILD)/stack.wasm
+	cp $(BUILD)/stack.wasm ../frontend/public/stack.wasm
+
+test-wasm: $(BUILD)/stack.wasm
+	node tests/test_wasm.mjs
 
 demo: $(BUILD)/demo
 	./$(BUILD)/demo

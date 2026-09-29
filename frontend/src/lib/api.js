@@ -1,44 +1,12 @@
-// Talking to the C server and the AI helper.
+// Talking to the AI helper.
 //
-// The website only calls /api/... on its own address. Vite passes those
-// calls on to the servers, so the browser never talks to them directly.
+// Flipping words happens in the browser, with the C stack compiled to
+// WebAssembly (see stack.js). Only Zazo's AI answers need a server:
+//   on your computer, Vite passes /api/chat to the helper in ai/server.js
+//   on Vercel, /api/chat is the function in api/chat.js
+//   on GitHub Pages, VITE_API_BASE points at the Vercel address
 
-const TIMEOUT_MS = 8000;
-
-// Send English, get XYZ back.
-// Returns { english, xyz, pushes, pops }, or throws if anything goes wrong.
-export async function reverseText(text) {
-  // Give up if the server takes too long.
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
-    const response = await fetch("/api/reverse", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-      body: text,
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`The server answered ${response.status}.`);
-    }
-
-    // Only keep the parts we expect, and check they are the right kind.
-    const data = await response.json();
-    if (
-      typeof data.english !== "string" ||
-      typeof data.xyz !== "string" ||
-      typeof data.pushes !== "number" ||
-      typeof data.pops !== "number"
-    ) {
-      throw new Error("The server's answer did not look right.");
-    }
-    return { english: data.english, xyz: data.xyz, pushes: data.pushes, pops: data.pops };
-  } finally {
-    clearTimeout(timer);
-  }
-}
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 // Ask the AI helper what Zazo says back, in plain English.
 // history is a few earlier turns, [{ you, zazo }], so Zazo remembers the chat.
@@ -46,7 +14,7 @@ export async function reverseText(text) {
 // Returns { reply, scene, pose, suggestion }, or throws if the AI is off or fails.
 // The caller then uses Zazo's fixed answers instead.
 export async function askZazo(message, name, history, scene) {
-  const response = await fetch("/api/chat", {
+  const response = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, name, history, scene }),
