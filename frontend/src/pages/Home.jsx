@@ -9,7 +9,7 @@ import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
-import PixelIntro from "../components/PixelIntro.jsx";
+import WaterIntro from "../components/WaterIntro.jsx";
 import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
@@ -449,7 +449,7 @@ export default function Home() {
       </header>
 
       {stage === "hero" && introDone && <Hero onBegin={begin} />}
-      {!introDone && <PixelIntro onDone={endIntro} />}
+      {!introDone && <WaterIntro onDone={endIntro} />}
       <LiquidGlassFilter />
 
       {/* The glass panel at the bottom: the story card, the name box, a

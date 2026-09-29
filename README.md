@@ -109,7 +109,7 @@ These are the rules for turning English into XYZ.
 
 ## How to Play
 
-1. **The title screen.** A mountain meadow. The title shows up backwards as `ozebirT`, then the letters slide into `Tribezo`. You press **Begin**.
+1. **The title screen.** A mountain meadow. The letters of the title fall onto a stone wall backwards as `ozebirT`, then hop into `Tribezo`. You press **Begin**.
 2. **The story.** It takes about 40 seconds. You tap once for each step.
    1. A beach. *"Past the edge of every map lies a little island that no one has visited in a very long time. Until today."*
    2. A jungle path. Zazo walks in and waves. He says `olleH, relevart! emocleW!`
@@ -162,10 +162,11 @@ On a phone, you play with the phone turned sideways, like most games. If the pho
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
 | **howler.js** | Plays music and fades between songs. |
-| **GSAP** | Times the opening: the icon fade and the pixel reveal. |
+| **GSAP** | Times the opening: the icon fade and the rising water. |
+| **OGL** | A very small library that lets a shader draw the water opening on the graphics card. |
 | **Google Fonts** | Fredoka for titles, Nunito for talking, and Great Vibes for the opening. |
 
-These are the same tools as my portfolio, plus howler.js and new fonts.
+These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 
 ### The backend (the part that does the work)
 
@@ -249,7 +250,7 @@ tribezo/
       assets/               a fine grain laid over the scene
       lib/                  the words, the story, the stack, talking to the AI, and the music
       hooks/                typing effect, the phone keyboard, smooth scrolling
-      components/           the scene, the characters, speech bubbles, the chat box, the pixel opening, glass buttons, and more
+      components/           the scene, the characters, speech bubbles, the chat box, the water opening, glass buttons, and more
       pages/                the main page and the "lost" page
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
@@ -526,25 +527,54 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
 6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
 
-### The opening and the liquid glass buttons
+### The opening, the falling title, and the liquid glass buttons
 
 #### The opening
 
 When someone opens the game, from the GitHub Pages link or the Vercel link, it plays a short opening.
 
-1. **A starry night sky** for 2.8 seconds. About 180 stars twinkle and one shooting star flies across the top.
+1. **A starry night sky.** Stars twinkle and one shooting star flies across the top.
 2. **My icon and the word "builds".** They fade in softly, a little blurry at first, stay for a moment, and fade out again. "builds" is written in **Great Vibes**, a flowing script font. The style I wanted was Inter with "Tempting". Tempting is only free for personal use, and this game is public, so Great Vibes is used instead. It is the closest free script font and it is on Google Fonts.
-3. **The pixel reveal, from the top to the bottom.** This is the same method as the opening of my MagWorks portfolio:
-   - The screen is cut into square blocks, about 26 across the short side.
-   - Each block gets a turn based on its row, plus a small random extra, so the edge of the reveal is soft and uneven.
-   - **GSAP**, the animation library used by MagWorks, moves one number from the top to the bottom over 2.9 seconds, starting and ending gently.
-   - Each block fades away over a short time as its turn comes, so nothing disappears all at once. While a block fades, it shows a faint glass edge, so it reads as a pixel.
-   - The rest of the sky keeps twinkling while the reveal moves down.
-4. **Then the title starts.** When the last block has faded, the title flips from `ozebirT` to `Tribezo`.
+3. **The water rises.** The dark sky fades a little. Then a line of water rises from the bottom of the screen to the top. The line is wavy, so it is never straight. Its edge melts into the sky in soft, uneven patches, and a light blue glow of foam runs along it. Under the water, the island shows, rippling.
+4. **The island settles.** The island picture starts a little low and comes up with the water. Then it slides down into its place while the ripples calm down.
+5. **The opening fades into the real scene.** The picture in the opening is drawn at the same size as the real background, so nothing jumps.
 
-The opening follows the real clock, so it always takes the same time, even on a slow computer. People who ask their device for less motion skip it.
+The opening follows the real clock, so it always takes the same time, even on a slow computer. If a device cannot draw it, the game skips straight to the title. People who ask their device for less motion skip it too.
 
-**Why GSAP.** I looked at how others build pixel reveals. Codrops tutorials use GSAP with canvas, SVG masks, or WebGL shaders. React Bits has a pixel transition, but only for a card on hover. MagWorks already uses GSAP with a canvas, and it gives the smoothest control over timing and easing, so Tribezo uses the same. The site's safety rules block the way GSAP writes styles to the page, so Tribezo only uses the GSAP core: it moves plain numbers, and the page copies those numbers onto the canvas and the icon itself.
+**How the water is made.** The water is drawn by a tiny program called a **shader**. It is written in **GLSL**, a language for the graphics card. It works out the color of every dot on the screen, 60 times every second. It uses soft random patterns, called noise, to make the wavy edge and the uneven patches. **OGL** is a very small library that sets up the graphics card for the shader. **GSAP** times each step.
+
+#### The title falls onto a wall
+
+After the opening, the title comes in like this:
+
+1. **A stone wall grows** out from the middle, where the title will sit.
+2. **The letters drop onto the wall one at a time, backwards,** as `ozebirT`. The `o` drops first. Each letter squashes a little when it lands and bounces twice, like a real block.
+3. **The letters hop over each other** into the right order, `Tribezo`. A letter with a long way to go jumps higher. The `T` and the `o` jump the highest.
+4. Then the line under the title and the **Begin** button fade in.
+
+This shows the whole idea of the game in a few seconds. The words come out backwards, and the game puts them the right way around.
+
+The wall is sized to the title, so it grows and shrinks with it on a phone. **Framer Motion** moves the letters. It can make a letter fall, bounce, and slide to a new spot, and it follows the site's safety rules.
+
+#### How I built the opening with Claude
+
+I built the opening by talking with Claude, one idea at a time. Each time, I said what I pictured, asked Claude to look on the internet for the best tools, and asked to try it on my computer first.
+
+1. **First try: pixels.** I asked for a pixel opening like my MagWorks portfolio: a starry sky for at least 2.5 seconds, my icon with "builds" fading in and out, then the sky breaking into blocks from the top to the bottom. Claude used GSAP with a canvas, the same as MagWorks. It worked, and it went live.
+2. **Second try: water.** I wanted something softer. I told Claude: *"dissolving like water. The black sky is fading away, and then this is dissolving from the bottom to the top, and then it's coming up, and then this new background image is setting down."* I also said: *"Do not deploy it. Let's try it in the local version."* Claude looked at shader tutorials on Codrops, the gl-transitions collection, and a liquid dissolve shader on 21st.dev. It picked a shader with OGL, since Three.js is much bigger than this one effect needs. The first test showed the island upside down, and Claude fixed it.
+3. **The title.** Then I pictured the title sitting on a wall: the letters fall onto the wall backwards, then arrange themselves into the right order. Claude compared three ways to do it:
+
+| Option | What Claude found |
+|---|---|
+| **Matter.js** | A real physics engine. The letters could land in random spots, and it is a big download for one title. |
+| **GSAP Flip** | Good at moving things to new spots, but it writes styles in a way the site's safety rules block. |
+| **Framer Motion** | Already in the game. It can fall, bounce, and move letters to new spots, and it follows the safety rules. |
+
+Framer Motion won, so no new library was needed.
+
+4. **Checking before going live.** I watched both on my computer first. When I liked them, I asked Claude to put them online.
+
+My design thinking was simple. The opening should feel calm, like the island is waking up. The title should not just appear. It should show the game's big idea, words coming out backwards and turning the right way, before anyone reads a single line.
 
 #### The liquid glass buttons
 
