@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import GlassButton from "./GlassButton.jsx";
-import { places } from "../lib/content.js";
+import { places, scenes } from "../lib/content.js";
 
-// The Places button at the top, with a list of every place on the island.
-// Picking a place does not jump there. It asks Zazo to go there (through
-// Benji, like anything else you say), so Zazo walks you there and talks
-// about it. You can also just type "can we go to the beach?".
+// The Places button at the top: a small map of every place on the island,
+// each with a little picture. Picking a place takes you straight there,
+// and Zazo starts by telling you about it. You can also just type
+// "can we go to the beach?".
 export default function PlacesMenu({ here, seen, disabled, onPick }) {
   const [open, setOpen] = useState(false);
   const box = useRef(null);
@@ -59,11 +59,11 @@ export default function PlacesMenu({ here, seen, disabled, onPick }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
-            className="glass absolute right-0 top-[calc(100%+8px)] z-40 w-64 rounded-3xl bg-black/30 p-2 short:max-h-[70svh] short:overflow-y-auto"
+            className="glass absolute right-0 top-[calc(100%+8px)] z-40 w-72 rounded-3xl bg-black/30 p-2 short:max-h-[70svh] short:overflow-y-auto"
             data-lenis-prevent
           >
             <p className="px-3 pb-1 pt-2 font-display text-xs font-semibold uppercase tracking-wider text-white/85">
-              Ask Zazo to take you to
+              Go to
             </p>
             <ul>
               {places.map((place) => {
@@ -74,9 +74,15 @@ export default function PlacesMenu({ here, seen, disabled, onPick }) {
                       type="button"
                       disabled={isHere || disabled}
                       onClick={() => pick(place)}
-                      className="flex w-full items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left text-sm font-bold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      className="flex w-full items-center gap-3 rounded-2xl px-2 py-1.5 text-left text-sm font-bold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
-                      <span className={isHere ? "text-white/70" : undefined}>{place.name}</span>
+                      <img
+                        src={scenes[place.scene].src}
+                        alt=""
+                        draggable="false"
+                        className={`h-10 w-14 shrink-0 rounded-xl object-cover ${isHere ? "ring-2 ring-white/90" : ""}`}
+                      />
+                      <span className={`flex-1 ${isHere ? "text-white/70" : ""}`}>{place.name}</span>
                       <span className="font-display text-[11px] font-semibold uppercase tracking-wider text-white/75">
                         {isHere ? "You are here" : seen.includes(place.scene) ? "" : "New"}
                       </span>

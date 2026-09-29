@@ -1,10 +1,10 @@
 /*
  * A small HTTP server for Tribezo.
  *
- * It lets the website send English to the C program and get XYZ back.
+ * It lets the website send English to the C program and get Calonis back.
  *
  *   GET  /api/health    answers {"ok":true} so you can check the server is on
- *   POST /api/reverse   send English as plain text, get XYZ back as JSON
+ *   POST /api/reverse   send English as plain text, get Calonis back as JSON
  *
  * It only listens on this computer (127.0.0.1), so nobody else on the
  * network can reach it. It handles one request at a time, which is

@@ -198,7 +198,7 @@ char *reverse_words_keeping(const char *text, const char *keep, ReverseStats *st
         from = end;
 
         /* Money stays exactly the same, so the amount means the same
-           thing in English and in XYZ. The copy already has it right,
+           thing in English and in Calonis. The copy already has it right,
            so we just skip the word. Money looks like one of these:
              - a number with a money sign:   "$100.50", "₹500"
              - a number with a money name:   "Rs500", "20usd"

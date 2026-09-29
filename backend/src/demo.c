@@ -1,6 +1,6 @@
 /*
  * A small program to try the reverse function by hand.
- * Type a line of English, press Enter, and see it in XYZ.
+ * Type a line of English, press Enter, and see it in Calonis.
  * Press Ctrl+D to stop.
  *
  * Run with: make demo
@@ -26,7 +26,7 @@ int main(void) {
         }
 
         /* The line already ends with a new line, so no extra \n here. */
-        printf("XYZ: %s", xyz);
+        printf("Calonis: %s", xyz);
         printf("(stack: %zu pushes, %zu pops)\n> ", stats.pushes, stats.pops);
         fflush(stdout);
         free(xyz);

@@ -114,6 +114,20 @@ export const hero = {
   scene: "hero-meadow",
   tagline: "An island where every word comes out backwards.",
   begin: "Begin",
+  continueAs: "Continue as {name}",
+  startOver: "Start over",
+};
+
+// ---------- The fiction notice (after the story, before the name) ----------
+
+export const disclaimer = {
+  title: "A Work of Fiction",
+  paragraphs: [
+    "Tribezo is a work of fiction. Zazo, Benji, the Tribezo islands, the Calonis language, and every person, place, and event in this game are imaginary. They were created entirely from the game developer's imagination and creativity.",
+    "These characters do not depict, represent, or refer to any real person, tribe, community, culture, or language, living or dead. Any resemblance to real people, places, or events is purely coincidental.",
+    "Zazo's replies are written by AI as you play. They are meant for fun, and they may not always be accurate.",
+  ],
+  button: "I understand",
 };
 
 // ---------- The story (about 40 seconds) ----------
@@ -142,7 +156,7 @@ export const story = [
     zazo: { pose: "idle" },
     benji: {
       pose: "talking",
-      says: "Hi, I'm Benji! Zazo speaks XYZ, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you.",
+      says: "Hi, I'm Benji! Zazo speaks Calonis, which is English in reverse. Talk to me in English, I'll flip your words with my stack, and he'll understand you.",
     },
   },
 ];
@@ -175,17 +189,22 @@ export const greeting = {
   choices: ["I come from a big city", "Where are the other people?", "Can you show me around?"],
 };
 
+// What Zazo says when you come back to a chat saved on this device.
+export const welcomeBack = {
+  zazo: "{name}! You came back! The goats missed you, and so did I. Where shall we go today?",
+  choices: ["Show me somewhere new", "What did you do while I was away?"],
+};
+
 // ---------- Places ----------
 
-// Every place on the island, for the Places menu. Picking one makes you
-// ask Zazo to go there, so he walks you there and talks about it.
+// Every place on the island, for the Places menu. Picking one takes you
+// straight there, and Zazo starts by telling you about the place.
 // "words" are what you might say to mean that place, for Zazo's fixed
 // answers. "arrive" is what he says when you get there without the AI.
 export const places = [
   {
     scene: "island-arrival",
     name: "The beach",
-    ask: "Can we go to the beach?",
     words: /\b(beach|sand|sea|ocean|canoes?|turtles?|shore)\b/,
     arrive:
       "To the beach! Feel that soft white sand? This is where every visitor lands, and where the sea turtles lay their eggs. The sea brought you here, so the sea must like you!",
@@ -193,7 +212,6 @@ export const places = [
   {
     scene: "jungle-path",
     name: "The jungle path",
-    ask: "Can we walk the jungle path?",
     words: /\b(jungle|path|trees?|vines?|parrots?|forest)\b/,
     arrive:
       "Into the jungle we go! Stay close, the parrots will tell everyone you are here. Those mossy stones were put here by the very first people.",
@@ -201,7 +219,6 @@ export const places = [
   {
     scene: "village",
     name: "The village",
-    ask: "Can we go back to the village?",
     words: /\b(village|huts|goats?|home base)\b/,
     arrive:
       "Back to the village! This is where we eat, dance, and argue about who caught the biggest fish. The goats act like they own it. They do.",
@@ -209,7 +226,6 @@ export const places = [
   {
     scene: "family-hut",
     name: "Zazo's family hut",
-    ask: "Can I see your family hut?",
     words: /\b(your hut|family hut|your home|your house|rugs?|carvings?)\b/,
     arrive:
       "Come in, come in! My mother wove all these rugs, and those 212 little animals on the shelf? I carved every one. Sit, a guest never leaves our hut hungry!",
@@ -217,7 +233,6 @@ export const places = [
   {
     scene: "waterfall",
     name: "The Singing Falls",
-    ask: "Can we go to the Singing Falls?",
     words: /\b(waterfall|falls|singing falls|pool|swim|swimming|water)\b/,
     arrive:
       "Here are the Singing Falls! Close your eyes and listen. Do you hear it humming? Kiki swims here every hot day, faster than any fish.",
@@ -225,7 +240,6 @@ export const places = [
   {
     scene: "lookout",
     name: "The lookout hill",
-    ask: "Can we climb the lookout hill?",
     words: /\b(lookout|hill|view|sunset|lune island|see everything)\b/,
     arrive:
       "Up the lookout hill! From here you can see every island. That far one is Lune, where my family is right now. Grandmother Ama is probably dancing!",
@@ -233,7 +247,6 @@ export const places = [
   {
     scene: "fire-camp",
     name: "The campfire at night",
-    ask: "Can we sit by the campfire?",
     words: /\b(campfire|fire|night|stars|moon|stories|drums?)\b/,
     arrive:
       "Night comes fast here! The fire is warm and the stars are out. When everyone is home, we sing here until the moon is high. This is the best time for stories.",

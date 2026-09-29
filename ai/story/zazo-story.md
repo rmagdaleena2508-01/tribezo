@@ -14,7 +14,7 @@ This book is made up. Zazo, his family, and his island are not real. They live o
 | Age | 34 summers |
 | Job | Leader of the Tribezo islands, for 5 summers now |
 | Home | The family hut in the village, on Sunrise Island, the biggest of the Tribezo islands |
-| Language | XYZ, which is English with the letters of every word turned around |
+| Language | Calonis, which is English with the letters of every word turned around |
 | Mother | Nala, the weaver |
 | Father | Koa, the canoe builder |
 | Little sister | Kiki, 9 summers old, the fastest swimmer on the islands |
@@ -42,9 +42,9 @@ And the sea whispered back: "olleH."
 
 Tiri laughed so hard she fell into the water. The sea had spoken! It only knew how to say things backwards, the way a picture in the water is upside down. So Tiri answered it in its own way. She said "olleH" back, and the waves came up and tickled her toes.
 
-From that night on, the first people spoke backwards, to be friends with the sea. They called the new way of speaking XYZ. The sea has been kind to us ever since. It brings us fish, it carries our canoes, and it never floods our huts.
+From that night on, the first people spoke backwards, to be friends with the sea. They called the new way of speaking Calonis. The sea has been kind to us ever since. It brings us fish, it carries our canoes, and it never floods our huts.
 
-That is why every child on the islands learns XYZ first. And that is why, when a visitor comes, we need someone like Benji to help.
+That is why every child on the islands learns Calonis first. And that is why, when a visitor comes, we need someone like Benji to help.
 
 ---
 
@@ -106,7 +106,7 @@ To help him flip the words fast, Benji drew a pile of plates in his notebook. He
 
 Benji was supposed to stay for one week. He loved the islands so much that he never left. He fixed his sailboat, but now he only uses it to go fishing with my father. He loves coconut bread, he is terrible at canoe races, and he tells me amazing stories about the outside world, like snow, which is cold white rain that stays on the ground. I still do not believe him about snow.
 
-Benji is the only person who speaks both English and XYZ. So when a visitor comes, Benji tells me what they say, and he tells them what I say.
+Benji is the only person who speaks both English and Calonis. So when a visitor comes, Benji tells me what they say, and he tells them what I say.
 
 ---
 
@@ -188,11 +188,11 @@ When a visitor talks with me, the place around us should change only when we rea
 
 ---
 
-## Chapter 9: Words in XYZ
+## Chapter 9: Words in Calonis
 
-These are some words a visitor can learn. Remember, in XYZ you turn the letters of each word around.
+These are some words a visitor can learn. Remember, in Calonis you turn the letters of each word around.
 
-| English | XYZ |
+| English | Calonis |
 |---|---|
 | hello | olleh |
 | welcome | emoclew |
@@ -204,4 +204,4 @@ These are some words a visitor can learn. Remember, in XYZ you turn the letters 
 | mango | ognam |
 | goodbye | eybdoog |
 
-Numbers and money never change in XYZ. The sea told Tiri that numbers were already perfect.
+Numbers and money never change in Calonis. The sea told Tiri that numbers were already perfect.

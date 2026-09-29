@@ -111,7 +111,7 @@ char *tribezo_keep(size_t bytes) {
 }
 
 /* Flip the message with the stack, keeping the names in "keep" (which
-   can be 0). Returns the XYZ text, or 0 if there was no memory. */
+   can be 0). Returns the Calonis text, or 0 if there was no memory. */
 __attribute__((export_name("tribezo_reverse")))
 char *tribezo_reverse(const char *text, const char *keep) {
     return reverse_words_keeping(text, keep, &stats);

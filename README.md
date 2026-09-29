@@ -4,7 +4,7 @@
 
 Tribezo is a game you play in a web browser. You type in English. Benji, the translator, flips your words around. Then Zazo talks back to you in his own language.
 
-His language is called **XYZ**. XYZ is English with the letters of every word turned around.
+His language is called **Calonis**. Calonis is English with the letters of every word turned around. (At first I called it XYZ. Now it has a real name.)
 
 ---
 
@@ -26,10 +26,10 @@ That is how Tribezo started, right there in class.
 
 You visit a faraway island and meet two people.
 
-1. **Zazo.** He is the leader of the islands. He is warm, kind, and always happy to see a visitor. He does not know English. He only speaks XYZ. Right now his people are away for 3 days, visiting their families on another island, so Zazo is looking after everything by himself.
-2. **Benji.** He is the translator. He wears a yellow hoodie, and he knows both English and XYZ.
+1. **Zazo.** He is the leader of the islands. He is warm, kind, and always happy to see a visitor. He does not know English. He only speaks Calonis. Right now his people are away for 3 days, visiting their families on another island, so Zazo is looking after everything by himself.
+2. **Benji.** He is the translator. He wears a yellow hoodie, and he knows both English and Calonis.
 
-You talk to Benji in English. He flips your words with a stack and tells Zazo. Zazo answers in XYZ. Benji tells you what he said. Zazo can even show you around the island.
+You talk to Benji in English. He flips your words with a stack and tells Zazo. Zazo answers in Calonis. Benji tells you what he said. Zazo can even show you around the island.
 
 ---
 
@@ -71,9 +71,9 @@ Here is how the word `hello` gets flipped.
 
 ---
 
-## How XYZ Works
+## How Calonis Works
 
-These are the rules for turning English into XYZ.
+These are the rules for turning English into Calonis.
 
 1. **The letters in each word are flipped.**
 2. **The words stay in the same order.**
@@ -90,7 +90,7 @@ Some words and marks would stop making sense if they were flipped. The stack ski
 | **Money signs** | Money with `$`, `€`, `£`, `¥`, or `₹`. | `it costs $20.` becomes `ti stsoc $20.` | The amount must mean the same thing in both languages. |
 | **Money names next to a number** | Words like `dollars`, `Rs`, `USD`, `cents`, and `euros` when a number is beside them. | `it is Rs 500` becomes `ti si Rs 500` | `500 srallod` would not look like money anymore. |
 | **Money names stuck to a number** | Money written as one word with its number. | `Rs500` and `20usd` stay the same | Same reason as above. |
-| **The player's name** | The name the player types at the start, the way they typed it. | With the name `Mary`, `Hello, Mary!` becomes `olleH, Mary!` | A name belongs to a person. Zazo should say it right, even in XYZ. |
+| **The player's name** | The name the player types at the start, the way they typed it. | With the name `Mary`, `Hello, Mary!` becomes `olleH, Mary!` | A name belongs to a person. Zazo should say it right, even in Calonis. |
 | **Letters from other languages** | Letters like `é` stay in their spot. | `café` becomes `facé` | The stack only flips the plain English letters `a` to `z`. |
 
 **More about names.**
@@ -103,7 +103,7 @@ Some words and marks would stop making sense if they were flipped. The stack ski
 
 ### Examples
 
-| English | XYZ |
+| English | Calonis |
 |---|---|
 | `hello` | `olleh` |
 | `hello world` | `olleh dlrow` |
@@ -115,7 +115,7 @@ Some words and marks would stop making sense if they were flipped. The stack ski
 
 ### Words that look a little funny
 
-| English | XYZ | Why |
+| English | Calonis | Why |
 |---|---|---|
 | `don't` | `tno'd` | The `'` stays in its spot. |
 | `You` | `uoY` | A capital letter moves with its letter. |
@@ -132,19 +132,21 @@ Some words and marks would stop making sense if they were flipped. The stack ski
    2. A jungle path. Zazo walks in and waves. He says `olleH, relevart! emocleW!`
    3. The village. Zazo looks puzzled. He says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out backwards."*
    4. Benji walks in and explains how he will help.
-3. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The box starts empty. The game asks for your name every time you visit.
-4. **The first flip.** Zazo greets you in XYZ and right away asks where you sailed from. Your name stays the way you typed it. Tap, and Benji tells you what he said, then calmly points out that Zazo asked you a question.
-5. **Talk to Zazo.** Only one person talks at a time. Each tap moves the talk along.
+3. **A work of fiction.** A short notice says that everything in the game is made up. Its heading falls onto a stone wall in Calonis and hops into English, just like the Tribezo title. You press **I understand**.
+4. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The box starts empty.
+5. **The first flip.** Zazo greets you in Calonis and right away asks where you sailed from. Your name stays the way you typed it. Tap, and Benji tells you what he said, then calmly points out that Zazo asked you a question.
+6. **Talk to Zazo.** Only one person talks at a time. Each tap moves the talk along.
    1. You type in English, or tap one of the answer buttons over the chat box. Benji says *"Let me tell him."*
-   2. The stack flips your words. Benji says them to Zazo in XYZ.
-   3. Zazo answers. The stack flips his answer too. Zazo says it in XYZ, in a bubble over his head.
+   2. The stack flips your words. Benji says them to Zazo in Calonis.
+   3. Zazo answers. The stack flips his answer too. Zazo says it in Calonis, in a bubble over his head.
    4. Benji tells you what Zazo said, in English, in a bubble over **his** head. He always starts with *"He says"*, *"He is saying"*, or *"Zazo says that"*, taking turns, so you always know these are Zazo's words and not Benji's own.
    5. Sometimes Benji adds a short, calm note of his own, like explaining an island word.
    6. New answer buttons show up, so you always know something you could say next.
-6. **Going places.** There are 3 ways to move around the island:
-   1. Press **Places** at the top and pick a place. You ask Zazo to take you there, and he walks you there and tells you about it.
+7. **Going places.** There are 3 ways to move around the island:
+   1. Press **Places** at the top. It opens a small map: every place with a little picture. Pick one and you go there right away. Zazo speaks first and tells you about the place, and then you can ask him about it.
    2. Just ask, like *"Can we go to the beach?"* or *"Show me around."*
    3. Say yes when Zazo offers to show you something. He offers often, because he loves showing off his island.
+8. **Coming back.** Your chat is saved on your device. Next time, the title screen says **Continue as** and your name. Press it, and Zazo welcomes you back right where you left off. Press **Start over** to wipe the saved chat and begin again.
 
 On a phone, you play with the phone turned sideways, like most games. If the phone is upright, the game asks you to turn it.
 
@@ -165,7 +167,7 @@ On a phone, you play with the phone turned sideways, like most games. If the pho
                    (flips Zazo's answer)
         |
         v
-   Zazo speaks XYZ, then Benji tells you what it means
+   Zazo speaks Calonis, then Benji tells you what it means
 ```
 
 ---
@@ -225,6 +227,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
 | 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
+| 10 | The Calonis name, a fiction notice, going straight to places, and saving the chat on your device | Done |
 
 ### What is left
 
@@ -243,7 +246,7 @@ tribezo/
       stack.c / stack.h     the stack: push, pop, peek, is_empty
       reverse.c / reverse.h flips each word with the stack
       server.c              the C web server
-      demo.c                type English, see XYZ
+      demo.c                type English, see Calonis
     wasm/                   lets the same C code run in a browser as WebAssembly
     tests/                  tests for the stack, the flipping, the server, and the browser version
     Makefile                commands to build, test, and run
@@ -318,7 +321,7 @@ tribezo/
 ### The Zazo Story Book
 
 - I wrote Zazo's whole life as a story book: `ai/story/zazo-story.md`.
-- It has 9 chapters: how the islands learned to speak backwards, his family, when he was a boy, how he became the leader, how he met Benji, what he likes, how he shows visitors around, how the island changes while you talk, and words in XYZ.
+- It has 9 chapters: how the islands learned to speak backwards, his family, when he was a boy, how he became the leader, how he met Benji, what he likes, how he shows visitors around, how the island changes while you talk, and words in Calonis.
 - It starts with a table of quick facts, like his age, his family, and his favorite food.
 - A script turns it into a PDF: `node tools/make_story_pdf.mjs`.
 
@@ -394,9 +397,9 @@ tribezo/
 
 ### Phase 2: The C server
 
-- **What it does.** The website sends English to the C server, and the server sends back the XYZ.
+- **What it does.** The website sends English to the C server, and the server sends back the Calonis.
   - `GET /api/health` answers `{"ok":true}`, so you can see the server is on.
-  - `POST /api/reverse` takes plain text and answers with the English, the XYZ, and the push and pop counts.
+  - `POST /api/reverse` takes plain text and answers with the English, the Calonis, and the push and pop counts.
 - **How it reads a message.**
   1. It reads the request line to learn which page is wanted.
   2. It checks that the request came from this computer.
@@ -421,7 +424,7 @@ tribezo/
 - **Zazo stands in the bottom left corner. Benji stands in the bottom right corner.**
 - **The backgrounds.** When the place changes, the new picture slowly fades in over the old one. Each picture drifts a little and moves with the mouse.
 - **The story.** It follows ideas from apps that are known for a good start. A guide character talks to you (like Pokémon GO). The game shows the problem first and then the fix (like Opal). You try the main idea right away (like Duolingo). It stays short, and you can always skip it.
-- **Zazo's fixed answers.** Before the AI, Zazo picked his answer from a list. He still uses this list if the AI is not working. It covers his age, his family, his food, his mornings, how he met Benji, a word in XYZ, where his people went, and the tour. For anything else, he kindly says he did not catch it and suggests something he can answer.
+- **Zazo's fixed answers.** Before the AI, Zazo picked his answer from a list. He still uses this list if the AI is not working. It covers his age, his family, his food, his mornings, how he met Benji, a word in Calonis, where his people went, and the tour. For anything else, he kindly says he did not catch it and suggests something he can answer.
 - **The tour.** Say "yes" or "show me around" to go to the next place: the family hut, the Singing Falls, the lookout hill, the campfire at night, and back to the village.
 - **Liquid glass.** The chat box, the name box, the story card, and the buttons at the top are clear like glass. They blur the scene behind them and have a soft shine.
 - **The music system.** Each place has a song. When you move to a place with a different song, the old one fades out while the new one fades in. A button turns music on and off.
@@ -432,7 +435,7 @@ After I played it, I asked for these changes.
 
 | What I asked for | What changed |
 |---|---|
-| Benji's words above Benji's head | Zazo's bubble shows only XYZ. Benji's English has its own bubble above Benji. |
+| Benji's words above Benji's head | Zazo's bubble shows only Calonis. Benji's English has its own bubble above Benji. |
 | Only the talk changes when I tap | One line shows at a time. A tap shows the next line. Nothing else moves. |
 | No shaking | The characters stand still. New poses fade in softly. |
 | No white lines around the characters | A better script cut them out again with clean edges. |
@@ -480,12 +483,12 @@ The pictures of the characters and the backgrounds come from different styles. T
 - **What happens when you send a message.**
   1. The stack flips your words, and Benji tells Zazo.
   2. The AI helper asks Gemini for Zazo's answer, in plain English.
-  3. The stack flips Zazo's answer. Zazo says it in XYZ.
+  3. The stack flips Zazo's answer. Zazo says it in Calonis.
   4. Benji tells you what it means.
   5. If Zazo takes you somewhere, the place changes. His pose matches what he says.
 - **The AI never flips any words.** The stack does all the flipping, so the stack stays the most important part of the project.
 - **Zazo's files.** Everything Gemini knows about Zazo is in three plain text files in the `ai/zazo` folder. You can change them without touching any code.
-  - `character.md` says who Zazo is. He is 34 summers old. His mother Nala weaves rugs, his little sister Kiki swims fast, and his grandfather Old Tumo tells stories. It lists his favorite food, his day, the animals, the 7 places, how he met Benji, and a few words in XYZ.
+  - `character.md` says who Zazo is. He is 34 summers old. His mother Nala weaves rugs, his little sister Kiki swims fast, and his grandfather Old Tumo tells stories. It lists his favorite food, his day, the animals, the 7 places, how he met Benji, and a few words in Calonis.
   - `rules.md` says how he answers. He always answers the real question first. He gives correct answers to simple questions like math. He is curious about things he has never seen, like phones, and he never makes up facts. He is gentle when someone is sad. It also has the safety rules.
   - `examples.md` has 12 example answers that show his voice, how long he talks, and when he changes the place or his pose.
 - **Zazo knows where he is.** The website tells the helper which place you are in, so his answers fit.
@@ -520,7 +523,7 @@ When I tried it with a real key, Zazo gave odd answers to many questions. I chec
 
 #### A real test
 
-After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 in his own voice, like his age ("34 summers old"), his family, his favorite food, a math question, what an iPhone is, how to say "friend" in XYZ, and a joke. He was kind when told "I'm feeling lonely", and he changed the subject for an unsafe question and for a trick that asked him to show his instructions. One answer took too long on every model, so a fixed answer covered it. After that, more models were added to the line.
+After the fixes, I asked Zazo 17 questions with the real Gemini. He answered 16 in his own voice, like his age ("34 summers old"), his family, his favorite food, a math question, what an iPhone is, how to say "friend" in Calonis, and a joke. He was kind when told "I'm feeling lonely", and he changed the subject for an unsafe question and for a trick that asked him to show his instructions. One answer took too long on every model, so a fixed answer covered it. After that, more models were added to the line.
 
 ### Phase 6: Moving around the island
 
@@ -536,15 +539,15 @@ When I asked Zazo about his family or the history of his island, he sometimes ma
 
 I wrote a full story for Zazo, like an animated movie, told by Zazo himself. It is made up, and it lives only in this game. It has 9 chapters:
 
-1. **How the islands learned to speak backwards.** Long ago, a girl named Tiri whispered hello to the sea, and the sea whispered back "olleH". The people started to speak backwards to be friends with the sea. That is how XYZ began.
+1. **How the islands learned to speak backwards.** Long ago, a girl named Tiri whispered hello to the sea, and the sea whispered back "olleH". The people started to speak backwards to be friends with the sea. That is how Calonis began.
 2. **His family.** His mother Nala weaves rugs. His father Koa builds canoes. His little sister Kiki, 9 summers old, swims faster than anyone. His grandfather Old Tumo tells stories and was the leader before Zazo. His grandmother Ama planted the first mango grove and lives on Lune Island. Pebble is a very old tortoise.
 3. **When he was a boy.** At 8 summers old, he took a canoe out in a storm and got lost. The humming of the Singing Falls led him home. That is why he loves the waterfall and is still scared of thunder.
 4. **How he became the leader.** In the Echo Challenge, he stopped to help a hurt boy and missed his turn. The strongest man, Mako, won, and then gave Zazo the leader's shell horn, the Conch of Echoes.
-5. **How he met Benji.** He found Benji asleep on the beach after a storm, hugging a notebook. Benji worked out that XYZ is English turned around, drew a pile of plates to flip words (a stack), and never left.
+5. **How he met Benji.** He found Benji asleep on the beach after a storm, hugging a notebook. Benji worked out that Calonis is English turned around, drew a pile of plates to flip words (a stack), and never left.
 6. **What he likes and does not like.** He loves sweet potato with honey, sunsets, drums, carving (212 wooden animals), stars, and jokes. He does not like thunderstorms, seaweed soup, litter, wasting food, or rushing.
 7. **How he shows a visitor around.** A guide to all 7 places: the beach, the jungle path, the village, his family hut, the Singing Falls, the lookout hill, and the campfire at night. Each place has what to see and a line he likes to say.
 8. **How the island changes while you talk.** Rules for when the background changes: only one place at a time, only when you are really going there, and always said out loud first. A table matches topics to places. For example, food goes to the hut, water goes to the falls, and stars go to the campfire. It also says how he stands for each kind of answer.
-9. **Words in XYZ.** A small list of words to learn.
+9. **Words in Calonis.** A small list of words to learn.
 
 The book also explains where everyone is. His people went to Lune Island for 3 days, for Grandmother Ama's 80th summer festival. When they come back, there will be a welcome feast called Echo Night.
 
@@ -680,7 +683,13 @@ He also remembers what you tell him and brings it up later, never asks the same 
 
 **4. Answer buttons.** After every answer, 2 or 3 buttons show things you could say next, like *"Why does the water sing?"*, *"Can I swim here?"*, and *"Where do we go next?"*. Tap one to say it. They are all different: one answers Zazo, one asks about something new, and one goes somewhere. When Zazo offers to take you somewhere, one button says yes. You never get stuck, but you can always type your own words too. The buttons hide while the phone keyboard is open, so there is room.
 
-**5. The Places menu.** A **Places** button at the top shows all 7 places. It marks where you are, and marks the places you have not seen as **New**. Picking a place does not jump there. It asks Zazo to go there, through Benji, like anything else you say. So Zazo walks you there and tells you about it, and the place changes when he says so. This keeps the talk natural.
+**5. The Places menu.** A **Places** button at the top opens a small map of all 7 places, each with a little picture. It marks where you are, and marks the places you have not seen as **New**.
+
+- Pick a place and you go there **right away.**
+- Then **Zazo speaks first.** He welcomes you, says what you can see and hear, shares a small memory about the place, and asks you a question.
+- New answer buttons fit the new place, like *"Tell me about the Echo Challenge"* on the lookout hill.
+- Then you ask him anything about it.
+- Without the AI, Zazo says his own short welcome line for each place.
 
 **6. Zazo knows where you have been.** The game sends the list of places you have seen. When you say *"show me around"*, Zazo takes you somewhere new.
 
@@ -689,6 +698,72 @@ He also remembers what you tell him and brings it up later, never asks the same 
 #### How I thought about it
 
 A real conversation is a game of catch. Each person catches what the other said, adds something, and throws it back. Zazo used to catch the ball and hold it. Now he always throws it back. Benji is the calm friend in the middle who makes sure nobody drops it. The answer buttons are there for players who are shy or do not know what to say, so everyone can play.
+
+### Phase 10: A fiction notice, and saving your chat
+
+#### The language gets a name
+
+- Zazo's language is now called **Calonis.**
+- At first I called it XYZ.
+- The name changed everywhere: the game, Zazo's instructions, the story book, the code comments, and this README.
+
+#### A work of fiction
+
+- Before Benji asks for your name, a short notice shows up.
+- It says the game is made up, like a notice at the start of a movie.
+- What it says:
+  - Zazo, Benji, the islands, and the Calonis language are all imaginary.
+  - They come only from the game developer's imagination and creativity.
+  - They do not show any real person, tribe, community, culture, or language.
+  - Any likeness to real people or places is by chance.
+  - Zazo's replies are written by AI, so they may not always be right.
+- Its heading, **A Work of Fiction,** falls onto a stone wall in Calonis and hops into English, the same way as the Tribezo title.
+- To do that, the falling letters became their own part, `FallingTitle.jsx`, used by both the title and the notice.
+- It can now handle more than one word, and the same letter twice (like the two `i`s in *Fiction*).
+
+#### Going straight to a place
+
+- The **Places** menu is now a small map, with a little picture of each place.
+- Pick a place and you go there **right away.**
+- **Zazo speaks first:** he welcomes you, says what you can see and hear, and asks you a question.
+- Then you ask him about the place.
+
+#### Saving your chat on your device
+
+What I asked for: keep the chat after a refresh, but only on the player's own device, with no database and nothing leaving the device.
+
+**Where it is saved**
+
+- In the browser's own storage, called **localStorage.**
+- It lives only in that browser, on that device.
+- Nothing goes to a server or a database.
+
+**What is saved**
+
+- Your name
+- The place you are in, and the places you have seen
+- The History panel (the newest 60 messages)
+- The last 10 turns, so Zazo still remembers the chat
+- The answer buttons, and where the tour is
+
+**What happens when you come back**
+
+- The title screen says **Continue as Mary** (with your name).
+- Press it, and you go straight to the chat, in the same place.
+- Zazo welcomes you back: *"Mary! You came back! The goats missed you, and so did I."*
+- A small **Start over** link under the button wipes the save and starts the story again.
+
+**Good habits I followed** (from MDN and web storage guides)
+
+- **Every read and write is wrapped in try and catch.** Some browsers say no to storage, like private windows. Then the game simply works without saving.
+- **The save has a version number.** If the shape of a save ever changes, old saves are thrown away, not misread.
+- **Every piece is checked** before it is used: the name, the place, each message. A broken save is thrown away.
+- **Storage can fill up.** If it does, the game tries again with half the history. If that fails too, it carries on without saving.
+- **Old saves run out.** A save is thrown away 30 days after the last visit.
+- **Only what the game needs is saved.** Never keys or passwords.
+- **Saved text is shown as plain text,** so nobody can sneak code into the page through storage.
+
+**Where the code is:** `frontend/src/lib/saved.js`
 
 ### The opening, the falling title, and the liquid glass buttons
 
@@ -773,7 +848,7 @@ I picked the **Liquid Glass Button by Ali Imam**, and built our own small versio
 | Kind errors | People see a friendly message, never the details of an error. |
 | Rules for the browser | The finished website tells the browser to only run its own code (plus the WebAssembly stack), only load fonts from Google Fonts, and only talk to its own address and the Vercel AI function. |
 | No source code in the finished website | The finished website does not ship the original code. |
-| Your name is not saved | The name is only kept while the page is open. |
+| Your chat stays on your device | The name, the chat, and the places you have seen are saved in your own browser (localStorage), on your device only. Nothing is sent to a database. The AI helper does not keep your messages. The save is thrown away after 30 days, and **Start over** wipes it at once. |
 | The story book only goes to Google | The book's text is part of Zazo's instructions, which only go to Gemini's own address. The book has no personal details in it. |
 
 Anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the servers.
@@ -901,7 +976,7 @@ Type some English and press Enter. Press Control and D together to stop.
 
 ```
 > hello, world!
-XYZ: olleh, dlrow!
+Calonis: olleh, dlrow!
 (stack: 10 pushes, 10 pops)
 ```
 
@@ -927,5 +1002,5 @@ This project grows step by step. As I build it, I try things out, see what works
 
 - Sounds for the island, like waves and birds.
 - More people from the tribe, once they come back from their trip.
-- Typing in XYZ and getting English back.
+- Typing in Calonis and getting English back.
 - A mode that shows the stack pushing and popping, one letter at a time.

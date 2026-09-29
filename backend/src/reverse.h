@@ -10,7 +10,7 @@ typedef struct {
 } ReverseStats;
 
 /*
- * Turn English into XYZ, the tribe's language.
+ * Turn English into Calonis, the tribe's language.
  *
  * Rules:
  *   1. The letters in each word are reversed.

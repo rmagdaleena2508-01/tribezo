@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
 // A side panel that lists everything said so far:
-// the English, the XYZ, and how much work the stack did.
+// the English, the Calonis, and how much work the stack did.
 export default function HistoryPanel({ open, onClose, entries }) {
   const closeButton = useRef(null);
 

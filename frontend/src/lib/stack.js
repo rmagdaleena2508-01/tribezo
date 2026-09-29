@@ -50,7 +50,7 @@ function loadStack() {
   return loading;
 }
 
-// Send English, get XYZ back. The words in "keep" (the player's name)
+// Send English, get Calonis back. The words in "keep" (the player's name)
 // stay the way they were typed.
 // Returns { english, xyz, pushes, pops }, or throws if anything goes wrong.
 export async function reverseText(text, keep = "") {

@@ -1,4 +1,4 @@
-/* Tests for turning English into XYZ. Run with: make test */
+/* Tests for turning English into Calonis. Run with: make test */
 
 #include "../src/reverse.h"
 
@@ -147,7 +147,7 @@ static void test_names_stay(void) {
 }
 
 static void test_reversing_twice_gives_back_english(void) {
-    /* XYZ reversed again should be the original English. */
+    /* Calonis reversed again should be the original English. */
     const char *english = "Hi there, friend! Can I visit your village?";
     char *xyz = reverse_words(english, NULL);
     char *back = reverse_words(xyz, NULL);
