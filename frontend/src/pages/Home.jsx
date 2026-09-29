@@ -9,6 +9,7 @@ import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
+import PlacesMenu from "../components/PlacesMenu.jsx";
 import WaterIntro from "../components/WaterIntro.jsx";
 import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
@@ -70,19 +71,34 @@ export default function Home() {
   // Where Zazo's tour is, and which fallback answer is next.
   const memory = useRef({ tourStop: 0, fallback: 0 });
 
-  // The last few turns of the chat, sent to the AI so Zazo remembers them.
+  // The last turns of the chat, sent to the AI so Zazo remembers them.
   const recentTurns = useRef([]);
 
-  // The question suggested in the chat box. Tab fills it in.
-  const [suggestion, setSuggestion] = useState(suggestedQuestions[0]);
-  const asked = useRef(new Set()); // questions already asked, in lowercase
+  // The places you have been, so Zazo knows where to take you next.
+  const [seen, setSeen] = useState([]);
 
-  // The next suggestion: Zazo's own idea if it is new, or else the next
-  // question from the list that has not been asked yet.
-  function pickSuggestion(fromZazo) {
+  // Things you could say next, shown as buttons over the chat box.
+  const [choices, setChoices] = useState(greeting.choices);
+  const asked = useRef(new Set()); // things already said, in lowercase
+
+  // The next choices: Zazo's own ideas that are new, topped up with
+  // questions from the list that have not been asked yet, up to 3.
+  function pickChoices(fromZazo = []) {
     const isNew = (question) => question && !asked.current.has(question.toLowerCase().trim());
-    if (isNew(fromZazo)) return fromZazo;
-    return suggestedQuestions.find(isNew) ?? "";
+    const picked = fromZazo.filter(isNew);
+    for (const question of suggestedQuestions) {
+      if (picked.length >= 3) break;
+      if (isNew(question) && !picked.includes(question)) picked.push(question);
+    }
+    return picked.slice(0, 3);
+  }
+
+  // Benji starts every translation with "He says", "He is saying", or
+  // "Zazo says that", taking turns so it does not sound the same each time.
+  const translations = useRef(1); // the hello already used "He says"
+  function translation(words) {
+    const start = benjiLines.translates[translations.current++ % benjiLines.translates.length];
+    return start.replace("{words}", words);
   }
 
   // Goes up each time something new starts. If a server answer comes back
@@ -102,9 +118,11 @@ export default function Home() {
     ]);
   }, []);
 
-  // Change the music when the place changes.
+  // Change the music when the place changes, and remember the places
+  // you have been (the title screen is not a place on the island).
   useEffect(() => {
     playForScene(scene);
+    if (scene !== hero.scene) setSeen((places) => (places.includes(scene) ? places : [...places, scene]));
   }, [scene]);
 
   // Some of Zazo's lines take you to a new place.
@@ -225,6 +243,8 @@ export default function Home() {
     setBusy(true);
 
     const english = greeting.zazo.replaceAll("{name}", visitorName);
+    recentTurns.current = [];
+    setChoices(pickChoices(greeting.choices));
     try {
       const [answer] = await Promise.all([reverseText(english, visitorName), wait(400)]);
       if (thisRound !== round.current) return;
@@ -236,7 +256,11 @@ export default function Home() {
           pose: "welcome",
           label: "Benji translates",
         },
+        { who: "benji", text: greeting.benjiNote, pose: "idle", label: "Benji" },
       ]);
+      // Zazo's first line is part of the chat, so the AI knows he asked
+      // where you come from.
+      recentTurns.current = [{ you: "(arrives on the island)", zazo: english }];
     } catch {
       if (thisRound !== round.current) return;
       say([{ who: "benji", text: benjiLines.error, pose: "confused" }]);
@@ -252,19 +276,21 @@ export default function Home() {
     try {
       // "hero-meadow" is only the title screen, so it counts as the village.
       const here = scene === "hero-meadow" ? "village" : scene;
-      const ai = await askZazo(english, name, recentTurns.current, here);
-      recentTurns.current = [...recentTurns.current, { you: english, zazo: ai.reply }].slice(-6);
+      const ai = await askZazo(english, name, recentTurns.current, here, seen);
+      recentTurns.current = [...recentTurns.current, { you: english, zazo: ai.reply }].slice(-10);
       return {
         says: ai.reply,
+        benji: ai.benji,
         pose: characters.zazo.poses[ai.pose] ? ai.pose : "talking",
         scene: scenes[ai.scene] ? ai.scene : undefined, // "stay" is not a scene, so he stays put
         source: "ai",
-        suggestion: ai.suggestion,
+        choices: ai.choices,
       };
     } catch {
-      const reply = zazoReply(english, name, memory.current);
+      const here = scene === "hero-meadow" ? "village" : scene;
+      const reply = zazoReply(english, name, memory.current, here);
       memory.current = reply.memory;
-      return { ...reply, source: "fixed" };
+      return { ...reply, choices: [], source: "fixed" };
     }
   }
 
@@ -283,13 +309,15 @@ export default function Home() {
       const reply = await thinkOfReply(english);
       const answer = await reverseText(reply.says, name);
       if (thisRound !== round.current) return;
-      setSuggestion(pickSuggestion(reply.suggestion));
+      setChoices(pickChoices(reply.choices));
 
-      // 3. Tap through: Benji tells Zazo, Zazo answers, Benji translates.
+      // 3. Tap through: Benji tells Zazo, Zazo answers, Benji translates,
+      //    and sometimes Benji adds a short, calm note of his own.
       say([
         { who: "benji", text: told.xyz, pose: "pointing", label: "Benji tells Zazo" },
         { who: "zazo", text: answer.xyz, pose: reply.pose, scene: reply.scene },
-        { who: "benji", text: reply.says, pose: "talking", label: "Benji translates" },
+        { who: "benji", text: translation(reply.says), pose: "talking", label: "Benji translates" },
+        ...(reply.benji ? [{ who: "benji", text: reply.benji, pose: "idle", label: "Benji" }] : []),
       ]);
       setHistory((entries) => [
         ...entries,
@@ -423,6 +451,12 @@ export default function Home() {
           )}
           {stage === "chat" && (
             <>
+              <PlacesMenu
+                here={scene}
+                seen={seen}
+                disabled={busy || moreLines || (line !== null && !lineDone)}
+                onPick={(place) => sendMessage(place.ask)}
+              />
               <GlassButton
                 onClick={startStory}
                 aria-label="Watch the story again"
@@ -470,7 +504,12 @@ export default function Home() {
                 Tap to continue
               </GlassButton>
             ) : (
-              <ChatBox onSend={sendMessage} disabled={busy || (line !== null && !lineDone)} suggestion={suggestion} />
+              <ChatBox
+                onSend={sendMessage}
+                disabled={busy || (line !== null && !lineDone)}
+                choices={choices}
+                showChoices={!keyboardOpen}
+              />
             ))}
         </div>
       </div>

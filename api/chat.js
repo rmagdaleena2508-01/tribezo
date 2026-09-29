@@ -14,7 +14,7 @@
 // These limits are counted by each running copy of the function. Vercel
 // may run a few copies, so they are a safety net, not a perfect count.
 
-import { answerChat, hasKey, warmUp } from "../ai/zazo-ai.js";
+import { answerChat, hasKey } from "../ai/zazo-ai.js";
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "https://rmagdaleena2508-01.github.io")
   .split(",")
@@ -22,8 +22,6 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "https://rmagdaleena2508
   .filter(Boolean);
 const PER_VISITOR_PER_MINUTE = Number(process.env.PER_VISITOR_PER_MINUTE || 8);
 const PER_DAY = Number(process.env.PER_DAY || 300);
-
-warmUp();
 
 // ---------- Who is asking ----------
 

@@ -17,30 +17,11 @@ const FAKE_PORT = 18763;
 const ok = (answer) => () => [200, { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify(answer) }] } }] }];
 let behavior = {};
 let requests = [];
-let uploads = 0;
-let uploadFails = false;
 
 const fakeGemini = createServer((req, res) => {
   let body = "";
   req.on("data", (chunk) => (body += chunk));
   req.on("end", () => {
-    // The story book upload: step 1 gives an address, step 2 takes the PDF.
-    if (req.url === "/upload/v1beta/files") {
-      if (uploadFails) {
-        res.writeHead(500).end();
-        return;
-      }
-      res.writeHead(200, { "x-goog-upload-url": `http://127.0.0.1:${FAKE_PORT}/upload/v1beta/session` }).end("{}");
-      return;
-    }
-    if (req.url === "/upload/v1beta/session") {
-      uploads++;
-      const expirationTime = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ file: { uri: "https://fake.example/files/zazo-story", expirationTime } }));
-      return;
-    }
-
     const model = decodeURIComponent(req.url.split("/models/")[1].split(":")[0]);
     const request = { model, headers: req.headers, url: req.url, body: JSON.parse(body) };
     requests.push(request);
@@ -113,8 +94,9 @@ test("a normal message gets Zazo's answer from the fast model", async () => {
   assert.deepEqual(await response.json(), {
     reply: "Come, I will show you the Singing Falls!",
     scene: "waterfall",
+    benji: "",
     pose: "pointing",
-    suggestion: "",
+    choices: [],
     source: "ai",
   });
   assert.deepEqual(requests.map((r) => r.model), ["fast-model"]);
@@ -137,6 +119,20 @@ test("Zazo's files, the name, and the current place are all sent", async () => {
   assert.match(instructions, /Example answers/); // from examples.md
   assert.match(instructions, /visitor named Ann/);
   assert.match(instructions, /standing at your family hut/);
+});
+
+test("the whole story book is in the instructions, not a PDF", async () => {
+  await post(18764, { message: "Who is Tiri?", name: "Ann" });
+  const { systemInstruction, contents } = requests[0].body;
+  assert.match(systemInstruction.parts[0].text, /Chapter 1: How the islands learned to speak backwards/);
+  assert.deepEqual(contents.at(-1).parts, [{ text: "Who is Tiri?" }]);
+});
+
+test("Zazo is told which places the visitor has seen", async () => {
+  await post(18764, { message: "Show me around", name: "Ann", scene: "village", seen: ["island-arrival", "jungle-path"] });
+  const instructions = requests[0].body.systemInstruction.parts[0].text;
+  assert.match(instructions, /has seen: the beach, the jungle path/);
+  assert.match(instructions, /has not seen yet: your family hut, the Singing Falls, the lookout hill, the campfire at night/);
 });
 
 test("the key goes in a header, never in the address", async () => {
@@ -224,7 +220,7 @@ test("unknown scenes and poses fall back to safe ones", async () => {
 test("very long replies are cut short", async () => {
   behavior["fast-model"] = ok({ reply: "a".repeat(1000), scene: "stay", pose: "idle" });
   const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
-  assert.equal(answer.reply.length, 400);
+  assert.equal(answer.reply.length, 600);
 });
 
 test("when every model fails, the website is told to use the fixed answers", async () => {
@@ -247,6 +243,7 @@ test("bad requests are turned away", async () => {
   assert.equal((await post(18764, { message: "Hi", name: "x".repeat(21) })).status, 400);
   assert.equal((await post(18764, { message: "Hi", name: "Ann", history: "no" })).status, 400);
   assert.equal((await post(18764, { message: "Hi", name: "Ann", scene: "the moon" })).status, 400);
+  assert.equal((await post(18764, { message: "Hi", name: "Ann", seen: ["the moon"] })).status, 400);
 });
 
 test("requests from other websites are turned away", async () => {
@@ -255,36 +252,29 @@ test("requests from other websites are turned away", async () => {
 });
 
 
-test("the story book PDF is uploaded once and attached to every message", async () => {
-  await post(18764, { message: "Who is your grandmother?", name: "Ann" });
-  await post(18764, { message: "And your father?", name: "Ann" });
-  for (const request of requests) {
-    const parts = request.body.contents.at(-1).parts;
-    assert.deepEqual(parts[0], { fileData: { mimeType: "application/pdf", fileUri: "https://fake.example/files/zazo-story" } });
-    assert.match(parts[1].text, /Zazo Story Book/);
-  }
-  assert.ok(uploads <= 4); // once per helper at start, never once per message
-});
-
-test("if uploading fails, the PDF is sent inside the message instead", async () => {
-  uploadFails = true;
-  const port = 18767;
-  await startHelper(port, "AIzaTestKey");
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  await post(port, { message: "Hi", name: "Ann" });
-  uploadFails = false;
-  const inline = requests.at(-1).body.contents.at(-1).parts[0].inlineData;
-  assert.equal(inline.mimeType, "application/pdf");
-  assert.ok(Buffer.from(inline.data, "base64").subarray(0, 5).toString() === "%PDF-");
-});
-
-test("Zazo sends back a suggested next question, short and clean", async () => {
-  behavior["fast-model"] = ok({ reply: "Hello!", scene: "stay", pose: "welcome", suggestion: "How did you *meet* Benji?" });
+test("Benji's note and the visitor's choices come back short and clean", async () => {
+  behavior["fast-model"] = ok({
+    reply: "Hello!",
+    benji: "He means the *goats*.",
+    scene: "stay",
+    pose: "welcome",
+    choices: ["How did you *meet* Benji?", "How did you *meet* Benji?", "x".repeat(300), "one", "two"],
+  });
   const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
-  assert.equal(answer.suggestion, "How did you meet Benji?");
-  behavior["fast-model"] = ok({ reply: "Hello!", scene: "stay", pose: "welcome", suggestion: "x".repeat(300) });
-  const long = await (await post(18764, { message: "Hi", name: "Ann" })).json();
-  assert.equal(long.suggestion.length, 80);
+  assert.equal(answer.benji, "He means the goats.");
+  assert.deepEqual(answer.choices, ["How did you meet Benji?", "x".repeat(60), "one"]);
+});
+
+test("an empty Benji note, written as (empty), is left out", async () => {
+  behavior["fast-model"] = ok({ reply: "Hello!", benji: "(empty)", scene: "stay", pose: "welcome", choices: [] });
+  const answer = await (await post(18764, { message: "Hi", name: "Ann" })).json();
+  assert.equal(answer.benji, "");
+});
+
+test("going to the place Zazo is already in counts as staying", async () => {
+  behavior["fast-model"] = ok({ reply: "Here we are!", scene: "waterfall", pose: "pointing" });
+  const answer = await (await post(18764, { message: "Go to the falls", name: "Ann", scene: "waterfall" })).json();
+  assert.equal(answer.scene, "stay");
 });
 
 // This one fills up the per-minute limit, so it runs last.

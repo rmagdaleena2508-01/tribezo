@@ -159,15 +159,86 @@ export const nameScreen = {
 
 export const benjiLines = {
   relaying: "Let me tell him…",
+  // How Benji starts every translation of Zazo's words. He takes turns
+  // with these, so it sounds natural. {words} is what Zazo said.
+  translates: ["He says, “{words}”", "He is saying, “{words}”", "Zazo says that “{words}”"],
   error: "I can't reach Zazo right now. Please try again in a moment.",
 };
 
 // What Zazo says when the story ends, and how Benji explains it.
-// {name} is swapped for your name.
+// {name} is swapped for your name. Zazo asks a question right away, so
+// the talk starts on its own.
 export const greeting = {
-  zazo: "Hello, {name}! Welcome to my islands!",
-  benji: "He says, “Hello, {name}! Welcome to my islands!” Go on, say something to him.",
+  zazo: "Hello, {name}! Welcome to my islands! A real visitor, how wonderful! Where did you sail from?",
+  benji: "He says, “Hello, {name}! Welcome to my islands! A real visitor, how wonderful! Where did you sail from?”",
+  benjiNote: "He asked where you come from. Tell him in English, or tap an answer below. I'll pass it on.",
+  choices: ["I come from a big city", "Where are the other people?", "Can you show me around?"],
 };
+
+// ---------- Places ----------
+
+// Every place on the island, for the Places menu. Picking one makes you
+// ask Zazo to go there, so he walks you there and talks about it.
+// "words" are what you might say to mean that place, for Zazo's fixed
+// answers. "arrive" is what he says when you get there without the AI.
+export const places = [
+  {
+    scene: "island-arrival",
+    name: "The beach",
+    ask: "Can we go to the beach?",
+    words: /\b(beach|sand|sea|ocean|canoes?|turtles?|shore)\b/,
+    arrive:
+      "To the beach! Feel that soft white sand? This is where every visitor lands, and where the sea turtles lay their eggs. The sea brought you here, so the sea must like you!",
+  },
+  {
+    scene: "jungle-path",
+    name: "The jungle path",
+    ask: "Can we walk the jungle path?",
+    words: /\b(jungle|path|trees?|vines?|parrots?|forest)\b/,
+    arrive:
+      "Into the jungle we go! Stay close, the parrots will tell everyone you are here. Those mossy stones were put here by the very first people.",
+  },
+  {
+    scene: "village",
+    name: "The village",
+    ask: "Can we go back to the village?",
+    words: /\b(village|huts|goats?|home base)\b/,
+    arrive:
+      "Back to the village! This is where we eat, dance, and argue about who caught the biggest fish. The goats act like they own it. They do.",
+  },
+  {
+    scene: "family-hut",
+    name: "Zazo's family hut",
+    ask: "Can I see your family hut?",
+    words: /\b(your hut|family hut|your home|your house|rugs?|carvings?)\b/,
+    arrive:
+      "Come in, come in! My mother wove all these rugs, and those 212 little animals on the shelf? I carved every one. Sit, a guest never leaves our hut hungry!",
+  },
+  {
+    scene: "waterfall",
+    name: "The Singing Falls",
+    ask: "Can we go to the Singing Falls?",
+    words: /\b(waterfall|falls|singing falls|pool|swim|swimming|water)\b/,
+    arrive:
+      "Here are the Singing Falls! Close your eyes and listen. Do you hear it humming? Kiki swims here every hot day, faster than any fish.",
+  },
+  {
+    scene: "lookout",
+    name: "The lookout hill",
+    ask: "Can we climb the lookout hill?",
+    words: /\b(lookout|hill|view|sunset|lune island|see everything)\b/,
+    arrive:
+      "Up the lookout hill! From here you can see every island. That far one is Lune, where my family is right now. Grandmother Ama is probably dancing!",
+  },
+  {
+    scene: "fire-camp",
+    name: "The campfire at night",
+    ask: "Can we sit by the campfire?",
+    words: /\b(campfire|fire|night|stars|moon|stories|drums?)\b/,
+    arrive:
+      "Night comes fast here! The fire is warm and the stars are out. When everyone is home, we sing here until the moon is high. This is the best time for stories.",
+  },
+];
 
 // ---------- What Zazo says back ----------
 
@@ -177,37 +248,37 @@ export const replies = [
   {
     // "Where are the other people?"
     match: /\bwhere\b.*\b(people|everyone|everybody|others?|tribe|family|families|anyone|villagers)\b/,
-    says: "They have gone on a 3 day vacation to Lune Island to meet their families and relatives, for my Grandmother Ama's 80th summer festival. I'm the only one taking care of the islands. Come, let me show you around!",
+    says: "They sailed to Lune Island for 3 whole days, for my Grandmother Ama's 80th summer festival! I stayed to look after the islands, and the goats. So you are my very special guest, {name}. Shall I show you around?",
     pose: "pointing",
   },
   {
     match: /\bbenji\b/,
-    says: "Benji came to our island by boat 2 summers ago to learn new languages. He loved it so much that he stayed. Now he is my good friend, and the only one who speaks both English and XYZ.",
+    says: "Ha, Benji! He came by boat 2 summers ago to learn new languages, and he loved it here so much that he stayed. He is so calm, and I am so loud. We are a good team! Do you speak other languages too?",
     pose: "talking",
   },
   {
     match: /\b(how old|your age)\b/,
-    says: "I am 34 summers old! On my island we count our age in summers.",
+    says: "I am 34 summers old! We count our age in summers here, because the sun is our oldest friend. Kiki says I am already an old coconut. How many summers are you?",
     pose: "laughing",
   },
   {
     match: /\b(family|mother|mom|sister|brother|grandfather|grandpa|parents)\b/,
-    says: "My mother Nala weaves our rugs, my little sister Kiki swims faster than anyone, and my grandfather Old Tumo tells the best stories.",
+    says: "Oh, my family! My mother Nala weaves our rugs, my father Koa builds canoes, and my little sister Kiki swims faster than anyone. Old Tumo, my grandfather, tells the best stories. Do you have brothers or sisters?",
     pose: "welcome",
   },
   {
     match: /\b(favou?rite food|like to eat|what do you eat)\b/,
-    says: "Roasted sweet potato with honey! I also love mangoes and coconut bread.",
+    says: "Roasted sweet potato with honey! It is soft and sticky and sweet. I also love mangoes and coconut bread. What is the best food where you live?",
     pose: "laughing",
   },
   {
     match: /\b(every ?day|morning|what do you do)\b/,
-    says: "Every morning I walk the beach, check the canoes, and say hello to the sea turtles.",
+    says: "Every morning I walk the beach, check the canoes, and say hello to the sea turtles. The turtles never say hello back, but I keep trying! What do you do in the morning?",
     pose: "talking",
   },
   {
     match: /\b(language|xyz|teach me|a word)\b/,
-    says: "In my language, the letters of every word are turned around. Here is a word for you: dneirf means friend!",
+    says: "In my language, the letters of every word are turned around! Here is my favorite word: dneirf means friend. And now you are my dneirf, so you have to come back and visit.",
     pose: "laughing",
   },
   {
@@ -222,12 +293,12 @@ export const replies = [
   },
   {
     match: /\b(who are you|your name|who is zazo)\b/,
-    says: "I am Zazo, leader of these islands. Benji is my good friend.",
+    says: "I am Zazo, leader of the Tribezo islands for 5 summers now! Benji is my good friend and my voice for you. And you are my guest, so ask me anything!",
     pose: "talking",
   },
   {
     match: /\bhow are you\b/,
-    says: "I am very happy today, because I have a visitor!",
+    says: "I am so happy today, because I have a visitor! The island has been very quiet with everyone away. How are you, {name}?",
     pose: "laughing",
   },
   {
@@ -242,7 +313,7 @@ export const replies = [
   },
   {
     match: /^(hi|hello|hey|hola|namaste|good (morning|afternoon|evening))\b/,
-    says: "Hello, {name}! It is so good to see you.",
+    says: "Hello, {name}! It is so good to see you. Tell me, what would you like to do first?",
     pose: "welcome",
   },
 ];
@@ -276,7 +347,6 @@ export const tour = [
   },
 ];
 
-// When nothing matches, Zazo takes turns saying these.
 // Questions to suggest in the chat box. Zazo's AI suggests a fitting next
 // question after each answer. These are used at the start, and whenever
 // the AI has no suggestion. Each one is only suggested once.
@@ -296,10 +366,23 @@ export const suggestedQuestions = [
 // These are only used when the AI is not available, so they should fit
 // any question and point the visitor to things Zazo can answer.
 export const fallbackReplies = [
-  { says: "Hmm, the sea is very loud today and I did not catch that. Ask me about my family, my food, or Benji!", pose: "confused" },
-  { says: "That is a good question, {name}. Shall I show you around the island while I think about it?", pose: "talking" },
-  { says: "Benji, can you help me? I think our visitor asked something new. Ask me how old I am, or where my people went!", pose: "laughing" },
-  { says: "I am not sure about that one, friend. But I know every corner of this island. Want to see it?", pose: "welcome" },
+  {
+    says: "Hmm, the sea is very loud today and I did not catch that! Ask me about my family, my food, or Benji. I love talking about all three.",
+    pose: "confused",
+  },
+  {
+    says: "Ooh, that is a good question, {name}. Let me think while we walk. Shall I show you around the island?",
+    pose: "talking",
+  },
+  {
+    says: "Benji, help me! I think our visitor asked something new. Ask me how old I am, or where my people went!",
+    pose: "laughing",
+    benji: "He did not catch that one. Try one of the questions below.",
+  },
+  {
+    says: "I am not sure about that one, my friend. But I know every corner of this island. Want to see it?",
+    pose: "welcome",
+  },
 ];
 
 // ---------- Music ----------

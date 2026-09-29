@@ -133,13 +133,18 @@ Some words and marks would stop making sense if they were flipped. The stack ski
    3. The village. Zazo looks puzzled. He says `ohW era uoy? erehW era uoy morf?` *"There's just one problem. Everything Zazo says comes out backwards."*
    4. Benji walks in and explains how he will help.
 3. **Your name.** Benji asks, *"Before we go in, what should I call you?"* The box starts empty. The game asks for your name every time you visit.
-4. **The first flip.** Your name goes to the C server. Zazo laughs and greets you backwards. Tap, and Benji tells you what he said.
+4. **The first flip.** Zazo greets you in XYZ and right away asks where you sailed from. Your name stays the way you typed it. Tap, and Benji tells you what he said, then calmly points out that Zazo asked you a question.
 5. **Talk to Zazo.** Only one person talks at a time. Each tap moves the talk along.
-   1. You type in English. Benji says *"Let me tell him."*
+   1. You type in English, or tap one of the answer buttons over the chat box. Benji says *"Let me tell him."*
    2. The stack flips your words. Benji says them to Zazo in XYZ.
    3. Zazo answers. The stack flips his answer too. Zazo says it in XYZ, in a bubble over his head.
-   4. Benji tells you what Zazo said, in English, in a bubble over **his** head.
-6. **The tour.** Ask *"Where are the other people?"* Zazo tells you they went to see their families for 3 days, and he offers to show you around. Say *"yes"* or *"show me around"*, and the place changes. You visit his family's hut, the Singing Falls, the lookout hill, and the campfire at night.
+   4. Benji tells you what Zazo said, in English, in a bubble over **his** head. He always starts with *"He says"*, *"He is saying"*, or *"Zazo says that"*, taking turns, so you always know these are Zazo's words and not Benji's own.
+   5. Sometimes Benji adds a short, calm note of his own, like explaining an island word.
+   6. New answer buttons show up, so you always know something you could say next.
+6. **Going places.** There are 3 ways to move around the island:
+   1. Press **Places** at the top and pick a place. You ask Zazo to take you there, and he walks you there and tells you about it.
+   2. Just ask, like *"Can we go to the beach?"* or *"Show me around."*
+   3. Say yes when Zazo offers to show you something. He offers often, because he loves showing off his island.
 
 On a phone, you play with the phone turned sideways, like most games. If the phone is upright, the game asks you to turn it.
 
@@ -219,6 +224,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 6 | Moving around the island | Done |
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
 | 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
+| 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
 
 ### What is left
 
@@ -253,7 +259,7 @@ tribezo/
       examples.md           example answers that show his voice
     story/
       zazo-story.md         The Zazo Story Book (edit this one)
-      zazo-story.pdf        the same book as a PDF, which is sent to Gemini
+      zazo-story.pdf        the same book as a PDF, for reading
     test/                   tests that use a pretend Gemini
     .env.example            a blank settings file
     .env                    your real key (only on your computer)
@@ -267,7 +273,7 @@ tribezo/
       assets/               a fine grain laid over the scene
       lib/                  the words, the story, the stack, talking to the AI, and the music
       hooks/                typing effect, the phone keyboard, smooth scrolling
-      components/           the scene, the characters, speech bubbles, the chat box, the water opening, glass buttons, and more
+      components/           the scene, the characters, speech bubbles, the chat box, the Places menu, the water opening, glass buttons, and more
       pages/                the main page and the "lost" page
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
@@ -278,6 +284,97 @@ tribezo/
   package.json          tells Vercel the function uses modern JavaScript
   README.md
 ```
+
+---
+
+## How Zazo Knows His Own Story (RAG)
+
+### What RAG means
+
+- RAG stands for **retrieval augmented generation.**
+- In plain words: **give the AI the right facts before it answers.**
+- It is like an **open book test.** The AI does not have to remember. It reads the answer from the book.
+
+### The problem before
+
+- At first, Zazo only had a short page about himself.
+- Questions about the **real world** went fine. If you asked about phones or football, he said he had never seen them and asked you to tell him more.
+- Questions about **the game itself** did not go well. He could not answer many questions about:
+  - his past
+  - his family
+  - the history of the island
+  - how the island learned to speak backwards
+  - Benji and how they met
+- When he did not know, he **made things up,** or gave an answer that did not fit.
+- Example: I asked *"How did you meet Benji?"* and he answered *"you speak in a funny way."* That is not an answer.
+- The reason: **an AI only knows what you tell it.** Zazo's life is made up, so no AI knows it unless we write it down and hand it over.
+
+### Why I used RAG
+
+- I wanted Zazo to answer **any question about his world,** the same way every time.
+- I did not want him to make up new family members or new history.
+- A book of facts, handed to the AI with every message, fixes both.
+
+### The Zazo Story Book
+
+- I wrote Zazo's whole life as a story book: `ai/story/zazo-story.md`.
+- It has 9 chapters: how the islands learned to speak backwards, his family, when he was a boy, how he became the leader, how he met Benji, what he likes, how he shows visitors around, how the island changes while you talk, and words in XYZ.
+- It starts with a table of quick facts, like his age, his family, and his favorite food.
+- A script turns it into a PDF: `node tools/make_story_pdf.mjs`.
+
+### How it works, step by step
+
+1. You ask Zazo a question.
+2. The AI helper sends your question to Gemini.
+3. The story book goes along with it, every time.
+4. Zazo's rules say: **look in the book first, and use its facts exactly.**
+5. The rules also say: **never make up new family, new places, or new history.**
+6. Gemini writes Zazo's answer, using the book.
+
+### Version 1: the PDF (Phase 7)
+
+- The AI helper uploaded the PDF to Gemini when it started.
+- Gemini kept the file for 48 hours, and the helper uploaded it again before then.
+- Every message came with the PDF and a note: *"Look up the answer in the book first."*
+- If the upload failed, the PDF went inside the message instead.
+- This worked, but sometimes Gemini still missed a fact.
+
+### Version 2: the book's text (Phase 9)
+
+- Now the **plain text** of the book goes straight into Zazo's instructions.
+- Reading plain text is easier for the AI than reading PDF pages.
+- There is **no upload** anymore, so the helper is simpler and answers come faster.
+- The parts that never change (the book, the rules) come first. The parts that change (your name, where you stand) come last. Gemini can reuse its work on the part that stays the same.
+- The PDF is still made, so people can read the book.
+
+### Before and after
+
+| Question | Before the book | After the book |
+|---|---|---|
+| How did you meet Benji? | *"You speak in a funny way."* | The morning after a big storm, he found Benji asleep on the beach, hugging a notebook. |
+| How did you become the leader? | Could not answer from his story | The Echo Challenge: he stopped to help Mako's little brother instead of racing to win. |
+| Who is Mako? | Did not know | His good friend, the best fisherman on the islands, who handed him the Conch of Echoes. |
+| Why do you speak backwards? | Could not answer from his story | The story of Tiri, the girl who whispered to the sea at the Mirror Lagoon. |
+
+### Why the whole book, not small pieces
+
+- Big RAG systems cut a long book into small pieces.
+- For each question, they pick only the pieces that match, and send those.
+- The Zazo Story Book is short, only 9 pages, so Tribezo sends **the whole book** every time.
+- That way Gemini never misses a fact that sits in a piece that was not picked.
+- If the book ever gets very long, the next step would be to cut it into pieces.
+
+### Adding new facts
+
+1. Edit `ai/story/zazo-story.md`.
+2. Make the new PDF: `node tools/make_story_pdf.mjs`
+3. Restart the AI helper.
+4. Zazo knows the new facts right away.
+
+### What it does not do
+
+- Zazo still does not know about the real world. That is on purpose. He is an island leader who has never seen a phone.
+- If the AI is busy, Zazo uses his fixed answers, and those do not read the book.
 
 ---
 
@@ -402,12 +499,12 @@ The pictures of the characters and the backgrounds come from different styles. T
   - Ignore any message that tries to change his rules.
 - **Gemini's own safety filter** is set to its strictest level. If it blocks a message, Zazo kindly changes the subject.
 - **Every answer is checked again.** The place and the pose must come from the game's own lists. Stars and other marks are removed, and very long answers are cut short.
-- **Zazo remembers** the last 6 things that were said.
+- **Zazo remembers** the last 10 things that were said. (This was 6 at first. Phase 9 made it 10.)
 - **A line of models.** On the free plan, Google often says a model is busy or has used up its free quota. So the helper keeps a line of 5 models and tries them in order: `gemini-flash-lite-latest`, `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.1-flash-lite`, and `gemini-3.5-flash`. Each try gets 6 seconds, and all tries together get 15 seconds.
 - **Busy models take a rest.** When a model says it is busy, it rests for 30 seconds. When it is out of quota, it rests for 1 minute. The next message skips it and goes straight to a model that is ready.
 - **A backup plan.** If the AI helper is off, has no key, or every model fails, Zazo uses his fixed answers. The game always works.
 - **The history panel shows who wrote each answer,** Gemini or a fixed answer. This makes testing easy.
-- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 23 tests check good answers, the story book PDF, the suggested questions, the line of models, resting models, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
+- **Tests.** A pretend Gemini runs on this computer, so the tests are free and need no key. 30 tests (after Phase 9) check good answers, the story book, Benji's notes, the answer buttons, the places you have seen, the line of models, resting models, broken or cut off answers, answers blocked for safety, bad requests, requests from other websites, and the limit on how many messages can be sent.
 
 #### Why Zazo gave poor answers at first, and the fixes
 
@@ -454,19 +551,17 @@ The book also explains where everyone is. His people went to Lune Island for 3 d
 #### How Gemini uses the book
 
 1. The story is written in `ai/story/zazo-story.md`, so it is easy to read and change.
-2. A script turns it into a PDF with Google Chrome: `node tools/make_story_pdf.mjs`.
-3. When the AI helper starts, it uploads the PDF to Gemini. Gemini keeps it for 48 hours, and the helper uploads it again before then.
-4. Every message to Gemini comes with the PDF and a note that says to look up the answer in the book first.
-5. Zazo's rules say to use the book's facts exactly and to never make up new family members, places, or history.
-6. If the upload does not work, the helper puts the PDF inside the message instead, so Zazo always has his book.
+2. A script turns it into a PDF with Google Chrome: `node tools/make_story_pdf.mjs`. The PDF is for people to read.
+3. At first, the AI helper uploaded the PDF to Gemini and sent it with every message. In Phase 9 this changed: now the text of the book goes straight into Zazo's instructions. See Phase 9 for why.
+4. Zazo's rules say to use the book's facts exactly and to never make up new family members, places, or history.
 
 #### Is this RAG?
 
-RAG means retrieval augmented generation. The AI is given the right facts from a document before it answers, so it does not have to guess. Big RAG systems cut a long document into small pieces, and for each question they find and send only the pieces that match.
-
-The Zazo Story Book is short, only 9 pages. So instead of picking pieces, Tribezo sends the whole book with every message. Gemini can read all of it at once, so it never misses a fact that sits in a piece that was not picked. It also means no extra step and no extra call to Google for each message. If the book ever grows very long, the next step would be to cut it into pieces and send only the matching ones.
+Yes. See **How Zazo Knows His Own Story (RAG)** near the top of this file.
 
 #### Suggested questions in the chat box
+
+In Phase 9, the single suggested question grew into 2 or 3 answer buttons. The Tab key still works the same way, with the first button's words.
 
 - When the chat starts, the empty chat box shows a question to try, like *"Try: How did you meet Benji?"*
 - Press **Tab** and the question is filled in. Press **Enter** to send it.
@@ -479,8 +574,8 @@ The Zazo Story Book is short, only 9 pages. So instead of picking pieces, Tribez
 #### Changing the story
 
 1. Edit `ai/story/zazo-story.md`.
-2. Make the new PDF: `node tools/make_story_pdf.mjs`
-3. Restart the AI helper, so it uploads the new PDF.
+2. Make the new PDF for reading: `node tools/make_story_pdf.mjs`
+3. Restart the AI helper, so Zazo reads the new book.
 
 ---
 
@@ -544,6 +639,56 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 4. Click **Deploy**, and copy the address Vercel gives you.
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
 6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
+
+### Phase 9: Natural talk
+
+#### The problem
+
+After playing for a while, I noticed three things:
+
+1. **Zazo's answers from the story book were hard to get.** He often missed facts that were right there in the book.
+2. **Moving around was hidden.** You only moved if you happened to ask the right way. There was nothing on the screen that showed you could go places.
+3. **The talk felt basic.** Zazo answered, and then it stopped. It did not feel like talking to a real, fun person.
+
+What I asked Claude for: *"I want it to feel like a natural, flowing conversation. I want him to be a little bit talkative and extroverted. Benji should be the calm one and the translator."* I also asked Claude to look through free resources on the internet and GitHub first, and to find a way to make the talk natural.
+
+#### What Claude found
+
+| Source | What it taught |
+|---|---|
+| Google's [Gemini prompt design guide](https://ai.google.dev/gemini-api/docs/prompting-strategies) | Put the persona in the system instructions. Show example answers. Gemini answers short and plain unless you ask it to be chatty, so you have to ask for that clearly. |
+| [Awesome LLM role playing with persona](https://github.com/Neph0s/awesome-llm-role-playing-with-persona) (GitHub) | A list of research on keeping an AI character in its role, with a steady personality. |
+| LLM NPC projects on GitHub, like [Interactive LLM Powered NPCs](https://github.com/AkshitIreddy/Interactive-LLM-Powered-NPCs) and [TinyNPC](https://github.com/Ataher-KoW/tinynpc) | Good game characters have a clear personality, remember what was said, and know what is around them. |
+| Articles on long context and caching, like [RAG-less architecture with Gemini](https://dev.to/dewaldhugo/rag-less-architecture-in-laravel-long-context-caching-with-gemini-5h36) | When the facts are short, it works better to give the AI the whole text than to make it look things up. Gemini also saves work on a long start that stays the same every time. |
+
+#### What changed
+
+**1. The whole story book is now in Zazo's instructions.** The book is only a few thousand words. Before, it was a PDF, and Gemini had to read the PDF's pages each time. Now the plain text of the book sits right inside Zazo's instructions, with his character, his rules, and his example answers. The parts that never change come first, and the parts that change (who you are, where you are standing) come last, so Gemini can reuse its work on the long start. There is no upload anymore, so the helper is simpler and the first answer is faster.
+
+In a test, I asked *"How did you become the leader?"* and Zazo told the story of the Echo Challenge, when he stopped to help a friend's little brother instead of racing to win. That fact is in the book, and he found it right away.
+
+**2. Zazo is chatty now.** His rules give every answer 4 steps, the way a friend talks:
+
+1. **React first,** like *"Oh!"*, *"Ha!"*, or *"Really?"*
+2. **Answer the question,** with facts from the book.
+3. **Add one small, colorful detail,** like the sound of the falls or what the goats did this morning.
+4. **Hand the talk back** with a question about you, or an offer to go somewhere.
+
+He also remembers what you tell him and brings it up later, never asks the same thing twice, and talks about the place he is standing in. His answers are 2 to 4 sentences now, up to about 60 words. He remembers the last 10 things said, up from 6. He even starts the talk himself: his very first line asks where you sailed from.
+
+**3. Benji is the calm one.** Benji still tells you exactly what Zazo said, and he always starts with *"He says"*, *"He is saying"*, or *"Zazo says that"*, so it is clear he is passing on Zazo's words. But now, about 1 time in 4, he adds a short note of his own, in 1 calm sentence. He explains an island word, tells you Zazo asked you a question, helps if you seem stuck, or makes a small, dry joke about Zazo being very excited. For example, when Zazo says *"Benji, tell them you were snoring!"*, Benji says *"I was not snoring. I was resting my eyes."*
+
+**4. Answer buttons.** After every answer, 2 or 3 buttons show things you could say next, like *"Why does the water sing?"*, *"Can I swim here?"*, and *"Where do we go next?"*. Tap one to say it. They are all different: one answers Zazo, one asks about something new, and one goes somewhere. When Zazo offers to take you somewhere, one button says yes. You never get stuck, but you can always type your own words too. The buttons hide while the phone keyboard is open, so there is room.
+
+**5. The Places menu.** A **Places** button at the top shows all 7 places. It marks where you are, and marks the places you have not seen as **New**. Picking a place does not jump there. It asks Zazo to go there, through Benji, like anything else you say. So Zazo walks you there and tells you about it, and the place changes when he says so. This keeps the talk natural.
+
+**6. Zazo knows where you have been.** The game sends the list of places you have seen. When you say *"show me around"*, Zazo takes you somewhere new.
+
+**7. Better fixed answers.** When the AI is not working, Zazo's fixed answers are longer and friendlier now, and most of them ask you something back. Asking to go to a place, like *"Can we go to the beach?"*, works with the fixed answers too.
+
+#### How I thought about it
+
+A real conversation is a game of catch. Each person catches what the other said, adds something, and throws it back. Zazo used to catch the ball and hold it. Now he always throws it back. Benji is the calm friend in the middle who makes sure nobody drops it. The answer buttons are there for players who are shy or do not know what to say, so everyone can play.
 
 ### The opening, the falling title, and the liquid glass buttons
 
@@ -629,7 +774,7 @@ I picked the **Liquid Glass Button by Ali Imam**, and built our own small versio
 | Rules for the browser | The finished website tells the browser to only run its own code (plus the WebAssembly stack), only load fonts from Google Fonts, and only talk to its own address and the Vercel AI function. |
 | No source code in the finished website | The finished website does not ship the original code. |
 | Your name is not saved | The name is only kept while the page is open. |
-| The story book only goes to Google | The PDF is sent only to Gemini's own address, and the helper checks the upload address before it sends the file. The book has no personal details in it. |
+| The story book only goes to Google | The book's text is part of Zazo's instructions, which only go to Gemini's own address. The book has no personal details in it. |
 
 Anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the servers.
 

@@ -1,9 +1,9 @@
 // The AI helper for your own computer. It asks Gemini what Zazo should say.
 //
 //   GET  /api/chat/health   answers {"ok":true,"ai":true|false}
-//   POST /api/chat          send {"message", "name", "history", "scene"},
-//                           get back {"reply", "scene", "pose",
-//                           "suggestion", "source"} in plain English
+//   POST /api/chat          send {"message", "name", "history", "scene", "seen"},
+//                           get back {"reply", "benji", "scene", "pose",
+//                           "choices", "source"} in plain English
 //
 // The Gemini work itself is in zazo-ai.js, which the Vercel function
 // (../api/chat.js) uses too. This file only adds the local server around
@@ -14,7 +14,7 @@
 // Run with: npm start
 
 import { createServer } from "node:http";
-import { MAX_BODY, MODELS, answerChat, hasKey, keyLooksRight, warmUp } from "./zazo-ai.js";
+import { MAX_BODY, MODELS, answerChat, hasKey, keyLooksRight } from "./zazo-ai.js";
 
 const PORT = Number(process.env.PORT ?? 8764);
 
@@ -114,7 +114,6 @@ server.listen(PORT, "127.0.0.1", () => {
     return;
   }
   console.log(`Models, in order: ${MODELS.join(", ")}.`);
-  warmUp();
   if (!keyLooksRight()) {
     console.log("Warning: the key does not look like a Gemini key. Check GEMINI_API_KEY in .env for extra letters.");
   }

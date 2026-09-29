@@ -6,7 +6,7 @@
   "functions": {
     "api/chat.js": {
       "maxDuration": 25,
-      "includeFiles": "ai/{zazo-ai.js,prompt.js,zazo/**,story/zazo-story.pdf}"
+      "includeFiles": "ai/{zazo-ai.js,prompt.js,zazo/**,story/zazo-story.md}"
     }
   },
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
