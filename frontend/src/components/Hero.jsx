@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { hero } from "../lib/content.js";
+import GlassButton from "./GlassButton.jsx";
 
 const TITLE = "Tribezo";
 
@@ -48,9 +49,9 @@ export default function Hero({ onBegin }) {
         transition={{ delay: 2, duration: 0.6 }}
         className="mt-8 short:mt-4"
       >
-        <button type="button" onClick={onBegin} autoFocus className="glass-button rounded-full px-10 py-3.5 font-display text-lg font-semibold short:py-2.5">
+        <GlassButton onClick={onBegin} autoFocus className="rounded-full px-10 py-3.5 font-display text-lg font-semibold short:py-2.5">
           {hero.begin}
-        </button>
+        </GlassButton>
       </motion.div>
     </div>
   );

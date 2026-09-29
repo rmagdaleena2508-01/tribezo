@@ -247,7 +247,7 @@ tribezo/
       assets/               a fine grain laid over the scene
       lib/                  the words, the story, the stack, talking to the AI, and the music
       hooks/                typing effect, the phone keyboard, smooth scrolling
-      components/           the scene, the characters, speech bubbles, the chat box, and more
+      components/           the scene, the characters, speech bubbles, the chat box, the pixel opening, glass buttons, and more
       pages/                the main page and the "lost" page
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
@@ -523,6 +523,36 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 4. Click **Deploy**, and copy the address Vercel gives you.
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
 6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
+
+### The pixel opening and the liquid glass buttons
+
+#### The pixel opening
+
+When someone opens the game, from the GitHub Pages link or the Vercel link, the first picture does not just appear.
+
+1. The mountain meadow shows up as 4 giant blocks.
+2. The blocks get smaller in 8 quick steps: 4, 7, 12, 20, 34, 56, 96, and 160 blocks across. This fits the island, which is built from blocks too.
+3. When the picture is sharp, it fades into the real scene.
+4. Only then does the title start its animation, flipping from `ozebirT` to `Tribezo`.
+
+The whole opening takes about one and a half seconds. It is drawn on a canvas: the picture is shrunk to a few blocks, then stretched back up with no smoothing, so every block keeps sharp edges. People who ask their device for less motion skip it. If the picture cannot load, the game starts right away.
+
+#### The liquid glass buttons
+
+I looked at glass button libraries and articles to pick the best one:
+
+| Option | What I found |
+|---|---|
+| Liquid Glass Button by Ali Imam (21st.dev) | The most saved button on 21st.dev. An SVG filter bends the scene behind the button, like thick glass. |
+| `liquid-glass-web-react` | Real bending that works in every browser, but it bends the whole scene underneath, which is too heavy for a full screen picture that moves. |
+| Glass UI kits (Glass UI, shadcn glass, GlassyUI) | Frosted glass only, and they bring many parts we do not need. |
+
+I picked the **Liquid Glass Button by Ali Imam**, and built our own small version of it (`GlassButton.jsx`), so there is no extra package.
+
+- In Chrome and Edge, the button bends the scene behind it a little, then frosts it, with a bright rim like the edge of real glass.
+- Safari and Firefox cannot bend what is behind a button, so they show the frosted glass we had before.
+- The bending is only used on small buttons: Begin, Tap to continue, and the buttons at the top. Bending costs a lot of drawing work over big areas, so the big chat box keeps the frosted glass.
+- People who ask their device for less see through effects (reduce transparency) get solid buttons that are easy to read.
 
 ## Keeping It Safe
 

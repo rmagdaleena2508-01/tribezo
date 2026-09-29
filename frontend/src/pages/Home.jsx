@@ -9,6 +9,8 @@ import SpeechBubble from "../components/SpeechBubble.jsx";
 import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
+import PixelIntro from "../components/PixelIntro.jsx";
+import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
 import { askZazo } from "../lib/api.js";
@@ -59,6 +61,11 @@ export default function Home() {
   const [muted, setMutedState] = useState(isMuted);
   const historyButton = useRef(null);
   const keyboardOpen = useKeyboard();
+
+  // The pixel opening plays once, when the page first opens. People who
+  // ask their device for less motion skip it.
+  const [introDone, setIntroDone] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const endIntro = useCallback(() => setIntroDone(true), []);
 
   // Where Zazo's tour is, and which fallback answer is next.
   const memory = useRef({ tourStop: 0, fallback: 0 });
@@ -405,31 +412,28 @@ export default function Home() {
 
         <div className="flex items-center gap-2">
           {hasMusic && (
-            <button
-              type="button"
+            <GlassButton
               onClick={toggleMute}
               aria-label={muted ? "Turn music on" : "Turn music off"}
               aria-pressed={muted}
-              className="glass-button grid h-11 w-11 place-items-center rounded-full short:h-9 short:w-9"
+              className="h-11 w-11 rounded-full short:h-9 short:w-9"
             >
               {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            </button>
+            </GlassButton>
           )}
           {stage === "chat" && (
             <>
-              <button
-                type="button"
+              <GlassButton
                 onClick={startStory}
                 aria-label="Watch the story again"
-                className="glass-button grid h-11 w-11 place-items-center rounded-full short:h-9 short:w-9"
+                className="h-11 w-11 rounded-full short:h-9 short:w-9"
               >
                 <RotateCcw size={18} />
-              </button>
-              <button
+              </GlassButton>
+              <GlassButton
                 ref={historyButton}
-                type="button"
                 onClick={() => setHistoryOpen(true)}
-                className="glass-button flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold short:h-9"
+                className="h-11 rounded-full px-4 text-sm font-bold short:h-9"
               >
                 <ScrollText size={18} />
                 <span>History</span>
@@ -438,13 +442,15 @@ export default function Home() {
                     {history.length}
                   </span>
                 )}
-              </button>
+              </GlassButton>
             </>
           )}
         </div>
       </header>
 
-      {stage === "hero" && <Hero onBegin={begin} />}
+      {stage === "hero" && introDone && <Hero onBegin={begin} />}
+      {!introDone && <PixelIntro src={scenes[hero.scene].src} onDone={endIntro} />}
+      <LiquidGlassFilter />
 
       {/* The glass panel at the bottom: the story card, the name box, a
           Continue button, or the chat box. When the phone keyboard is open,
@@ -460,9 +466,9 @@ export default function Home() {
           {stage === "name" && <NameScreen onDone={onName} />}
           {stage === "chat" &&
             (moreLines ? (
-              <button type="button" onClick={tap} autoFocus className="glass-button mx-auto block rounded-full px-8 py-3 font-display font-semibold short:py-2">
+              <GlassButton onClick={tap} autoFocus className="mx-auto w-fit rounded-full px-8 py-3 font-display font-semibold short:py-2">
                 Tap to continue
-              </button>
+              </GlassButton>
             ) : (
               <ChatBox onSend={sendMessage} disabled={busy || (line !== null && !lineDone)} suggestion={suggestion} />
             ))}
