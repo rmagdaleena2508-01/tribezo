@@ -9,7 +9,7 @@ import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const SERVER = fileURLToPath(new URL("../server.js", import.meta.url));
+const SERVER = fileURLToPath(new URL("../local-server.js", import.meta.url));
 const FAKE_PORT = 18763;
 
 // How the fake Gemini behaves, per model. Each value is a function that

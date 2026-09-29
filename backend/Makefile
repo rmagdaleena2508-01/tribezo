@@ -4,7 +4,7 @@
 #   make test-server  start the server and check every endpoint
 #   make run          start the server on port 8765
 #   make demo         try reversing text by typing it in
-#   make wasm         build the stack for web browsers (frontend/public/stack.wasm)
+#   make wasm         build the stack for web browsers (public/stack.wasm)
 #   make test-wasm    check the browser version flips text the same way
 #   make clean        delete everything that was built
 
@@ -63,7 +63,7 @@ $(BUILD)/stack.wasm: wasm/shim.c $(CORE) $(HEADERS) | $(BUILD)
 		-Wl,--no-entry -fuse-ld=$(WASM_LD) -o $@ wasm/shim.c $(CORE)
 
 wasm: $(BUILD)/stack.wasm
-	cp $(BUILD)/stack.wasm ../frontend/public/stack.wasm
+	cp $(BUILD)/stack.wasm ../public/stack.wasm
 
 test-wasm: $(BUILD)/stack.wasm
 	node tests/test_wasm.mjs

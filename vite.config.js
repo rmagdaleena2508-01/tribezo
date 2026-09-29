@@ -10,7 +10,7 @@ const BASE = process.env.VITE_BASE || "/";
 // the Vercel address.
 const API_BASE = process.env.VITE_API_BASE || "";
 
-// The AI helper on your computer (ai/server.js). The words are flipped in
+// The AI helper on your computer (ai/local-server.js). The words are flipped in
 // the browser now, so the C server is not needed to play.
 const AI_HELPER = "http://127.0.0.1:8764";
 const proxy = {

@@ -241,6 +241,18 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 
 ```
 tribezo/
+  index.html            the page the website starts from
+  src/                  the website's code
+    assets/               a fine grain laid over the scene
+    lib/                  the words, the story, the stack, talking to the AI, saving, and the music
+    hooks/                typing effect, the phone keyboard, smooth scrolling
+    components/           the scene, the characters, speech bubbles, the chat box, the Places menu, the water opening, glass buttons, and more
+    pages/                the main page and the "lost" page
+  public/               pictures and files the website uses as they are
+    characters/           Zazo's and Benji's poses
+    scenes/               the 8 backgrounds
+    intro/icon.webp       my icon for the opening
+    stack.wasm            the C stack, built for web browsers
   backend/              the C part
     src/
       stack.c / stack.h     the stack: push, pop, peek, is_empty
@@ -254,7 +266,7 @@ tribezo/
     chat.js               the AI helper as a Vercel function, with limits for the public
   ai/                   the AI helper
     zazo-ai.js              asks Gemini what Zazo says and checks every answer
-    server.js               runs the AI helper on your own computer
+    local-server.js         runs the AI helper on your own computer
     prompt.js               puts Zazo's files together for Gemini
     zazo/
       character.md          a short summary of who Zazo is
@@ -266,25 +278,14 @@ tribezo/
     test/                   tests that use a pretend Gemini
     .env.example            a blank settings file
     .env                    your real key (only on your computer)
-  frontend/             the website
-    public/
-      characters/           Zazo's and Benji's poses
-      scenes/               the 8 backgrounds
-      intro/icon.webp       my icon for the opening
-      stack.wasm            the C stack, built for web browsers
-    src/
-      assets/               a fine grain laid over the scene
-      lib/                  the words, the story, the stack, talking to the AI, and the music
-      hooks/                typing effect, the phone keyboard, smooth scrolling
-      components/           the scene, the characters, speech bubbles, the chat box, the Places menu, the water opening, glass buttons, and more
-      pages/                the main page and the "lost" page
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
     make_story_pdf.mjs    turns the story book into a PDF
   .github/workflows/
     pages.yml             puts the website on GitHub Pages after every push
+  package.json          the website's packages, and commands like npm run dev and npm run ai
+  vite.config.js        settings for building the website
   vercel.json           settings for Vercel
-  package.json          tells Vercel the function uses modern JavaScript
   README.md
 ```
 
@@ -600,7 +601,7 @@ The same `stack.c` and `reverse.c` are built a second time as **WebAssembly**. W
 - `backend/wasm/shim.c` gives the C code the few pieces of the C library it needs, like `malloc` and `strlen`, because a browser does not have a C library.
 - Memory works like a notepad. Every message starts on a clean page, which keeps it simple.
 - `make wasm` builds `stack.wasm` (only about 3.6 KB) and puts it in the website.
-- `frontend/src/lib/stack.js` loads it and calls it, the same way the website used to call the C server.
+- `src/lib/stack.js` loads it and calls it, the same way the website used to call the C server.
 - `make test-wasm` checks that the browser version flips every test sentence exactly like the C version.
 
 Now the words are flipped right on the player's own device. There is no waiting for a server, and the C server is not needed to play. It is still in the project, with all its tests, for learning and for class.
@@ -609,7 +610,7 @@ Building it needs `clang` (which comes with the Mac) and the WebAssembly linker:
 
 #### The AI helper is a Vercel function
 
-- The Gemini part of the AI helper moved into `ai/zazo-ai.js`. Both the helper on my computer (`ai/server.js`) and the Vercel function (`api/chat.js`) use it, so they always act the same way.
+- The Gemini part of the AI helper moved into `ai/zazo-ai.js`. Both the helper on my computer (`ai/local-server.js`) and the Vercel function (`api/chat.js`) use it, so they always act the same way.
 - On Vercel, the Gemini key is saved in the project settings. It is never in the code, on GitHub, or in the website.
 
 #### Guards for the public
@@ -637,7 +638,7 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 #### Connecting Vercel (only once)
 
 1. Go to [vercel.com](https://vercel.com), sign in with GitHub, and click **Add New**, then **Project**.
-2. Pick the `tribezo` repository and click **Import**. If Vercel asks for a **Root Directory**, pick **tribezo (root)**, not `frontend` or `ai`. Leave the other settings as they are. `vercel.json` already tells Vercel how to build.
+2. Pick the `tribezo` repository and click **Import**. If Vercel asks for a **Root Directory**, pick **tribezo (root)**. Leave the other settings as they are. `vercel.json` already tells Vercel how to build.
 3. Before you click **Deploy**, open **Environment Variables** and add `GEMINI_API_KEY` with your key. Use a key that has billing turned off.
 4. Click **Deploy**, and copy the address Vercel gives you.
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
@@ -645,13 +646,24 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 
 #### Why the Deploy button was missing at first
 
-- Vercel looks at each folder to guess what kind of app it is.
-- It found a Vite website in `frontend/` and a Node app in `ai/`.
-- The top folder had no app in it, so Vercel did not show **Deploy** for it.
-- My portfolio has the Vite website right at the top, so it deployed straight away.
-- The fix: the top `package.json` now lists Vite, and `vercel.json` says `"framework": "vite"`.
-- Now Vercel sees a Vite website at the top, and **Deploy** shows up, like my portfolio.
-- `vercel.json` still builds the real website inside `frontend/`, and the AI function in `api/` comes along with it.
+- My portfolio deployed to Vercel with one click. Tribezo did not show a **Deploy** button.
+- Vercel looks through the folders to find apps. It found **3 apps** in Tribezo:
+  - a Vite website in `frontend/`
+  - a Node server in `ai/` (because of `ai/package.json` and a file called `server.js`)
+  - the top folder
+- When the top folder has other apps inside it, Vercel wants a special "services" setup, so it hid the Deploy button.
+- My portfolio has only **1 app**, right at the top. That is why it just worked.
+
+**The fix: make Tribezo 1 app, like my portfolio.**
+
+- The website moved from `frontend/` to the top folder: `index.html`, `src/`, `public/`, and the settings files.
+- The two `package.json` files became one, at the top. It has the website's packages and commands for everything:
+  - `npm run dev` starts the website
+  - `npm run ai` starts the AI helper
+  - `npm run test:ai` runs the AI tests
+- `ai/server.js` is now `ai/local-server.js`, so Vercel does not think it is a separate server app.
+- I checked with Vercel's own detection code. Before: 3 apps (`ai`, `frontend`, and the top). After: **1 app**, the top folder.
+- The C code, the AI code, and the Vercel function did not change. Only where the website's files live changed.
 
 ### Phase 9: Natural talk
 
@@ -773,7 +785,7 @@ What I asked for: keep the chat after a refresh, but only on the player's own de
 - **Only what the game needs is saved.** Never keys or passwords.
 - **Saved text is shown as plain text,** so nobody can sneak code into the page through storage.
 
-**Where the code is:** `frontend/src/lib/saved.js`
+**Where the code is:** `src/lib/saved.js`
 
 ### The opening, the falling title, and the liquid glass buttons
 
@@ -891,10 +903,14 @@ Do this in the Terminal on your own computer. **Never** put the key on the GitHu
    ```
 
    It should print a line that ends with `.env`. If it prints nothing, stop and do not commit anything.
-6. Start the AI helper.
+6. Go back to the top folder and start the AI helper.
 
    ```bash
-   npm start
+   cd ..
+   ```
+
+   ```bash
+   npm run ai
    ```
 
    It should say which Gemini models it is using. If it says it found no key, or that the key does not look like a Gemini key, check step 4.
@@ -911,7 +927,7 @@ You need a C compiler and `make`. On a Mac, this command gets both.
 xcode-select --install
 ```
 
-You also need [Node.js](https://nodejs.org) version 22.9 or newer.
+You also need [Node.js](https://nodejs.org) version 22.
 
 ### Run the tests
 
@@ -923,26 +939,28 @@ make test-wasm
 ```
 
 ```bash
-cd ai
-npm test
+npm run test:ai
 ```
 
 ### Start the game
 
 The words are flipped in the browser now, so the C server is not needed to play. Use two Terminal windows.
 
+Run these from the top `tribezo` folder.
+
 1. Start the AI helper. This step is optional. Without it, Zazo uses his fixed answers. Set up the Gemini key first.
 
    ```bash
-   cd ai
-   npm start
+   npm run ai
    ```
 
 2. Start the website.
 
    ```bash
-   cd frontend
    npm install
+   ```
+
+   ```bash
    npm run dev
    ```
 
@@ -995,8 +1013,10 @@ Calonis: olleh, dlrow!
 This version has all the safety rules turned on. Keep the AI helper running, then run these.
 
 ```bash
-cd frontend
 npm run build
+```
+
+```bash
 npm run preview
 ```
 

@@ -31,10 +31,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Build the website
-        working-directory: frontend
         env:
           VITE_BASE: /tribezo/
           VITE_API_BASE: ${{ vars.TRIBEZO_API_BASE }}
@@ -47,7 +46,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist
+          path: dist
 
   deploy:
     needs: build

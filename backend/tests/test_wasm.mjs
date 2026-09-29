@@ -2,7 +2,7 @@
 // text exactly like the C version. Run with: make test-wasm
 
 import { readFileSync } from "node:fs";
-import { flip } from "../../frontend/src/lib/stack.js";
+import { flip } from "../../src/lib/stack.js";
 
 const { instance } = await WebAssembly.instantiate(readFileSync(new URL("../build/stack.wasm", import.meta.url)));
 const wasm = instance.exports;

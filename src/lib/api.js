@@ -2,7 +2,7 @@
 //
 // Flipping words happens in the browser, with the C stack compiled to
 // WebAssembly (see stack.js). Only Zazo's AI answers need a server:
-//   on your computer, Vite passes /api/chat to the helper in ai/server.js
+//   on your computer, Vite passes /api/chat to the helper in ai/local-server.js
 //   on Vercel, /api/chat is the function in api/chat.js
 //   on GitHub Pages, VITE_API_BASE points at the Vercel address
 

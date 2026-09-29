@@ -1,7 +1,7 @@
 // The AI helper as a Vercel function, for the website online.
 //
 //   GET  /api/chat   answers {"ok":true,"ai":true|false}
-//   POST /api/chat   the same as the helper on your computer (ai/server.js)
+//   POST /api/chat   the same as the helper on your computer (ai/local-server.js)
 //
 // The Gemini work is shared with the local helper, in ai/zazo-ai.js.
 // The key is set in the Vercel project settings as GEMINI_API_KEY.

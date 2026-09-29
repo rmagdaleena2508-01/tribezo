@@ -1,9 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "cd frontend && npm ci",
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
   "functions": {
     "api/chat.js": {
       "maxDuration": 25,

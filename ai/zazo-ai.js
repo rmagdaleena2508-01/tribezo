@@ -1,5 +1,5 @@
 // Everything that talks to Gemini for Zazo, shared by two places:
-//   server.js      the helper you run on your own computer (npm start)
+//   local-server.js  the helper you run on your own computer (npm run ai)
 //   ../api/chat.js the same thing as a Vercel function, for the website online
 //
 // Who Zazo is, the rules he follows, and his whole life story (the story

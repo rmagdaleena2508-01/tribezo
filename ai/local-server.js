@@ -11,7 +11,7 @@
 //
 // The key is read from the .env file in this folder.
 //
-// Run with: npm start
+// Run from the top folder with: npm run ai
 
 import { createServer } from "node:http";
 import { MAX_BODY, MODELS, answerChat, hasKey, keyLooksRight } from "./zazo-ai.js";
