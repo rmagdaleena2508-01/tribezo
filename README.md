@@ -524,18 +524,17 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
 6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
 
-### The pixel opening and the liquid glass buttons
+### The opening and the liquid glass buttons
 
-#### The pixel opening
+#### The opening
 
-When someone opens the game, from the GitHub Pages link or the Vercel link, the first picture does not just appear.
+When someone opens the game, from the GitHub Pages link or the Vercel link, it starts the same way as my portfolio, and then turns into pixels.
 
-1. The mountain meadow shows up as 4 giant blocks.
-2. The blocks get smaller in 8 quick steps: 4, 7, 12, 20, 34, 56, 96, and 160 blocks across. This fits the island, which is built from blocks too.
-3. When the picture is sharp, it fades into the real scene.
-4. Only then does the title start its animation, flipping from `ozebirT` to `Tribezo`.
+1. **A starry night sky.** About 180 stars twinkle, one shooting star flies across the top, and a small line fades in: *"a small island, far past the edge of every map"*. This part is the same as the opening of my portfolio.
+2. **The sky breaks into pixels, from the top to the bottom.** The screen is cut into square blocks, about 48 across. Row by row, starting at the top, each block first turns into one pixel of the island picture, then clears, so the real island shows through. The blocks in a row start a tiny bit apart, so the edge looks natural. This fits the island, which is built from blocks too.
+3. **Then the title starts.** Only after the last row clears does the title flip from `ozebirT` to `Tribezo`.
 
-The whole opening takes about one and a half seconds. It is drawn on a canvas: the picture is shrunk to a few blocks, then stretched back up with no smoothing, so every block keeps sharp edges. People who ask their device for less motion skip it. If the picture cannot load, the game starts right away.
+The sky stays for 1.8 seconds, and the pixel wipe takes about 2 seconds. Everything is drawn on one canvas. People who ask their device for less motion skip the opening. If the island picture is slow to load, the wipe waits up to 2 seconds for it, then goes on anyway.
 
 #### The liquid glass buttons
 
@@ -547,12 +546,14 @@ I looked at glass button libraries and articles to pick the best one:
 | `liquid-glass-web-react` | Real bending that works in every browser, but it bends the whole scene underneath, which is too heavy for a full screen picture that moves. |
 | Glass UI kits (Glass UI, shadcn glass, GlassyUI) | Frosted glass only, and they bring many parts we do not need. |
 
-I picked the **Liquid Glass Button by Ali Imam**, and built our own small version of it (`GlassButton.jsx`), so there is no extra package.
+I picked the **Liquid Glass Button by Ali Imam**, and built our own small version of it (`GlassButton.jsx`), so there is no extra package. The look follows Apple's Liquid Glass:
 
-- In Chrome and Edge, the button bends the scene behind it a little, then frosts it, with a bright rim like the edge of real glass.
-- Safari and Firefox cannot bend what is behind a button, so they show the frosted glass we had before.
-- The bending is only used on small buttons: Begin, Tap to continue, and the buttons at the top. Bending costs a lot of drawing work over big areas, so the big chat box keeps the frosted glass.
-- People who ask their device for less see through effects (reduce transparency) get solid buttons that are easy to read.
+- **Mostly clear.** Only a light blur, so the island stays easy to see through the buttons and the chat box.
+- **A bright shine** along the top edge, and a curved highlight, like light on real glass.
+- **A soft glow inside the rim,** so the edge looks thick.
+- **Bending.** In Chrome and Edge, small buttons also bend the scene behind them a little. Safari and Firefox cannot bend what is behind a button, so they show the clear glass without bending.
+- The bending is only used on small buttons: Begin, Tap to continue, and the buttons at the top. Bending costs a lot of drawing work over big areas, so the big chat box is clear glass without bending.
+- White text has a soft shadow, so it stays readable on bright parts of the island.
 
 ## Keeping It Safe
 

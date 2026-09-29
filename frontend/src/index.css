@@ -69,36 +69,39 @@
 }
 
 @layer components {
-  /* Liquid glass: see-through, blurs what is behind it, with a soft
-     shine on the top edge. Used for the chat box and the buttons. */
+  /* Liquid glass, in the style of Apple's Liquid Glass: mostly clear, a
+     light blur so the scene stays visible, a bright shine along the top
+     edge, and a soft glow inside the rim, like a piece of thick glass. */
   .glass {
     position: relative;
     isolation: isolate;
     color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08));
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.35);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.65),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.15),
-      0 12px 40px rgba(8, 24, 16, 0.28);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-    backdrop-filter: blur(18px) saturate(180%);
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.18),
+      inset 1px 0 0 rgba(255, 255, 255, 0.25),
+      inset -1px 0 0 rgba(255, 255, 255, 0.12),
+      inset 0 0 24px rgba(255, 255, 255, 0.1),
+      0 10px 30px rgba(0, 0, 0, 0.18);
+    -webkit-backdrop-filter: blur(8px) saturate(170%) brightness(1.04);
+    backdrop-filter: blur(8px) saturate(170%) brightness(1.04);
   }
 
-  /* The shine: a soft light across the top left. */
+  /* The shine: a curved highlight across the top, like light on glass. */
   .glass::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: 1px;
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
-    background: radial-gradient(120% 70% at 15% 0%, rgba(255, 255, 255, 0.5), transparent 60%);
-    opacity: 0.55;
+    background: radial-gradient(140% 60% at 30% -10%, rgba(255, 255, 255, 0.45), transparent 55%);
   }
 
-  /* A light tint underneath, so white text stays easy to read on bright scenes. */
+  /* A very light shade underneath, only so white text stays readable. */
   .glass::after {
     content: "";
     position: absolute;
@@ -106,7 +109,7 @@
     z-index: -2;
     border-radius: inherit;
     pointer-events: none;
-    background: rgba(12, 30, 22, 0.22);
+    background: rgba(10, 20, 15, 0.12);
   }
 
   /* Big titles: warm cream with a soft brown "clay" shadow under them. */
@@ -122,36 +125,14 @@
   }
 
   /* Liquid glass (see GlassButton.jsx). In Chrome and Edge, the SVG
-     filter bends the scene behind the button, then it is frosted.
+     filter bends the scene behind the button, then lightly frosted.
      main.jsx adds "can-bend" to the page only in those browsers. The
      others keep the frosted glass from ".glass". */
   .can-bend .liquid-glass {
-    -webkit-backdrop-filter: url("#liquid-glass") blur(10px) saturate(180%);
-    backdrop-filter: url("#liquid-glass") blur(10px) saturate(180%);
+    -webkit-backdrop-filter: url("#liquid-glass") blur(6px) saturate(170%) brightness(1.04);
+    backdrop-filter: url("#liquid-glass") blur(6px) saturate(170%) brightness(1.04);
   }
 
-  /* A brighter rim and a soft inner glow, like the edge of thick glass. */
-  .liquid-glass {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.75),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.25),
-      inset 0 0 18px rgba(255, 255, 255, 0.12),
-      0 10px 32px rgba(8, 24, 16, 0.3);
-  }
-
-  /* People who ask for less see-through effects get solid buttons. */
-  @media (prefers-reduced-transparency: reduce) {
-    .glass,
-    .glass-button {
-      background: rgba(20, 38, 28, 0.88);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-    .can-bend .liquid-glass {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
 }
 
 /* Lenis needs these to work with the page. */
