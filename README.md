@@ -637,11 +637,21 @@ On GitHub Pages the site lives in a folder called `tribezo`, so every picture an
 #### Connecting Vercel (only once)
 
 1. Go to [vercel.com](https://vercel.com), sign in with GitHub, and click **Add New**, then **Project**.
-2. Pick the `tribezo` repository and click **Import**. Leave the settings as they are. `vercel.json` already tells Vercel how to build.
+2. Pick the `tribezo` repository and click **Import**. If Vercel asks for a **Root Directory**, pick **tribezo (root)**, not `frontend` or `ai`. Leave the other settings as they are. `vercel.json` already tells Vercel how to build.
 3. Before you click **Deploy**, open **Environment Variables** and add `GEMINI_API_KEY` with your key. Use a key that has billing turned off.
 4. Click **Deploy**, and copy the address Vercel gives you.
 5. On GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**, then the **Variables** tab. Add a variable called `TRIBEZO_API_BASE` with the Vercel address, like `https://tribezo.vercel.app`, with no slash at the end.
 6. Open the **Actions** tab and run **GitHub Pages** again, so the GitHub Pages site starts using the Vercel AI.
+
+#### Why the Deploy button was missing at first
+
+- Vercel looks at each folder to guess what kind of app it is.
+- It found a Vite website in `frontend/` and a Node app in `ai/`.
+- The top folder had no app in it, so Vercel did not show **Deploy** for it.
+- My portfolio has the Vite website right at the top, so it deployed straight away.
+- The fix: the top `package.json` now lists Vite, and `vercel.json` says `"framework": "vite"`.
+- Now Vercel sees a Vite website at the top, and **Deploy** shows up, like my portfolio.
+- `vercel.json` still builds the real website inside `frontend/`, and the AI function in `api/` comes along with it.
 
 ### Phase 9: Natural talk
 

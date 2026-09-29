@@ -2,8 +2,14 @@
   "name": "tribezo",
   "private": true,
   "type": "module",
-  "description": "Root settings for Vercel. The website is in frontend/, the AI function is in api/.",
+  "description": "The top of the project, for Vercel. The website is in frontend/, the AI function is in api/, and the AI code is in ai/. Vercel sees vite below and knows this is a Vite website, so it can be deployed straight from the top folder. vercel.json says how to build it.",
+  "scripts": {
+    "build": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "vite": "^8.1.1"
+  },
   "engines": {
-    "node": ">=22.9"
+    "node": "22.x"
   }
 }
