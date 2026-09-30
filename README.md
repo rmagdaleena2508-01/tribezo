@@ -228,6 +228,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
 | 10 | The Calonis name, a fiction notice, going straight to places, and saving the chat on your device | Done |
+| 11 | A video that teaches how the stack works | Done |
 
 ### What is left
 
@@ -252,6 +253,7 @@ tribezo/
     characters/           Zazo's and Benji's poses
     scenes/               the 8 backgrounds
     intro/icon.webp       my icon for the opening
+    video/                the "How the stack works" video and its cover picture
     stack.wasm            the C stack, built for web browsers
   backend/              the C part
     src/
@@ -281,6 +283,8 @@ tribezo/
   tools/
     cut_out_characters.py cut the characters out of their picture sheets
     make_story_pdf.mjs    turns the story book into a PDF
+    make_stack_video.py   makes the "How the stack works" video
+    stack-video-script.md the words of that video
   .github/workflows/
     pages.yml             puts the website on GitHub Pages after every push
   package.json          the website's packages, and commands like npm run dev and npm run ai
@@ -786,6 +790,80 @@ What I asked for: keep the chat after a refresh, but only on the player's own de
 - **Saved text is shown as plain text,** so nobody can sneak code into the page through storage.
 
 **Where the code is:** `src/lib/saved.js`
+
+### Phase 11: A video about the stack
+
+#### Why
+
+- Tribezo is a DSA project, and the stack is the heart of it.
+- People who play should be able to learn how the stack works, right inside the game.
+
+#### Where to find it
+
+- In the chat, press **How the stack works** at the top left, next to the Tribezo name.
+- On small screens, it shows only the play icon.
+- The video opens in a window. Press the **X**, the Escape key, or click outside to close it.
+
+#### What the video teaches (3 minutes 19 seconds)
+
+1. What a stack is: a pile of plates. You can only add or take from the top.
+2. LIFO: last in, first out.
+3. The four jobs: push, pop, peek, and is empty.
+4. Why push and pop are always fast: O(1).
+5. Stacks in real life: the undo button, the back button, the call stack, and checking brackets.
+6. Good sides: simple, fast, and little extra memory.
+7. Bad sides: only the top can be reached, overflow, and underflow.
+8. The stack inside Tribezo: written in C, keeps letters in an array, grows 2 times bigger when full, and runs in the browser as WebAssembly.
+9. Flipping a word: `hello` goes in, `olleh` comes out.
+10. What does not flip: marks, money, numbers, and your name.
+11. When you talk to Benji: your words are flipped into Calonis.
+12. When Zazo answers: the same stack flips his words, and the History panel shows the pushes and pops.
+
+#### Where the facts come from
+
+- GeeksforGeeks: *Stack Data Structure*, and *Applications, Advantages and Disadvantages of Stack*.
+- Programiz: *Stack Data Structure*.
+- The words were then made simple, for a third grade reader.
+
+#### How the video is made
+
+- The whole script is in `tools/stack-video-script.md`.
+- `tools/make_stack_video.py` makes the video by itself:
+  - **Kokoro** reads each sentence out loud, in a young male voice called `am_puck`.
+  - Python draws every frame: the game's backgrounds, Zazo and Benji, plates that move on and off a stack, and captions.
+  - ffmpeg joins the pictures and the voice into one small video, about 6 MB.
+#### The voice
+
+- The first version used the Mac's own voice. It sounded a bit like a robot.
+- I asked for a voice that sounds like a real young man.
+- The pick: **Kokoro**, a free voice model. Anyone can use it, even in a public project (Apache 2.0).
+  - It runs on my own computer. No internet, no key, and no cost.
+  - It is small (82 million parts), so it is fast. It made the whole voice in under a minute.
+  - It has 9 American male voices. `am_puck` sounds young and friendly.
+- I also looked at **Chatterbox**. It sounds very real too, but it needs a strong graphics card and a sample voice to copy, so Kokoro was the better fit.
+- If Kokoro is not set up, the script uses the Mac's voice, so it always works.
+
+#### Remaking the video
+
+Set up Kokoro once, from the top folder:
+
+```bash
+python3 -m venv .venv-tts
+```
+
+```bash
+.venv-tts/bin/pip install kokoro-onnx soundfile pillow
+```
+
+Then put the two model files, `kokoro-v1.0.onnx` and `voices-v1.0.bin`, in `~/.cache/tribezo-tts`. They come from the [kokoro-onnx releases page](https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0).
+
+To change the words, edit the script inside `tools/make_stack_video.py`, then run:
+
+```bash
+.venv-tts/bin/python tools/make_stack_video.py
+```
+
+- The video is saved in `public/video/stack-explained.mp4`.
 
 ### The opening, the falling title, and the liquid glass buttons
 

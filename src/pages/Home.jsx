@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { RotateCcw, ScrollText, Volume2, VolumeX } from "lucide-react";
+import { PlayCircle, RotateCcw, ScrollText, Volume2, VolumeX } from "lucide-react";
 import Scene from "../components/Scene.jsx";
 import NameScreen from "../components/NameScreen.jsx";
 import Hero from "../components/Hero.jsx";
@@ -11,6 +11,7 @@ import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
 import PlacesMenu from "../components/PlacesMenu.jsx";
+import StackVideo from "../components/StackVideo.jsx";
 import WaterIntro from "../components/WaterIntro.jsx";
 import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions, welcomeBack } from "../lib/content.js";
@@ -67,6 +68,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [videoOpen, setVideoOpen] = useState(false); // the "How the stack works" video
+  const videoButton = useRef(null);
   const [muted, setMutedState] = useState(isMuted);
   const historyButton = useRef(null);
   const keyboardOpen = useKeyboard();
@@ -467,6 +470,11 @@ export default function Home() {
     setBusy(false);
   }
 
+  const closeVideo = useCallback(() => {
+    setVideoOpen(false);
+    videoButton.current?.focus();
+  }, []);
+
   const closeHistory = useCallback(() => {
     setHistoryOpen(false);
     historyButton.current?.focus();
@@ -559,9 +567,24 @@ export default function Home() {
 
       <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6 short:py-2">
         {stage !== "hero" ? (
-          <p className="title-text font-display text-3xl font-bold tracking-tight sm:text-4xl short:hidden">
-            Tribezo
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="title-text font-display text-3xl font-bold tracking-tight sm:text-4xl short:hidden">
+              Tribezo
+            </p>
+            {/* A short video for DSA learners: how the stack works in the game */}
+            {stage === "chat" && (
+              <GlassButton
+                ref={videoButton}
+                onClick={() => setVideoOpen(true)}
+                aria-label="Watch: how the stack works"
+                className="h-11 rounded-full px-4 text-sm font-bold short:h-9"
+              >
+                <PlayCircle size={18} />
+                {/* On small screens only the play icon shows, so the top row fits. */}
+                <span className="whitespace-nowrap max-lg:hidden">How the stack works</span>
+              </GlassButton>
+            )}
+          </div>
         ) : (
           <span />
         )}
@@ -644,6 +667,7 @@ export default function Home() {
       </div>
 
       <HistoryPanel open={historyOpen} onClose={closeHistory} entries={history} />
+      <StackVideo open={videoOpen} onClose={closeVideo} />
     </main>
   );
 }

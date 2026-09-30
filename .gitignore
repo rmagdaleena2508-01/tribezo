@@ -13,3 +13,9 @@ dist/
 
 # System files
 .DS_Store
+
+# Python
+__pycache__/
+
+# The local Python setup for making the stack video
+.venv-tts/
