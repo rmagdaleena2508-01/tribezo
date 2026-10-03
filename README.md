@@ -228,7 +228,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
 | 10 | The Calonis name, a fiction notice, going straight to places, and saving the chat on your device | Done |
-| 11 | A video that teaches how the stack works | Done |
+| 11 | A video class that teaches how the stack works, with real game screens | Done |
 
 ### What is left
 
@@ -284,6 +284,8 @@ tribezo/
     cut_out_characters.py cut the characters out of their picture sheets
     make_story_pdf.mjs    turns the story book into a PDF
     make_stack_video.py   makes the "How the stack works" video
+    capture_game_shots.mjs takes real screenshots of the game for the video
+    video-shots/          those screenshots, and zoomed in speech bubbles
     stack-video-script.md the words of that video
   .github/workflows/
     pages.yml             puts the website on GitHub Pages after every push
@@ -804,34 +806,50 @@ What I asked for: keep the chat after a refresh, but only on the player's own de
 - On small screens, it shows only the play icon.
 - The video opens in a window. Press the **X**, the Escape key, or click outside to close it.
 
-#### What the video teaches (3 minutes 19 seconds)
+#### What the video teaches (4 minutes 2 seconds)
 
-1. What a stack is: a pile of plates. You can only add or take from the top.
-2. LIFO: last in, first out.
-3. The four jobs: push, pop, peek, and is empty.
-4. Why push and pop are always fast: O(1).
-5. Stacks in real life: the undo button, the back button, the call stack, and checking brackets.
-6. Good sides: simple, fast, and little extra memory.
-7. Bad sides: only the top can be reached, overflow, and underflow.
-8. The stack inside Tribezo: written in C, keeps letters in an array, grows 2 times bigger when full, and runs in the browser as WebAssembly.
-9. Flipping a word: `hello` goes in, `olleh` comes out.
-10. What does not flip: marks, money, numbers, and your name.
-11. When you talk to Benji: your words are flipped into Calonis.
-12. When Zazo answers: the same stack flips his words, and the History panel shows the pushes and pops.
+1. **What a data structure is:** a way to keep data in order, so a computer can use it fast. Arrays, linked lists, queues, trees, and stacks are all data structures.
+2. **What a stack is:** a linear data structure, like a pile of plates. You add and take only from the top.
+3. **LIFO:** last in, first out.
+4. **The four jobs:** push, pop, peek, and is empty. Push and pop are O(1).
+5. **Stacks in algorithms:** the call stack and recursion, matching brackets, solving math like `3 4 + 5 x`, and depth first search in a maze.
+6. **Stacks in everyday apps:** undo, redo, and the back button in a browser or on a phone.
+7. **Good sides and limits:** simple, fast, little memory. Only the top can be reached, overflow, and underflow.
+8. **Meet Zazo and Benji:** Zazo, the loud and friendly leader who only speaks Calonis, and Benji, the calm translator with a stack.
+9. **What happens when you talk:** real screenshots of the game, step by step. You type, Benji tells Zazo in Calonis, Zazo answers, and Benji translates. Each speech bubble is zoomed in so it can be read.
+10. **Watch one word flip:** `hello` goes in, `olleh` comes out.
+11. **What does not flip:** marks, money, and your name.
+12. **Benji's stack is real code:** C, an array that doubles when full, and WebAssembly in the browser.
+13. **See the stack at work:** the History panel shows 12 pushes and 12 pops for "How old are you?", one of each for every letter.
+
+#### Smooth playing in the game
+
+- **It starts before it is all downloaded.** The video file keeps its index at the very start ("fast start"), so the browser can play it while the rest is still coming.
+- **It warms up early.** When the chat opens, the game quietly loads the first part of the video in the background. Then it starts quickly when you press the button.
+- **A spinner while it waits.** If the internet is slow and the video needs more data, a small spinning circle shows, so it never looks frozen.
+- **It is small.** About 7 MB for 4 minutes, so it plays well even on a phone.
+- **Tested in Chrome:** the video started playing in about 1.4 seconds, and jumping to 3:20 took about half a second, with no errors.
 
 #### Where the facts come from
 
-- GeeksforGeeks: *Stack Data Structure*, and *Applications, Advantages and Disadvantages of Stack*.
-- Programiz: *Stack Data Structure*.
+- GeeksforGeeks: *Stack Data Structure*, and *Applications, Advantages and Disadvantages of Stack* (function calls, recursion, expression evaluation, bracket checking, memory).
+- Programiz: *Stack Data Structure* (push, pop, peek, is empty, O(1), reversing a word).
 - The words were then made simple, for a third grade reader.
 
 #### How the video is made
 
 - The whole script is in `tools/stack-video-script.md`.
 - `tools/make_stack_video.py` makes the video by itself:
-  - **Kokoro** reads each sentence out loud, in a young male voice called `am_puck`.
+  - **Kokoro** reads each sentence out loud, in a young British male voice called `bm_fable`.
   - Python draws every frame: the game's backgrounds, Zazo and Benji, plates that move on and off a stack, and captions.
+  - The conversation part uses real screenshots of the game, kept in `tools/video-shots/`. `tools/capture_game_shots.mjs` takes them by playing the game in Chrome with no window.
   - ffmpeg joins the pictures and the voice into one small video, about 6 MB.
+#### The script
+
+- The first script sounded like a list of facts.
+- I asked for it to sound like a computer science teacher taking a short class, in simple words.
+- Now the teacher welcomes the class, asks questions (*"When you add a plate, where does it go?"*), has everyone say *"LIFO!"* together, and ends with *"See you next time."*
+
 #### The voice
 
 - The first version used the Mac's own voice. It sounded a bit like a robot.
@@ -839,7 +857,7 @@ What I asked for: keep the chat after a refresh, but only on the player's own de
 - The pick: **Kokoro**, a free voice model. Anyone can use it, even in a public project (Apache 2.0).
   - It runs on my own computer. No internet, no key, and no cost.
   - It is small (82 million parts), so it is fast. It made the whole voice in under a minute.
-  - It has 9 American male voices. `am_puck` sounds young and friendly.
+  - It has 9 American and 4 British male voices. I listened to samples of 12 of them and picked `bm_fable`, a young British voice.
 - I also looked at **Chatterbox**. It sounds very real too, but it needs a strong graphics card and a sample voice to copy, so Kokoro was the better fit.
 - If Kokoro is not set up, the script uses the Mac's voice, so it always works.
 

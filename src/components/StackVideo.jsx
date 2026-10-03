@@ -1,17 +1,43 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { LoaderCircle, X } from "lucide-react";
 
 const VIDEO = `${import.meta.env.BASE_URL}video/stack-explained.mp4`;
 const POSTER = `${import.meta.env.BASE_URL}video/stack-poster.jpg`;
 
-// "How the stack works": a 3 minute video for people learning
-// DSA. It explains what a stack is, where stacks are used in real life,
-// their good and bad sides, and how Tribezo's stack flips words when Benji
-// and Zazo speak. The video is made by tools/make_stack_video.py, and its
-// words are in tools/stack-video-script.md.
+// "How the stack works": a 4 minute class for people learning DSA. It
+// explains what a data structure is, what a stack is, where stacks are used
+// in algorithms and everyday apps, and how Tribezo's stack flips words when
+// Benji and Zazo speak, using real screens from the game. The video is made
+// by tools/make_stack_video.py, and its words are in
+// tools/stack-video-script.md.
+//
+// For smooth playing:
+// - The video file keeps its index at the start ("fast start"), so it plays
+//   while it is still downloading.
+// - Once the game is on screen, the browser quietly loads the start of the
+//   video, so it begins at once when the button is pressed.
+// - While the video waits for more data, a small spinner shows, so it never
+//   looks stuck.
+// Warm up the start of the video before it is needed. Only the first part
+// is fetched (preload="metadata" style), so it costs very little.
+export function useWarmStackVideo(ready) {
+  useEffect(() => {
+    if (!ready) return undefined;
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.src = VIDEO;
+    return () => {
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [ready]);
+}
+
 export default function StackVideo({ open, onClose }) {
   const closeButton = useRef(null);
+  const [waiting, setWaiting] = useState(true);
 
   // Close with the Escape key, and move focus into the window when it opens.
   useEffect(() => {
@@ -63,17 +89,28 @@ export default function StackVideo({ open, onClose }) {
                 <X size={20} />
               </button>
             </div>
-            <video
-              src={VIDEO}
-              poster={POSTER}
-              controls
-              autoPlay
-              playsInline
-              preload="metadata"
-              className="block aspect-video w-full bg-black"
-            >
-              Your browser cannot play this video.
-            </video>
+            <div className="relative">
+              <video
+                poster={POSTER}
+                controls
+                autoPlay
+                playsInline
+                preload="auto"
+                onLoadStart={() => setWaiting(true)}
+                onWaiting={() => setWaiting(true)}
+                onPlaying={() => setWaiting(false)}
+                onCanPlay={() => setWaiting(false)}
+                className="block aspect-video w-full bg-black"
+              >
+                <source src={VIDEO} type="video/mp4" />
+                Your browser cannot play this video.
+              </video>
+              {waiting && (
+                <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center">
+                  <LoaderCircle size={44} className="animate-spin text-parchment/90 drop-shadow" />
+                </div>
+              )}
+            </div>
           </motion.div>
         </motion.div>
       )}

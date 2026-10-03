@@ -11,7 +11,7 @@ import StoryCard from "../components/StoryCard.jsx";
 import ChatBox from "../components/ChatBox.jsx";
 import HistoryPanel from "../components/HistoryPanel.jsx";
 import PlacesMenu from "../components/PlacesMenu.jsx";
-import StackVideo from "../components/StackVideo.jsx";
+import StackVideo, { useWarmStackVideo } from "../components/StackVideo.jsx";
 import WaterIntro from "../components/WaterIntro.jsx";
 import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
 import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions, welcomeBack } from "../lib/content.js";
@@ -70,6 +70,7 @@ export default function Home() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false); // the "How the stack works" video
   const videoButton = useRef(null);
+  useWarmStackVideo(stage === "chat"); // load the start of the video early, so it plays at once
   const [muted, setMutedState] = useState(isMuted);
   const historyButton = useRef(null);
   const keyboardOpen = useKeyboard();
