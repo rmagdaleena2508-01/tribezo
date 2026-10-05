@@ -225,7 +225,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 5 | Talking with AI | Done. Tested with real Gemini. |
 | 6 | Moving around the island | Done |
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
-| 8 | Putting Tribezo online (GitHub Pages and Vercel) | Both sites are live. The Gemini key still needs to be added in Vercel, so Zazo uses his fixed answers online for now. |
+| 8 | Putting Tribezo online (GitHub Pages and Vercel) | Done. Both sites are live, and Zazo answers with Gemini on both. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
 | 10 | The Calonis name, a fiction notice, and going straight to places | Done |
 | 11 | A video class that teaches how the stack works, with real game screens | Done |
@@ -233,7 +233,6 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 
 ### What is left
 
-- **Connect Gemini on the live sites.** Add `GEMINI_API_KEY` in Vercel and `TRIBEZO_API_BASE` in GitHub (see "Connecting Vercel"). Until then, Zazo can only answer the questions his fixed list knows.
 - **Add music files.** The music system works, but there are no songs in the project yet, so the game is quiet for now.
 - **Try it on a real phone,** turned sideways, with the keyboard open.
 - **More stop motion pictures.** Right now each pose has 1 picture. Real stop motion uses 2 or 3 small changes of each pose.
@@ -1000,7 +999,9 @@ Building Tribezo was not a straight line. These are the biggest problems, and wh
 | Answers got cut off in the middle. The model used all its space to "think". | It is asked to think only a little, and the answer has more room. |
 | Zazo could not answer questions about his own life. He made things up. | The Zazo Story Book. Its whole text now goes into his instructions, so he answers from it (see the RAG part). |
 | Zazo sounded short and flat. | New rules: react first, answer, add one detail, then ask something back. Benji adds calm notes, and answer buttons help shy players. |
-| Questions you write yourself only get a "the sea is loud" reply on the live site. | The live site has no Gemini key yet, so Zazo can only use his fixed list. I checked the live backend: it is running and answers, but says `"ai": false`. The fix is to add `GEMINI_API_KEY` in Vercel and `TRIBEZO_API_BASE` in GitHub. On my computer, with the AI helper running (`npm run ai`), Zazo answered a brand new question about games on the island with a full, friendly answer. |
+| Questions you write yourself only got a "the sea is loud" reply on the live site. | The live site had no Gemini key, so Zazo could only use his fixed list. The backend was running, but said `"ai": false`. |
+| The key was added in Vercel, but the live site still said `"ai": false`. | Two small slips. First the names were `for_tribezo_project` and `api_key`, but the code only reads `GEMINI_API_KEY`. Then the right name was saved, but Vercel only reads a new key on a new deployment, so it needed one more Redeploy. After that it said `"ai": true`. |
+| The GitHub Pages site still used fixed answers after Vercel worked. | GitHub Pages did not know where Vercel was. Setting the repository variable `TRIBEZO_API_BASE` to the Vercel address and running the GitHub Pages workflow again fixed it. A test on the live GitHub Pages site asked "What do you do when it rains on the island?", and Zazo answered with Gemini about staying dry in the round huts. |
 
 ### Putting it online
 
