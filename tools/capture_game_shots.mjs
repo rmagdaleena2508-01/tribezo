@@ -1,8 +1,9 @@
 // Takes real screenshots of the game for the stack video.
 //
-// It opens the built game in Chrome with no window, skips to the chat with
-// a saved visitor called Mary, asks Zazo "How old are you?", and saves a
-// picture of every step, plus the History panel.
+// It opens the built game in Chrome with no window, goes through the start
+// like a new visitor (title, story, fiction notice, and the name "Mary"),
+// asks Zazo "How old are you?", and saves a picture of every step, plus
+// the History panel.
 //
 // Run the built game first (npm run build, then npm run preview), then:
 //   npm i --no-save puppeteer-core
@@ -17,21 +18,26 @@ await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 2 });
 await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 await page.goto("http://127.0.0.1:8767/", { waitUntil: "networkidle0" });
-await page.evaluate(() => localStorage.setItem("tribezo:save", JSON.stringify({ version: 1, savedAt: Date.now(), name: "Mary", scene: "village", seen: ["village"], choices: [], turns: [], history: [], memory: { tourStop: 0, fallback: 0 } })));
-await page.reload({ waitUntil: "networkidle0" });
-await wait(800);
 const clickText = async (text) => {
   const ok = await page.evaluate((t) => { const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim().startsWith(t)); if (b) { b.click(); return true; } return false; }, text);
   if (!ok) throw new Error("no button " + text);
 };
 const shot = async (name) => { await wait(500); await page.screenshot({ path: `${OUT}/${name}.png` }); console.log("shot", name); };
-await clickText("Continue as");
+await clickText("Begin");
+await wait(800);
+await clickText("Skip");
+await wait(800);
+await clickText("I understand");
+await wait(800);
+await page.type("#visitor-name", "Mary");
+await page.keyboard.press("Enter");
 await wait(2500);
 // finish the welcome back lines
 for (let i = 0; i < 6; i++) { const more = await page.evaluate(() => !![...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Tap to continue")); if (!more) break; await clickText("Tap to continue"); await wait(300); await clickText("Tap to continue").catch(() => {}); await wait(600); }
 await wait(1500);
 await shot("chat-idle");
 await page.type("#message", "How old are you?");
+await shot("chat-typed"); // the question sits in the chat box, ready to send
 await page.keyboard.press("Enter");
 await wait(4000);
 const tapBtn = () => page.evaluate(() => { const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "Tap to continue"); if (b) { b.click(); return true; } return false; });

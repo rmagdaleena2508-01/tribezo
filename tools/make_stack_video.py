@@ -169,7 +169,6 @@ SCENES = [
         "title": "What happens when you talk",
         "bg": "village",
         "lines": [
-            "Here's what happens when you talk to them.",
             "You type in English, like, how old are you? Benji pushes each word's letters onto his stack, then pops them off.",
             "Out comes Calonis! woH dlo era uoy? Benji says it to Zazo.",
             "Zazo answers in Calonis. His words went through the same stack.",
@@ -408,8 +407,14 @@ class StackAnim:
                         landed.append((label, color_index, value))
                 else:
                     moving.append(("pop", label, color_index, p, len(items), value))
-        # the base
-        d.rounded_rectangle((self.x - self.w / 2 - 20, self.y + 26, self.x + self.w / 2 + 20, self.y + 40), radius=7, fill=with_alpha((120, 84, 50), a))
+        # the base, which fades away once every plate has gone
+        base_a = a
+        if self.ops and not items and not moving and not self.start_items:
+            last = max(when for when, _, _ in self.ops)
+            if t >= last:
+                base_a = a * (1 - ease((t - last - 0.55) / 0.5))
+        if base_a > 0:
+            d.rounded_rectangle((self.x - self.w / 2 - 20, self.y + 26, self.x + self.w / 2 + 20, self.y + 40), radius=7, fill=with_alpha((120, 84, 50), base_a))
         for i, (label, ci) in enumerate(items):
             top = i == len(items) - 1
             glow = highlight_top_at is not None and top and t >= highlight_top_at
@@ -521,10 +526,30 @@ def cards_grid(d, local, at, cards, first_line=1):
         y0 = 150 + row * 220 + 20 * (1 - a)
         panel(d, (x0, y0, x0 + 520, y0 + 195), a)
         d.rounded_rectangle((x0 + 22, y0 + 28, x0 + 162, y0 + 168), radius=22, fill=with_alpha(PLATE_COLORS[i], a))
-        text_center(d, (x0 + 92, y0 + 98), icon, 30 if len(icon) < 8 else 24, fill=with_alpha(INK, a), shadow=False)
+        if icon == "maze":
+            draw_maze(d, x0 + 42, y0 + 48, 100, a)
+        else:
+            text_center(d, (x0 + 92, y0 + 98), icon, 30 if len(icon) < 8 else 24, fill=with_alpha(INK, a), shadow=False)
         text_left(d, (x0 + 186, y0 + 40), name, 34, fill=with_alpha(MUSTARD, a))
         text_left(d, (x0 + 186, y0 + 96), what[0], 24, fill=with_alpha(CREAM, a), shadow=False)
         text_left(d, (x0 + 186, y0 + 128), what[1], 24, fill=with_alpha(CREAM, a), shadow=False)
+
+
+def draw_maze(d, x, y, size, a):
+    """A small maze, with a path that goes in, hits a dead end, backs up,
+    and finds the way out, like depth first search."""
+    c = size / 4
+    wall = with_alpha(INK, a)
+    d.rectangle((x, y, x + size, y + size), outline=wall, width=4)
+    for x1, y1, x2, y2 in [(1, 0, 1, 3), (2, 1, 2, 4), (3, 0, 3, 2), (2, 2, 3, 2)]:
+        d.line((x + x1 * c, y + y1 * c, x + x2 * c, y + y2 * c), fill=wall, width=4)
+    path = [(0.5, 3.5), (0.5, 0.5)]
+    dead_end = [(1.5, 0.5), (1.5, 3.5)]
+    out = [(1.5, 0.5), (2.5, 0.5), (2.5, 1.5), (3.5, 1.5), (3.5, 3.5)]
+    pts = lambda ps: [(x + px * c, y + py * c) for px, py in ps]
+    d.line(pts(path + out), fill=with_alpha(CREAM, a), width=5, joint="curve")
+    d.line(pts(dead_end), fill=with_alpha(SASH, a), width=4)
+    d.ellipse((x + 3.5 * c - 7, y + 3.5 * c - 7, x + 3.5 * c + 7, y + 3.5 * c + 7), fill=with_alpha(CREAM, a))
 
 
 def draw_scene(scene, local, line_starts, frame, chars, shots):
@@ -670,8 +695,7 @@ def draw_scene(scene, local, line_starts, frame, chars, shots):
 
     elif sid == "convo":
         steps = [
-            ("chat", None, None),
-            ("chat", (1, "You type"), None),
+            ("you-type", (1, "You type"), None),
             ("benji-tells-zazo", (2, "Benji tells Zazo"), "bubble-benji-tells"),
             ("zazo-answers", (3, "Zazo answers"), "bubble-zazo"),
             ("benji-translates", (4, "Benji translates"), "bubble-benji-translates"),
@@ -683,7 +707,7 @@ def draw_scene(scene, local, line_starts, frame, chars, shots):
         box = (50, 130, 690, 490)
         name, label, bubble = steps[current]
         prev = steps[max(0, current - 1)][0]
-        mix = since(local, at(current), 0.45) if current > 0 else 1.0
+        mix = since(local, at(current), 0.45) if current > 0 else since(local, 0.1, 0.45)
         screen(frame, shots[prev], box, 1.0)
         screen(frame, shots[name], box, mix)
         if label:
@@ -699,17 +723,22 @@ def draw_scene(scene, local, line_starts, frame, chars, shots):
             L = layer()
             d = ImageDraw.Draw(L)
             screen(frame, img, (720, 190, 720 + w, 190 + h), e)
-        if current == 1:
-            e = since(local, at(1) + 0.4)
-            panel(d, (720, 150, 1230, 230), e)
-            text_left(d, (745, 170), "You: How old are you?", 34, fill=with_alpha(CREAM, e))
-            spots = [(1020, 330), (1100, 330), (1180, 330)]
-            ops = [(at(1) + 2.0 + i * 0.35, "push", ch) for i, ch in enumerate("How")]
-            ops += [(at(1) + 3.4 + i * 0.45, "pop", spots[i]) for i in range(3)]
-            s = StackAnim(840, 480, width=120, step=48, ops=ops)
+        if current == 0:
+            # the question in the chat box, zoomed in, then "How" going through the stack
+            e = since(local, 0.4, 0.45)
+            img = shots["bubble-you-type"]
+            text_left(d, (765, 102), "Zoomed in", 24, fill=with_alpha(MUSTARD, e), shadow=False)
+            frame.alpha_composite(L)
+            L = layer()
+            d = ImageDraw.Draw(L)
+            screen(frame, img, (760, 138, 1200, 138 + int(img.height * 440 / img.width)), e)
+            spots = [(1020, 420), (1100, 420), (1180, 420)]
+            ops = [(at(0) + 2.4 + i * 0.35, "push", ch) for i, ch in enumerate("How")]
+            ops += [(at(0) + 3.8 + i * 0.45, "pop", spots[i]) for i in range(3)]
+            s = StackAnim(860, 530, width=120, step=48, ops=ops)
             s.draw(d, local, label_size=28)
-            if local >= at(1) + 5.0:
-                text_center(d, (1100, 400), "How  becomes  woH", 28, fill=with_alpha(MUSTARD, since(local, at(1) + 5.0)))
+            if local >= at(0) + 5.4:
+                text_center(d, (1100, 490), "How  becomes  woH", 28, fill=with_alpha(MUSTARD, since(local, at(0) + 5.4)))
 
     elif sid == "flip":
         word = "hello"
@@ -811,7 +840,7 @@ def draw_scene(scene, local, line_starts, frame, chars, shots):
             a = since(local, at(2), 0.5)
             text_center(d, (W / 2, 470), "olleH!", 120 + int(10 * math.sin(local * 3)), fill=with_alpha(MUSTARD, a))
             zazo = chars["zazo-laughing"]
-            frame.alpha_composite(fade(zazo, a), (60, H - zazo.height - 10))
+            frame.alpha_composite(fade(zazo, a), (60, H - zazo.height - 95))
 
     frame.alpha_composite(L)
 
@@ -882,7 +911,7 @@ def main():
         "benji-pointing": load_character("benji", "pointing", 470),
         "zazo-talking": load_character("zazo", "talking", 380),
         "benji-talking": load_character("benji", "talking", 380),
-        "zazo-laughing": load_character("zazo", "laughing", 340),
+        "zazo-laughing": load_character("zazo", "laughing", 280),
     }
 
     video = subprocess.Popen(
@@ -891,8 +920,6 @@ def main():
             "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
             "-i", voice,
             "-c:v", "libx264", "-preset", "slow", "-crf", "27", "-pix_fmt", "yuv420p",
-            # a keyframe every 2 seconds, so jumping around in the video is quick
-            "-g", str(FPS * 2), "-keyint_min", str(FPS),
             "-c:a", "aac", "-b:a", "96k", "-shortest", "-movflags", "+faststart",
             OUT_FILE,
         ],

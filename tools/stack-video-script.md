@@ -60,38 +60,37 @@ The narration for `public/video/stack-explained.mp4`. Made by `tools/make_stack_
 
 ## 2:31 What happens when you talk
 
-- Here's what happens when you talk to them.
 - You type in English, like, how old are you? Benji pushes each word's letters onto his stack, then pops them off.
 - Out comes Calonis! woH dlo era uoy? Benji says it to Zazo.
 - Zazo answers in Calonis. His words went through the same stack.
 - Then Benji flips them back, and tells you what Zazo said, in English.
 
-## 2:55 Watch one word flip
+## 2:52 Watch one word flip
 
 - Let's slow it down and watch one word.
 - Take the word hello. Push each letter. H, E, L, L, O.
 - Now pop them off. Last in, first out.
 - O, L, L, E, H. Hello just became olleh.
 
-## 3:08 What does not flip
+## 3:06 What does not flip
 
 - The stack only flips letters.
 - Commas, marks, and spaces stay right where they are.
 - Money never flips. Twenty dollars stays twenty dollars.
 - And your name stays just the way you typed it.
 
-## 3:22 Benji's stack is real code
+## 3:19 Benji's stack is real code
 
 - Benji's stack is real code, written in C. It keeps letters in an array, and the top is the end of the array.
 - When the array gets full, it grows to twice its size, so it never overflows.
 - And the C code runs right in your browser, as WebAssembly.
 
-## 3:38 See the stack at work
+## 3:35 See the stack at work
 
 - Want to see the stack at work? Open the History panel.
 - For, how old are you, the stack did twelve pushes and twelve pops. One push and one pop for every letter.
 
-## 3:48 One stack, two directions
+## 3:45 One stack, two directions
 
 - So that's our class for today. One stack, two directions.
 - Flip English once, and you get Calonis. Flip it again, and you're back to English.

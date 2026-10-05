@@ -146,7 +146,7 @@ Some words and marks would stop making sense if they were flipped. The stack ski
    1. Press **Places** at the top. It opens a small map: every place with a little picture. Pick one and you go there right away. Zazo speaks first and tells you about the place, and then you can ask him about it.
    2. Just ask, like *"Can we go to the beach?"* or *"Show me around."*
    3. Say yes when Zazo offers to show you something. He offers often, because he loves showing off his island.
-8. **Coming back.** Your chat is saved on your device. Next time, the title screen says **Continue as** and your name. Press it, and Zazo welcomes you back right where you left off. Press **Start over** to wipe the saved chat and begin again.
+8. **Every visit starts fresh.** When you open the game again, or refresh the page, it starts from the title, and Benji asks for your name with an empty box. Nothing from the last visit shows up.
 
 On a phone, you play with the phone turned sideways, like most games. If the phone is upright, the game asks you to turn it.
 
@@ -227,7 +227,7 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
 | 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
-| 10 | The Calonis name, a fiction notice, going straight to places, and saving the chat on your device | Done |
+| 10 | The Calonis name, a fiction notice, and going straight to places | Done |
 | 11 | A video class that teaches how the stack works, with real game screens | Done |
 
 ### What is left
@@ -727,7 +727,7 @@ He also remembers what you tell him and brings it up later, never asks the same 
 
 A real conversation is a game of catch. Each person catches what the other said, adds something, and throws it back. Zazo used to catch the ball and hold it. Now he always throws it back. Benji is the calm friend in the middle who makes sure nobody drops it. The answer buttons are there for players who are shy or do not know what to say, so everyone can play.
 
-### Phase 10: A fiction notice, and saving your chat
+### Phase 10: A fiction notice, and the language gets a name
 
 #### The language gets a name
 
@@ -756,42 +756,25 @@ A real conversation is a game of catch. Each person catches what the other said,
 - **Zazo speaks first:** he welcomes you, says what you can see and hear, and asks you a question.
 - Then you ask him about the place.
 
-#### Saving your chat on your device
+#### Saving your chat (tried, then taken out)
 
-What I asked for: keep the chat after a refresh, but only on the player's own device, with no database and nothing leaving the device.
+**What I tried first**
 
-**Where it is saved**
+- I saved the chat in the browser's own storage (localStorage), on the player's device only.
+- The next time, the title screen said **Continue as Mary**, and the chat came back.
 
-- In the browser's own storage, called **localStorage.**
-- It lives only in that browser, on that device.
-- Nothing goes to a server or a database.
+**Why I took it out**
 
-**What is saved**
+- Many people can use the same computer, like at school or in a library.
+- The next person would see **Continue as Mary**, and could open Mary's whole chat.
+- That gives away the last player's name and words. A game should never do that.
 
-- Your name
-- The place you are in, and the places you have seen
-- The History panel (the newest 60 messages)
-- The last 10 turns, so Zazo still remembers the chat
-- The answer buttons, and where the tour is
+**What happens now**
 
-**What happens when you come back**
-
-- The title screen says **Continue as Mary** (with your name).
-- Press it, and you go straight to the chat, in the same place.
-- Zazo welcomes you back: *"Mary! You came back! The goats missed you, and so did I."*
-- A small **Start over** link under the button wipes the save and starts the story again.
-
-**Good habits I followed** (from MDN and web storage guides)
-
-- **Every read and write is wrapped in try and catch.** Some browsers say no to storage, like private windows. Then the game simply works without saving.
-- **The save has a version number.** If the shape of a save ever changes, old saves are thrown away, not misread.
-- **Every piece is checked** before it is used: the name, the place, each message. A broken save is thrown away.
-- **Storage can fill up.** If it does, the game tries again with half the history. If that fails too, it carries on without saving.
-- **Old saves run out.** A save is thrown away 30 days after the last visit.
-- **Only what the game needs is saved.** Never keys or passwords.
-- **Saved text is shown as plain text,** so nobody can sneak code into the page through storage.
-
-**Where the code is:** `src/lib/saved.js`
+- Every visit starts from the very beginning: the title, the story, the fiction notice, and an empty name box.
+- The name and the chat only live while the page is open. Close it or refresh it, and they are gone.
+- When the game opens, it also wipes any chat that an older version saved, so nothing from a past player is left on the device.
+- There is still no database, and the AI helper does not keep any messages.
 
 ### Phase 11: A video about the stack
 
@@ -806,7 +789,7 @@ What I asked for: keep the chat after a refresh, but only on the player's own de
 - On small screens, it shows only the play icon.
 - The video opens in a window. Press the **X**, the Escape key, or click outside to close it.
 
-#### What the video teaches (4 minutes 2 seconds)
+#### What the video teaches (3 minutes 59 seconds)
 
 1. **What a data structure is:** a way to keep data in order, so a computer can use it fast. Arrays, linked lists, queues, trees, and stacks are all data structures.
 2. **What a stack is:** a linear data structure, like a pile of plates. You add and take only from the top.
@@ -966,7 +949,7 @@ I picked the **Liquid Glass Button by Ali Imam**, and built our own small versio
 | Kind errors | People see a friendly message, never the details of an error. |
 | Rules for the browser | The finished website tells the browser to only run its own code (plus the WebAssembly stack), only load fonts from Google Fonts, and only talk to its own address and the Vercel AI function. |
 | No source code in the finished website | The finished website does not ship the original code. |
-| Your chat stays on your device | The name, the chat, and the places you have seen are saved in your own browser (localStorage), on your device only. Nothing is sent to a database. The AI helper does not keep your messages. The save is thrown away after 30 days, and **Start over** wipes it at once. |
+| Nothing is kept after you leave | The name and the chat only live while the page is open. Every visit starts fresh, so the next person on the same device never sees your name or your chat. Any chat saved by an older version is wiped when the game opens. There is no database, and the AI helper does not keep your messages. |
 | The story book only goes to Google | The book's text is part of Zazo's instructions, which only go to Gemini's own address. The book has no personal details in it. |
 
 Anything that runs in a browser can be looked at with the browser's developer tools. That is why every real check happens in the servers.

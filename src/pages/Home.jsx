@@ -14,8 +14,7 @@ import PlacesMenu from "../components/PlacesMenu.jsx";
 import StackVideo, { useWarmStackVideo } from "../components/StackVideo.jsx";
 import WaterIntro from "../components/WaterIntro.jsx";
 import GlassButton, { LiquidGlassFilter } from "../components/GlassButton.jsx";
-import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions, welcomeBack } from "../lib/content.js";
-import { clearSave, loadSave, writeSave } from "../lib/saved.js";
+import { benjiLines, characters, greeting, hero, nameScreen, scenes, story, suggestedQuestions } from "../lib/content.js";
 import { useKeyboard } from "../hooks/useKeyboard.js";
 import { askZazo } from "../lib/api.js";
 import { reverseText } from "../lib/stack.js";
@@ -42,16 +41,24 @@ let nextId = 1;
 //   disclaimer  the notice that everything in the game is made up
 //   name        Benji asks for your name, starting with an empty box
 //   chat        you talk to Zazo through Benji
-// A chat saved on this device (see saved.js) skips straight from the
-// title to the chat.
+// Every visit starts fresh from the title, with an empty name box.
+// Nothing about a visitor is kept after the page closes, so the next
+// person on the same device never sees the last person's name or chat.
 export default function Home() {
   const [stage, setStage] = useState("hero");
   const [step, setStep] = useState(0);
   const [scene, setScene] = useState(hero.scene);
   const [name, setName] = useState("");
 
-  // A chat saved on this device from an earlier visit, or null.
-  const [saved, setSaved] = useState(loadSave);
+  // Older versions of the game saved the chat in this browser. Wipe any
+  // such save, so nothing from a past visitor is left on the device.
+  useEffect(() => {
+    try {
+      window.localStorage.removeItem("tribezo:save");
+    } catch {
+      // Storage is blocked, so there is nothing to wipe.
+    }
+  }, []);
 
   // The dialogue: a list of lines, shown one at a time. Tapping shows
   // the next line. Each line is { id, who, text, pose, label?, scene? }.
@@ -193,61 +200,7 @@ export default function Home() {
   function begin() {
     startMusic(hero.scene); // the Begin press is the tap browsers need before sound
     preload(Object.values(scenes).map((s) => s.src));
-    if (saved) {
-      resume(saved);
-    } else {
-      startStory();
-    }
-  }
-
-  // "Start over" on the title screen: wipe the saved chat and play the
-  // game from the story, as a new visitor.
-  function startOver() {
-    clearSave();
-    setSaved(null);
-    setName("");
-    setHistory([]);
-    setSeen([]);
-    recentTurns.current = [];
-    memory.current = { tourStop: 0, fallback: 0 };
-    asked.current = new Set();
-    startMusic(hero.scene);
-    preload(Object.values(scenes).map((s) => s.src));
     startStory();
-  }
-
-  // Coming back to a saved chat: everything is put back the way it was,
-  // and Zazo welcomes you back.
-  async function resume(save) {
-    const thisRound = ++round.current;
-    setName(save.name);
-    setScene(save.scene);
-    setSeen(save.seen.includes(save.scene) ? save.seen : [...save.seen, save.scene]);
-    setHistory(save.history.map((entry) => ({ id: nextId++, ...entry })));
-    recentTurns.current = save.turns;
-    memory.current = save.memory;
-    asked.current = new Set(save.history.map((entry) => entry.english.toLowerCase().trim()));
-    setStage("chat");
-    setZazoRest("idle");
-    setBenjiRest("idle");
-    say([]);
-    setBusy(true);
-
-    const english = welcomeBack.zazo.replaceAll("{name}", save.name);
-    setChoices(pickChoices([...welcomeBack.choices, ...save.choices]));
-    try {
-      const [answer] = await Promise.all([reverseText(english, save.name), wait(400)]);
-      if (thisRound !== round.current) return;
-      say([
-        { who: "zazo", text: answer.xyz, pose: "welcome" },
-        { who: "benji", text: translation(english), pose: "welcome", label: "Benji translates" },
-      ]);
-      recentTurns.current = [...recentTurns.current, { you: "(comes back to the island)", zazo: english }].slice(-10);
-    } catch {
-      if (thisRound !== round.current) return;
-      say([{ who: "benji", text: benjiLines.error, pose: "confused" }]);
-    }
-    setBusy(false);
   }
 
   function showStep(index) {
@@ -340,12 +293,6 @@ export default function Home() {
     }
     setBusy(false);
   }
-
-  // Save the chat on this device whenever it changes (see saved.js).
-  useEffect(() => {
-    if (stage !== "chat" || !name) return;
-    writeSave({ name, scene, seen, choices, turns: recentTurns.current, history, memory: memory.current });
-  }, [stage, name, scene, seen, choices, history, lines]);
 
   // ---------- Talking to Zazo ----------
 
@@ -634,7 +581,7 @@ export default function Home() {
         </div>
       </header>
 
-      {stage === "hero" && introDone && <Hero onBegin={begin} savedName={saved?.name} onStartOver={startOver} />}
+      {stage === "hero" && introDone && <Hero onBegin={begin} />}
       {stage === "disclaimer" && <Disclaimer onDone={showNameBox} />}
       {!introDone && <WaterIntro onDone={endIntro} />}
       <LiquidGlassFilter />

@@ -114,8 +114,6 @@ export const hero = {
   scene: "hero-meadow",
   tagline: "An island where every word comes out backwards.",
   begin: "Begin",
-  continueAs: "Continue as {name}",
-  startOver: "Start over",
 };
 
 // ---------- The fiction notice (after the story, before the name) ----------
@@ -187,12 +185,6 @@ export const greeting = {
   benji: "He says, “Hello, {name}! Welcome to my islands! A real visitor, how wonderful! Where did you sail from?”",
   benjiNote: "He asked where you come from. Tell him in English, or tap an answer below. I'll pass it on.",
   choices: ["I come from a big city", "Where are the other people?", "Can you show me around?"],
-};
-
-// What Zazo says when you come back to a chat saved on this device.
-export const welcomeBack = {
-  zazo: "{name}! You came back! The goats missed you, and so did I. Where shall we go today?",
-  choices: ["Show me somewhere new", "What did you do while I was away?"],
 };
 
 // ---------- Places ----------
