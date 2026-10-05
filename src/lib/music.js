@@ -40,7 +40,19 @@ function makeLayer(files, volume, streaming) {
   const load = (name) => {
     const src = name && files[name];
     if (!src) return null;
-    cache[name] ??= new Howl({ src: [src], loop: true, volume: 0, html5: streaming });
+    cache[name] ??= new Howl({
+      src: [src],
+      loop: true,
+      volume: 0,
+      html5: streaming,
+      // Some browsers, like Brave and Safari, can still block sound. If
+      // that happens, try again on the visitor's next tap or click.
+      onplayerror() {
+        this.once("unlock", () => {
+          if (this === current) this.play();
+        });
+      },
+    });
     return cache[name];
   };
 
@@ -57,14 +69,23 @@ function makeLayer(files, volume, streaming) {
 
   const fadeIn = (howl) => {
     if (!howl) return;
-    if (!howl.playing()) {
-      howl.volume(0);
-      howl.play();
+    const rise = () => howl.fade(howl.volume(), silent() ? 0 : volume, music.fadeMs);
+    if (howl.playing()) {
+      rise();
+      return;
     }
-    howl.fade(howl.volume(), silent() ? 0 : volume, music.fadeMs);
+    // Start at 0 and fade up once it is really playing. A long track can
+    // take a moment to start, and a fade asked for before that is lost.
+    howl.volume(0);
+    howl.once("play", rise);
+    howl.play();
   };
 
   return {
+    // Start loading a sound before it is needed, with no sound yet.
+    preload(name) {
+      load(name);
+    },
     play(name) {
       if (name === currentName) return;
       const next = load(name);
@@ -85,6 +106,15 @@ const ambienceLayer = makeLayer(music.ambience ?? {}, music.ambienceVolume ?? 0.
 
 // True if there is any sound at all, so the mute button only shows then.
 export const hasMusic = [...Object.values(music.tracks), ...Object.values(music.ambience ?? {})].some(Boolean);
+
+// Load the first sounds as soon as the page opens. Then, when the visitor
+// presses Begin, they are ready and start inside that click. Some
+// browsers only allow sound that starts right inside a click.
+export function preloadMusic(scene) {
+  if (!hasMusic) return;
+  musicLayer.preload(music.sceneTracks[scene]);
+  ambienceLayer.preload(music.sceneAmbience?.[scene]);
+}
 
 // Call once, from a click or tap.
 export function startMusic(scene) {

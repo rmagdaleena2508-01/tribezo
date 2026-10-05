@@ -1,5 +1,7 @@
 # Tribezo
 
+**Play it live: [tribezo-8tqo.vercel.app](https://tribezo-8tqo.vercel.app)**
+
 **Talk to Zazo, the kind leader of an island where every word comes out backwards.**
 
 Tribezo is a game you play in a web browser. You type in English. Benji, the translator, flips your words around. Then Zazo talks back to you in his own language.
@@ -953,6 +955,7 @@ I also tried a soft blur as each picture fades in. It looked nice, but the scree
 - The birds are loaded fully before they play, so their loop has no gap.
 - A **mute** button shows at the top. It remembers your choice on that device.
 - When the stack video plays, the music and birds fade down, and they come back when the video closes.
+- **Made sturdier after a report that the live site was silent.** Some browsers, like Brave and Safari, only allow sound that starts right inside a click. Before, the piano only began to load after **Begin** was pressed, so it could start too late. Now the first music and the birds load as soon as the page opens, so they are ready the moment you press **Begin**. If a browser still blocks the sound, it tries again on your next tap or click. The fade in now waits until the piano is really playing, so it can never get stuck at no sound. Tested in Chrome and in Brave.
 
 #### Tested
 
@@ -1060,6 +1063,7 @@ Building Tribezo was not a straight line. These are the biggest problems, and wh
 |---|---|
 | Vercel would not show a Deploy button, even though my portfolio deployed in one click. | Vercel saw 3 apps in the project. I moved the website to the top folder and joined the two `package.json` files, so it sees 1 app, like my portfolio. I checked this with Vercel's own detection code. |
 | Vercel kept running an old command, `cd frontend && npm ci`, after that folder was gone. | The right commands are now written in `vercel.json`, which wins over old dashboard settings. |
+| Vercel showed an orange "Node.js Version Override" warning. `package.json` asked for Node 22, but the Vercel project was set to a newer version. | The Node version line was taken out of `package.json`, so Vercel simply uses its own setting. The game and the AI function work on the newer Node too. |
 | The key was typed into the wrong box in Vercel, and it showed in a screenshot. | The name goes in Key, the key goes in Value. A key that was ever shown should be replaced with a new one. |
 
 ### The look and feel

@@ -19,7 +19,7 @@ import { useKeyboard } from "../hooks/useKeyboard.js";
 import { askZazo } from "../lib/api.js";
 import { reverseText } from "../lib/stack.js";
 import { zazoReply } from "../lib/zazo.js";
-import { hasMusic, isMuted, playForScene, setMuted, startMusic } from "../lib/music.js";
+import { hasMusic, isMuted, playForScene, preloadMusic, setMuted, startMusic } from "../lib/music.js";
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -128,8 +128,9 @@ export default function Home() {
   const moreLines = lineIndex < lines.length - 1;
   const look = scenes[scene].look;
 
-  // Load the characters and the story scenes right away.
+  // Load the characters, the story scenes, and the first music right away.
   useEffect(() => {
+    preloadMusic(hero.scene);
     preload([
       ...Object.values(characters.zazo.poses),
       ...Object.values(characters.benji.poses),
