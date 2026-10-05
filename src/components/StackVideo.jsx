@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LoaderCircle, X } from "lucide-react";
+import { setDucked } from "../lib/music.js";
 
 const VIDEO = `${import.meta.env.BASE_URL}video/stack-explained.mp4`;
 const POSTER = `${import.meta.env.BASE_URL}video/stack-poster.jpg`;
@@ -38,6 +39,13 @@ export function useWarmStackVideo(ready) {
 export default function StackVideo({ open, onClose }) {
   const closeButton = useRef(null);
   const [waiting, setWaiting] = useState(true);
+
+  // The music and birds fade down while the video is open.
+  useEffect(() => {
+    if (!open) return undefined;
+    setDucked(true);
+    return () => setDucked(false);
+  }, [open]);
 
   // Close with the Escape key, and move focus into the window when it opens.
   useEffect(() => {

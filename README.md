@@ -231,10 +231,10 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 10 | The Calonis name, a fiction notice, and going straight to places | Done |
 | 11 | A video class that teaches how the stack works, with real game screens | Done |
 | 12 | Smoother changes between places, poses, and sizes | Done |
+| 13 | Cozy music with birds and a soft breeze | Done |
 
 ### What is left
 
-- **Add music files.** The music system works, but there are no songs in the project yet, so the game is quiet for now.
 - **Try it on a real phone,** turned sideways, with the keyboard open.
 - **More stop motion pictures.** Right now each pose has 1 picture. Real stop motion uses 2 or 3 small changes of each pose.
 
@@ -256,6 +256,8 @@ tribezo/
     scenes/               the 8 backgrounds
     intro/icon.webp       my icon for the opening
     video/                the "How the stack works" video and its cover picture
+    music/                the day and night piano loops
+    ambience/             the bird sounds
     stack.wasm            the C stack, built for web browsers
   backend/              the C part
     src/
@@ -916,6 +918,48 @@ I recorded the screen in Chrome while switching places 3 times in a row, half a 
 | Biggest change between two frames | 8.9 | 7.3 |
 
 I also tried a soft blur as each picture fades in. It looked nice, but the screen froze for up to 0.8 seconds on a computer without a graphics card, so the blur is left out.
+
+### Phase 13: Cozy music and bird sounds
+
+#### What I wanted
+
+- Calm, cozy, peaceful music, with birds singing and a soft breeze now and then.
+- It should feel like a quiet morning on the island, and never get in the way of the talk.
+
+#### Where the music comes from
+
+- I compared free music libraries. **Pixabay** was the best fit: free to use in a game, and no credit is needed. Others, like Incompetech or Bensound, need a visible credit or a paid license.
+- I picked two pieces from Pixabay:
+  - **"Relaxing Birds and Piano Music" by InnerTune.** Soft solo piano with birds. It is 37 minutes long, so only a calm part of it is used.
+  - **"Bird Chirps" by loswin23.** Birds chirping, played quietly under the piano.
+- Both are free under the Pixabay Content License.
+- One note: the piano piece is registered with YouTube's Content ID. Playing it in the game is fine. But a YouTube video that records the game may get an automatic claim, which the Pixabay license lets you dispute.
+
+#### How it was made to fit
+
+- **Short loops.** A 37 minute song is far too big for a web game. I measured how loud each minute was, and picked the calmest, most even part (from minute 16 to minute 24).
+- **No jump when a loop restarts.** The end of each loop slowly blends into its start, so it can play over and over without a bump.
+- **Small files.** Day piano: 4.5 minutes, 3.8 MB. Night piano: 3.5 minutes, 2.6 MB. Birds: 1 minute, under half a MB.
+
+| Where | Music | Birds |
+|---|---|---|
+| Title, story, and all the daytime places | Day piano | Singing quietly |
+| The campfire at night | Night piano: the same piece, a different part, softer, warmer, and a little slower | Quiet |
+
+#### How it plays
+
+- The sound starts when you press **Begin**. Browsers do not allow sound before a click.
+- The music and the birds are two layers. When you change places, each layer fades into its new sound on its own, over about 2 seconds.
+- The birds are loaded fully before they play, so their loop has no gap.
+- A **mute** button shows at the top. It remembers your choice on that device.
+- When the stack video plays, the music and birds fade down, and they come back when the video closes.
+
+#### Tested
+
+- After Begin: the piano and the birds both play.
+- At the campfire: the piano changes to the night piano, and the birds fade away.
+- The video: the sound fades down while it plays, and comes back after.
+- Mute: everything goes quiet. No errors.
 
 ### The opening, the falling title, and the liquid glass buttons
 

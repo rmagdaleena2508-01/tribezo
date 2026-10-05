@@ -392,18 +392,29 @@ export const fallbackReplies = [
 
 // ---------- Music ----------
 
-// Put music files in public/music/ and list them here. A track left as
-// null is skipped, so the site works fine with no music at all.
+// The music and the nature sounds. Each one is a short loop that blends
+// its end into its start, so it plays on and on with no jump.
+//
+// Music (public/music/), from Pixabay, free to use under the Pixabay
+// Content License:
+//   island  "Relaxing Birds and Piano Music" by InnerTune, a calm 4 and a
+//           half minute part of it
+//   night   the same piece, a different part, made softer and a little
+//           slower for the campfire
+// Nature sounds (public/ambience/), also from Pixabay:
+//   birds   "Bird Chirps" by loswin23, played quietly under the music by day
+//
+// A track left as null is skipped, so the site still works with no sound.
 export const music = {
   tracks: {
-    theme: null, // the start screen and the story, e.g. asset("music/theme.mp3")
-    island: null, // daytime on the island, e.g. asset("music/island.mp3")
-    night: null, // the campfire at night, e.g. asset("music/night.mp3")
+    island: asset("music/island.mp3"),
+    night: asset("music/night.mp3"),
   },
-  // Which track plays in which scene.
+  // Which track plays in which place. The title screen and the story use
+  // the daytime piano too, so it carries on smoothly into the island.
   sceneTracks: {
-    "hero-meadow": "theme",
-    "island-arrival": "theme",
+    "hero-meadow": "island",
+    "island-arrival": "island",
     "jungle-path": "island",
     village: "island",
     "family-hut": "island",
@@ -413,4 +424,21 @@ export const music = {
   },
   volume: 0.45,
   fadeMs: 1800,
+
+  // Nature sounds, a quiet second layer under the music.
+  ambience: {
+    birds: asset("ambience/birds.mp3"),
+  },
+  // Birds sing by day. At night by the campfire, they go quiet.
+  sceneAmbience: {
+    "hero-meadow": "birds",
+    "island-arrival": "birds",
+    "jungle-path": "birds",
+    village: "birds",
+    "family-hut": "birds",
+    waterfall: "birds",
+    lookout: "birds",
+    "fire-camp": null,
+  },
+  ambienceVolume: 0.22,
 };
