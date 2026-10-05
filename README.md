@@ -899,6 +899,11 @@ I picked **Motion**, with a better way of fading.
 - **Poses blend.** The new pose fades in on top while the old one stays solid, then the old one fades away. The character never turns see-through.
 - **Places works any time,** even while Zazo is talking. His old answer is dropped, and the new place dissolves in.
 
+#### More fixes, after playing again
+
+- **Characters blinked out when their pose changed.** The old pose was taken away, and the new picture was not always drawn yet. Now every pose is loaded once and kept, stacked on top of each other. A new pose fades in fast (under a fifth of a second) on top of the old one, and the old one stays solid underneath until the new one is fully in. A test in Chrome checked every frame while Zazo changed poses: he was fully solid the whole time.
+- **Benji's next line came too late.** After "Let me tell him...", nothing happened until Gemini had answered, which can take a few seconds. But flipping your words with the stack takes only a few thousandths of a second. Now Benji says your words in Calonis right away, while Zazo's answer is still on its way. Zazo shows "mmH..." (that is "Hmm..." in Calonis) while he thinks, and it turns into his answer the moment it arrives. In a test, Benji's line showed 0.28 seconds after sending, instead of after the whole answer.
+
 #### Testing it
 
 I recorded the screen in Chrome while switching places 3 times in a row, half a second apart, and measured the brightness of every frame.

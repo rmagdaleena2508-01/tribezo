@@ -170,7 +170,7 @@ export const nameScreen = {
 // ---------- Benji's lines ----------
 
 export const benjiLines = {
-  relaying: "Let me tell him…",
+  thinking: "mmH…", // Zazo, while his answer is on its way ("Hmm…" in Calonis)
   // How Benji starts every translation of Zazo's words. He takes turns
   // with these, so it sounds natural. {words} is what Zazo said.
   translates: ["He says, “{words}”", "He is saying, “{words}”", "Zazo says that “{words}”"],

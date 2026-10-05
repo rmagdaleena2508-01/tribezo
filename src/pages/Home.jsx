@@ -158,6 +158,20 @@ export default function Home() {
     setShowAll(false);
   }
 
+  // Swap one line for another while it may already be on screen, like
+  // Zazo's "thinking" line turning into his real answer. If that line is
+  // the one showing, it starts typing again with the new words.
+  const lineIndexRef = useRef(0);
+  lineIndexRef.current = lineIndex;
+  function replaceFrom(index, newLines) {
+    setLines((current) => [...current.slice(0, index), ...newLines.map((l) => ({ id: nextId++, ...l }))]);
+    if (lineIndexRef.current >= index) {
+      setLineIndex(index);
+      setLineDone(false);
+      setShowAll(false);
+    }
+  }
+
   const onLineDone = useCallback(() => setLineDone(true), []);
 
   // One tap: finish the current line, or move to the next one.
@@ -377,23 +391,29 @@ export default function Home() {
     const thisRound = ++round.current;
     asked.current.add(english.toLowerCase().trim());
     setBusy(true);
-    say([{ who: "benji", text: benjiLines.relaying, pose: "talking" }]);
+
+    // Zazo starts thinking of his answer right away, while Benji talks.
+    const replyComing = thinkOfReply(english);
 
     try {
-      // 1. Benji flips your words for Zazo.
-      const [told] = await Promise.all([reverseText(english, name), wait(600)]);
+      // 1. Benji flips your words for Zazo. The stack takes a few
+      //    milliseconds, so his line shows at once, with no waiting.
+      const told = await reverseText(english, name);
       if (thisRound !== round.current) return;
+      say([
+        { who: "benji", text: told.xyz, pose: "pointing", label: "Benji tells Zazo" },
+        { who: "zazo", text: benjiLines.thinking, pose: "idle", label: "Zazo is thinking" },
+      ]);
 
-      // 2. Zazo thinks of an answer, and the stack flips it into Calonis too.
-      const reply = await thinkOfReply(english);
+      // 2. Zazo's answer arrives, and the stack flips it into Calonis too.
+      const reply = await replyComing;
       const answer = await reverseText(reply.says, name);
       if (thisRound !== round.current) return;
       setChoices(pickChoices(reply.choices));
 
-      // 3. Tap through: Benji tells Zazo, Zazo answers, Benji translates,
-      //    and sometimes Benji adds a short, calm note of his own.
-      say([
-        { who: "benji", text: told.xyz, pose: "pointing", label: "Benji tells Zazo" },
+      // 3. His "thinking" line turns into his answer. Then Benji
+      //    translates, and sometimes adds a short, calm note of his own.
+      replaceFrom(1, [
         { who: "zazo", text: answer.xyz, pose: reply.pose, scene: reply.scene },
         { who: "benji", text: translation(reply.says), pose: "talking", label: "Benji translates" },
         ...(reply.benji ? [{ who: "benji", text: reply.benji, pose: "idle", label: "Benji" }] : []),

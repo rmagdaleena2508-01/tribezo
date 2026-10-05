@@ -1,4 +1,5 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { characters } from "../lib/content.js";
 
 // One character, lit to match the scene they are standing in.
@@ -16,9 +17,35 @@ import { characters } from "../lib/content.js";
 //
 // side: "left" (Zazo) or "right" (Benji), used to work out where the
 // light hits when it comes from the middle, like a campfire.
+// How a new pose comes in: quick, so it keeps up with the talk.
+const POSE_IN = { duration: 0.18, ease: [0.33, 0, 0.2, 1] };
+const POSE_OUT = { duration: 0.12, ease: "easeOut" };
+
+// Which pose is solid on screen ("base"), and which one is fading in on
+// top of it ("incoming"). The base only changes once the new pose is fully
+// in, so there is always one solid pose and the character never vanishes.
+function usePoseLayers(pose) {
+  const [state, setState] = useState({ base: pose, incoming: null });
+
+  useEffect(() => {
+    setState((current) => {
+      if (pose === (current.incoming ?? current.base)) return current;
+      if (pose === current.base) return { base: current.base, incoming: null };
+      return { base: current.base, incoming: pose };
+    });
+  }, [pose]);
+
+  const settle = useCallback((name) => {
+    setState((current) => (current.incoming === name ? { base: name, incoming: null } : current));
+  }, []);
+
+  return { ...state, settle };
+}
+
 export default function Character({ who, pose, look, side }) {
   const character = characters[who];
-  const src = character.poses[pose] ?? character.poses.idle;
+  const wanted = character.poses[pose] ? pose : "idle";
+  const { base, incoming, settle } = usePoseLayers(wanted);
 
   // Which way the light comes from, as seen by this character.
   const lightFrom = look.sun === "middle" ? (side === "left" ? "right" : "left") : look.sun;
@@ -47,68 +74,75 @@ export default function Character({ who, pose, look, side }) {
         style={{ background: `rgba(0, 0, 0, ${look.shadow})` }}
       />
 
-      {/* Poses blend into each other. The new pose fades in on top while
-          the old one stays solid underneath, and the old one only fades
-          away once the new one is nearly in. So the character never turns
-          see-through for a moment, even when poses change quickly. */}
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={src}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: 0.35, ease: [0.33, 0, 0.2, 1] } }}
-          exit={{ opacity: 0, transition: { duration: 0.2, delay: 0.25, ease: "easeOut" } }}
-          className="absolute inset-0 isolate will-change-[opacity]"
-        >
-          <img
-            src={src}
-            alt=""
-            draggable="false"
-            className="absolute inset-0 h-full w-full select-none"
-            style={{
-              filter: `${look.filter} drop-shadow(${rimX}px -1px 0 ${look.rim})`,
-              transition: "filter 1.2s ease",
-            }}
-          />
+      {/* Every pose is loaded and stacked, so a change never waits for a
+          picture. The new pose fades in quickly on top of the old one,
+          which stays solid underneath until the new one is fully in. Even
+          when poses change fast, one pose is always solid on screen. */}
+      {Object.entries(character.poses).map(([name, src]) => {
+        const isIncoming = name === incoming;
+        const isBase = name === base;
+        return (
+          <motion.div
+            key={name}
+            initial={false}
+            animate={{ opacity: isIncoming || isBase ? 1 : 0 }}
+            transition={isIncoming ? POSE_IN : POSE_OUT}
+            onAnimationComplete={() => isIncoming && settle(name)}
+            className="absolute inset-0 isolate will-change-[opacity]"
+            style={{ zIndex: isIncoming ? 3 : isBase ? 2 : 1 }}
+            aria-hidden={!isBase}
+          >
+            <img
+              src={src}
+              alt=""
+              draggable="false"
+              className="absolute inset-0 h-full w-full select-none"
+              style={{
+                filter: `${look.filter} drop-shadow(${rimX}px -1px 0 ${look.rim})`,
+                transition: "filter 1.2s ease",
+              }}
+            />
 
-          {/* The scene's light color */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              ...maskStyle(src),
-              background: look.tint.color,
-              mixBlendMode: look.tint.blend,
-              opacity: look.tint.opacity,
-              transition: "background 1.2s ease, opacity 1.2s ease",
-            }}
-          />
-
-          {/* Moonlight, only at night */}
-          {look.shade && (
+            {/* The scene's light color */}
             <div
               aria-hidden="true"
               className="absolute inset-0"
               style={{
                 ...maskStyle(src),
-                background: look.shade.color,
-                mixBlendMode: look.shade.blend,
-                opacity: look.shade.opacity,
+                background: look.tint.color,
+                mixBlendMode: look.tint.blend,
+                opacity: look.tint.opacity,
+                transition: "background 1.2s ease, opacity 1.2s ease",
               }}
             />
-          )}
 
-          {/* The side away from the light is a little darker */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              ...maskStyle(src),
-              background: `linear-gradient(${shadeDirection}, transparent 35%, rgba(0, 0, 0, 0.28))`,
-              mixBlendMode: "multiply",
-            }}
-          />
-        </motion.div>
-      </AnimatePresence>
+            {/* Moonlight, only at night */}
+            {look.shade && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-0"
+                style={{
+                  ...maskStyle(src),
+                  background: look.shade.color,
+                  mixBlendMode: look.shade.blend,
+                  opacity: look.shade.opacity,
+                }}
+              />
+            )}
+
+            {/* The side away from the light is a little darker */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                ...maskStyle(src),
+                background: `linear-gradient(${shadeDirection}, transparent 35%, rgba(0, 0, 0, 0.28))`,
+                mixBlendMode: "multiply",
+              }}
+            />
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
