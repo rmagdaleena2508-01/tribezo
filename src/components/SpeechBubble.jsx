@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { DotWave } from "ldrs/react";
+import "ldrs/react/DotWave.css";
 import { useTypewriter } from "../hooks/useTypewriter.js";
 
 // A speech bubble above a character.
@@ -9,7 +11,10 @@ import { useTypewriter } from "../hooks/useTypewriter.js";
 // label: a small title above the text, like "Benji translates".
 // showAll: true when the visitor tapped, so the rest of the text appears at once.
 // hint: a small line at the bottom, like "Tap to continue".
-export default function SpeechBubble({ text, side = "left", label, onDone, showAll, hint }) {
+// thinking: true while Zazo's answer is on its way. The bubble shows a
+// small wave of dots (DotWave from LDRS, uiball.com/ldrs) next to his
+// "mmH...", so it is clear he is still thinking.
+export default function SpeechBubble({ text, side = "left", label, onDone, showAll, hint, thinking = false }) {
   const shown = useTypewriter(text, onDone, showAll);
   const finished = shown.length === text.length;
 
@@ -32,13 +37,20 @@ export default function SpeechBubble({ text, side = "left", label, onDone, showA
       </p>
 
       {/* data-lenis-prevent lets long text scroll inside the bubble. */}
-      <p
-        aria-hidden="true"
-        data-lenis-prevent
-        className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-base font-semibold leading-snug short:max-h-24 short:text-sm"
-      >
-        {shown}
-      </p>
+      {thinking ? (
+        <div aria-hidden="true" className="flex items-center gap-3 py-1 text-sash">
+          <DotWave size={46} speed={1} color="currentColor" />
+          <span className="text-base font-semibold text-ink short:text-sm">{shown}</span>
+        </div>
+      ) : (
+        <p
+          aria-hidden="true"
+          data-lenis-prevent
+          className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-base font-semibold leading-snug short:max-h-24 short:text-sm"
+        >
+          {shown}
+        </p>
+      )}
 
       {hint && finished && (
         <p aria-hidden="true" className="mt-2 text-right text-xs font-bold text-ink-soft short:mt-1">

@@ -183,6 +183,7 @@ On a phone, you play with the phone turned sideways, like most games. If the pho
 | **React Router** | Lets the website have more than one page. |
 | **Tailwind CSS** | Adds colors, sizes, and spacing. |
 | **Framer Motion** | Makes things move and fade. |
+| **LDRS** | The small wave of dots while Zazo is thinking. |
 | **Lenis** | Smooth scrolling. |
 | **Lucide React** | Icons. |
 | **howler.js** | Plays music and fades between songs. |
@@ -903,6 +904,7 @@ I picked **Motion**, with a better way of fading.
 
 - **Characters blinked out when their pose changed.** The old pose was taken away, and the new picture was not always drawn yet. Now every pose is loaded once and kept, stacked on top of each other. A new pose fades in fast (under a fifth of a second) on top of the old one, and the old one stays solid underneath until the new one is fully in. A test in Chrome checked every frame while Zazo changed poses: he was fully solid the whole time.
 - **Benji's next line came too late.** After "Let me tell him...", nothing happened until Gemini had answered, which can take a few seconds. But flipping your words with the stack takes only a few thousandths of a second. Now Benji says your words in Calonis right away, while Zazo's answer is still on its way. Zazo shows "mmH..." (that is "Hmm..." in Calonis) while he thinks, and it turns into his answer the moment it arrives. In a test, Benji's line showed 0.28 seconds after sending, instead of after the whole answer.
+- **A loading wave while Zazo thinks.** His "mmH..." bubble now has a small wave of bouncing dots, so it is clear he is still thinking. I compared loading libraries: **LDRS** by UI Ball (uiball.com/ldrs) is the most modern one, each loader is under 1 KB, and it needs nothing else. Its React loaders use plain CSS files, which follow the site's safety rules. Other libraries, like react-spinners, add styles in a way those rules would block. The loader used is **DotWave**, in Zazo's sunset orange.
 
 #### Testing it
 

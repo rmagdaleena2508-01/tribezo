@@ -402,7 +402,7 @@ export default function Home() {
       if (thisRound !== round.current) return;
       say([
         { who: "benji", text: told.xyz, pose: "pointing", label: "Benji tells Zazo" },
-        { who: "zazo", text: benjiLines.thinking, pose: "idle", label: "Zazo is thinking" },
+        { who: "zazo", text: benjiLines.thinking, pose: "idle", label: "Zazo is thinking", thinking: true },
       ]);
 
       // 2. Zazo's answer arrives, and the stack flips it into Calonis too.
@@ -483,7 +483,8 @@ export default function Home() {
         side={side}
         onDone={onLineDone}
         showAll={showAll}
-        hint={hint}
+        hint={line.thinking ? undefined : hint}
+        thinking={line.thinking}
       />
     );
   }
