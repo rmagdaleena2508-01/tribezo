@@ -8,7 +8,9 @@ import { places, scenes } from "../lib/content.js";
 // each with a little picture. Picking a place takes you straight there,
 // and Zazo starts by telling you about it. You can also just type
 // "can we go to the beach?".
-export default function PlacesMenu({ here, seen, disabled, onPick }) {
+// You can change places any time, even while Zazo is still talking. His
+// old answer is dropped, and the new place dissolves in smoothly.
+export default function PlacesMenu({ here, seen, onPick }) {
   const [open, setOpen] = useState(false);
   const box = useRef(null);
   const button = useRef(null);
@@ -72,7 +74,7 @@ export default function PlacesMenu({ here, seen, disabled, onPick }) {
                   <li key={place.scene}>
                     <button
                       type="button"
-                      disabled={isHere || disabled}
+                      disabled={isHere}
                       onClick={() => pick(place)}
                       className="flex w-full items-center gap-3 rounded-2xl px-2 py-1.5 text-left text-sm font-bold text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >

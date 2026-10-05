@@ -443,7 +443,12 @@ export default function Home() {
 
   // Character height: set for laptops first (see --character-height in
   // index.css), then made bigger or smaller for each place.
-  const characterStyle = { height: `calc(var(--character-height) * ${look.scale})` };
+  // The size change between places is eased, so the characters grow or
+  // shrink gently instead of jumping.
+  const characterStyle = {
+    height: `calc(var(--character-height) * ${look.scale})`,
+    transition: "height 1.4s cubic-bezier(0.33, 0, 0.2, 1)",
+  };
 
   function bubbleFor(who, side) {
     if (line?.who !== who) return null;
@@ -553,7 +558,6 @@ export default function Home() {
               <PlacesMenu
                 here={scene}
                 seen={seen}
-                disabled={busy || moreLines || (line !== null && !lineDone)}
                 onPick={goTo}
               />
               <GlassButton

@@ -47,15 +47,17 @@ export default function Character({ who, pose, look, side }) {
         style={{ background: `rgba(0, 0, 0, ${look.shadow})` }}
       />
 
-      {/* Poses fade into each other instead of jumping. */}
+      {/* Poses blend into each other. The new pose fades in on top while
+          the old one stays solid underneath, and the old one only fades
+          away once the new one is nearly in. So the character never turns
+          see-through for a moment, even when poses change quickly. */}
       <AnimatePresence initial={false}>
         <motion.div
           key={src}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="absolute inset-0 isolate"
+          animate={{ opacity: 1, transition: { duration: 0.35, ease: [0.33, 0, 0.2, 1] } }}
+          exit={{ opacity: 0, transition: { duration: 0.2, delay: 0.25, ease: "easeOut" } }}
+          className="absolute inset-0 isolate will-change-[opacity]"
         >
           <img
             src={src}

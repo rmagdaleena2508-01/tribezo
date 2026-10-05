@@ -225,13 +225,15 @@ These are the same tools as my portfolio, plus howler.js, OGL, and new fonts.
 | 5 | Talking with AI | Done. Tested with real Gemini. |
 | 6 | Moving around the island | Done |
 | 7 | Zazo's Story Book and suggested questions | Done. The story book answers still need a test when Google is not busy. |
-| 8 | Putting Tribezo online (GitHub Pages and Vercel) | Built. Vercel needs to be connected once. |
+| 8 | Putting Tribezo online (GitHub Pages and Vercel) | Both sites are live. The Gemini key still needs to be added in Vercel, so Zazo uses his fixed answers online for now. |
 | 9 | Natural talk: a chatty Zazo, a calm Benji, answer buttons, and the Places menu | Done. Tested with real Gemini. |
 | 10 | The Calonis name, a fiction notice, and going straight to places | Done |
 | 11 | A video class that teaches how the stack works, with real game screens | Done |
+| 12 | Smoother changes between places, poses, and sizes | Done |
 
 ### What is left
 
+- **Connect Gemini on the live sites.** Add `GEMINI_API_KEY` in Vercel and `TRIBEZO_API_BASE` in GitHub (see "Connecting Vercel"). Until then, Zazo can only answer the questions his fixed list knows.
 - **Add music files.** The music system works, but there are no songs in the project yet, so the game is quiet for now.
 - **Try it on a real phone,** turned sideways, with the keyboard open.
 - **More stop motion pictures.** Right now each pose has 1 picture. Real stop motion uses 2 or 3 small changes of each pose.
@@ -866,6 +868,49 @@ To change the words, edit the script inside `tools/make_stack_video.py`, then ru
 
 - The video is saved in `public/video/stack-explained.mp4`.
 
+### Phase 12: Smoother changes
+
+#### The problem
+
+- Changing places looked sudden.
+- Halfway through a change, both pictures were half see-through, so the screen got darker for a moment.
+- Each new picture started a little zoomed in, so it seemed to jump.
+- The characters snapped to a new size in each place.
+- When a pose changed, the character flickered.
+- The Places menu was locked while Zazo was talking, so you could not switch quickly.
+
+#### What I looked at
+
+| Option | What I found |
+|---|---|
+| **Motion (Framer Motion)** | Already in the game. Fades run on the graphics card, and a fade can be stopped halfway and turned into a new one. |
+| **The View Transitions API** | Built into browsers, but a change cannot be stopped halfway. Clicking fast makes it skip or jump. |
+| **GSAP** | Great for timed scenes, but it would add a second way of animating the same pictures. |
+| **A WebGL shader** | Very fancy effects, but heavy for a simple fade, and harder to keep smooth on phones. |
+
+I picked **Motion**, with a better way of fading.
+
+#### What changed
+
+- **The new place dissolves in on top.** The old picture stays fully visible underneath. The new one fades in over it and settles from a tiny zoom. Only when the new one is fully in does the old one go away. So the screen never dims halfway.
+- **Fast clicking stays smooth.** Each new place simply dissolves in over whatever is showing. Old pictures are removed once they are covered.
+- **No half loaded pictures.** A new picture only starts to fade in once the browser has it ready to draw.
+- **One slow drift for every picture.** The gentle zoom now belongs to the whole background, so a new place never starts with a zoom jump.
+- **Characters change size gently** over 1.4 seconds, instead of snapping.
+- **Poses blend.** The new pose fades in on top while the old one stays solid, then the old one fades away. The character never turns see-through.
+- **Places works any time,** even while Zazo is talking. His old answer is dropped, and the new place dissolves in.
+
+#### Testing it
+
+I recorded the screen in Chrome while switching places 3 times in a row, half a second apart, and measured the brightness of every frame.
+
+| | Before | After |
+|---|---|---|
+| Darkest moment during the changes (out of 255) | 78 | 88 |
+| Biggest change between two frames | 8.9 | 7.3 |
+
+I also tried a soft blur as each picture fades in. It looked nice, but the screen froze for up to 0.8 seconds on a computer without a graphics card, so the blur is left out.
+
 ### The opening, the falling title, and the liquid glass buttons
 
 #### The opening
@@ -933,6 +978,62 @@ I picked the **Liquid Glass Button by Ali Imam**, and built our own small versio
 - **Bending.** In Chrome and Edge, small buttons also bend the scene behind them a little. Safari and Firefox cannot bend what is behind a button, so they show the clear glass without bending.
 - The bending is only used on small buttons: Begin, Tap to continue, and the buttons at the top. Bending costs a lot of drawing work over big areas, so the big chat box is clear glass without bending.
 - White text has a soft shadow, so it stays readable on bright parts of the island.
+
+## Problems I Faced and How I Fixed Them
+
+Building Tribezo was not a straight line. These are the biggest problems, and what fixed each one.
+
+### The stack and the servers
+
+| Problem | How I fixed it |
+|---|---|
+| The website could not reach the C server online. GitHub Pages and Vercel cannot run a C program that waits for messages. | The same C stack code is turned into WebAssembly, so it runs right inside the browser. No C server is needed to play. |
+| Zazo said the player's name backwards. | Names are now an exception. The stack is given the name, and it leaves those words alone. |
+| Numbers and money came out flipped, so "$20" stopped making sense. | Numbers, money signs, and money words like "dollars" and "Rs" are skipped by the stack. |
+
+### Talking with Gemini
+
+| Problem | How I fixed it |
+|---|---|
+| Every answer came from the fixed list. The key had an extra letter at the start. | Took the letter out. The helper now warns when a key does not look like a Gemini key. |
+| Google said its models were busy, or out of free quota. | A line of 5 models. A busy model rests, and the next one answers. |
+| Answers got cut off in the middle. The model used all its space to "think". | It is asked to think only a little, and the answer has more room. |
+| Zazo could not answer questions about his own life. He made things up. | The Zazo Story Book. Its whole text now goes into his instructions, so he answers from it (see the RAG part). |
+| Zazo sounded short and flat. | New rules: react first, answer, add one detail, then ask something back. Benji adds calm notes, and answer buttons help shy players. |
+| Questions you write yourself only get a "the sea is loud" reply on the live site. | The live site has no Gemini key yet, so Zazo can only use his fixed list. I checked the live backend: it is running and answers, but says `"ai": false`. The fix is to add `GEMINI_API_KEY` in Vercel and `TRIBEZO_API_BASE` in GitHub. On my computer, with the AI helper running (`npm run ai`), Zazo answered a brand new question about games on the island with a full, friendly answer. |
+
+### Putting it online
+
+| Problem | How I fixed it |
+|---|---|
+| Vercel would not show a Deploy button, even though my portfolio deployed in one click. | Vercel saw 3 apps in the project. I moved the website to the top folder and joined the two `package.json` files, so it sees 1 app, like my portfolio. I checked this with Vercel's own detection code. |
+| Vercel kept running an old command, `cd frontend && npm ci`, after that folder was gone. | The right commands are now written in `vercel.json`, which wins over old dashboard settings. |
+| The key was typed into the wrong box in Vercel, and it showed in a screenshot. | The name goes in Key, the key goes in Value. A key that was ever shown should be replaced with a new one. |
+
+### The look and feel
+
+| Problem | How I fixed it |
+|---|---|
+| The site's safety rules blocked GSAP from changing styles, so the opening froze. | Only the GSAP core is used. It moves plain numbers, and the page copies them onto the screen itself. |
+| Changing places looked sudden, and the screen dimmed halfway. | The new place now dissolves in on top of the old one, characters change size gently, and poses blend (see Phase 12). |
+| A soft blur in the change made slower computers freeze for up to 0.8 seconds. | The blur was taken out. Smooth beats fancy. |
+
+### Privacy
+
+| Problem | How I fixed it |
+|---|---|
+| The title screen said "Continue as Mary", so the next person on the same computer could open Mary's chat. | Saving was taken out. Every visit starts fresh, and any old save is wiped when the game opens. |
+
+### The stack video
+
+| Problem | How I fixed it |
+|---|---|
+| The first voice sounded like a robot. | Kokoro, a free voice model that runs on my own computer, with a young British voice. |
+| The script read like a list of facts. | It was rewritten as a teacher taking a short class. |
+| Speech bubbles in the game screenshots were too small to read. | Each bubble is shown zoomed in, next to the screen. |
+| The video was over 4 minutes. | Some lines were cut and the voice was sped up a little. It is now 3 minutes 59 seconds. |
+
+---
 
 ## Keeping It Safe
 
