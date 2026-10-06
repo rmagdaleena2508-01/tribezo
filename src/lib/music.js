@@ -1,4 +1,4 @@
-import { Howl } from "howler";
+import { Howl, Howler } from "howler";
 import { music } from "./content.js";
 
 // Background sound with howler.js, in two layers:
@@ -16,6 +16,21 @@ let started = false;
 let muted = readMuted();
 let ducked = false; // true while the stack video plays, so the two do not clash
 const silent = () => muted || ducked;
+
+// Phones, like iPhones and iPads, ignore volume changes for long music
+// files, so fading to 0 does not make them quiet. They do obey a real
+// "mute" switch. So after fading down, every sound is also muted, and it
+// is unmuted again before fading back up.
+let muteTimer;
+function applySilence(ms) {
+  clearTimeout(muteTimer);
+  if (silent()) {
+    muteTimer = setTimeout(() => Howler.mute(true), ms);
+  } else {
+    Howler.mute(false);
+  }
+}
+Howler.mute(muted); // a choice saved from an earlier visit
 
 function readMuted() {
   try {
@@ -142,6 +157,7 @@ export function setMuted(value) {
   }
   musicLayer.hush(silent());
   ambienceLayer.hush(silent());
+  applySilence(400);
 }
 
 // While the stack video plays, the music and birds fade down, then come
@@ -150,4 +166,5 @@ export function setDucked(value) {
   ducked = value;
   musicLayer.hush(silent(), 700);
   ambienceLayer.hush(silent(), 700);
+  applySilence(700);
 }

@@ -1023,6 +1023,7 @@ I also tried a soft blur as each picture fades in. It looked nice, but the scree
 - A **mute** button shows at the top. It remembers your choice on that device.
 - When the stack video plays, the music and birds fade down, and they come back when the video closes.
 - **Made sturdier after a report that the live site was silent.** Some browsers, like Brave and Safari, only allow sound that starts right inside a click. Before, the piano only began to load after **Begin** was pressed, so it could start too late. Now the first music and the birds load as soon as the page opens, so they are ready the moment you press **Begin**. If a browser still blocks the sound, it tries again on your next tap or click. The fade in now waits until the piano is really playing, so it can never get stuck at no sound. Tested in Chrome and in Brave.
+- **The mute button did not work on phones.** iPhones and iPads ignore volume changes for long music files, so "fading to 0" left the piano playing at full volume. The birds use a different way of playing sound, so they did go quiet. Now, after the sound fades down, everything is also switched to a real "mute", which phones obey. It is unmuted again before the sound fades back up. Tested on an iPhone screen in Chrome: tapping the speaker mutes the piano, the night piano starts muted at the campfire, and tapping again turns it all back on.
 
 #### Tested
 
