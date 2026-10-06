@@ -73,6 +73,73 @@ Here is how the word `hello` gets flipped.
 
 ---
 
+## My Explanation: How the Stack Works Here
+
+### One stack for each message, not for each word
+
+- The game makes **one stack for a whole message**.
+- That same stack is used again for every word in the message.
+- After each word, the stack is empty again, so it is ready for the next word.
+
+### The stack itself
+
+The code is in `backend/src/stack.c`.
+
+- The stack is a list of letters (an **array**) and a count of how many letters are in it.
+- The **top** of the stack is the end of the list.
+- **Push** (`stack_push`) puts a letter on the top. If the list is full, it grows to twice its size.
+- **Pop** (`stack_pop`) takes the top letter off.
+- Push and pop always take the same short time, no matter how big the stack is. This is called **O(1)**.
+
+### How a whole message gets flipped
+
+The code is `reverse_words_keeping` in `backend/src/reverse.c`.
+
+1. **Copy the message.** In the copy, the spaces, marks, and numbers are already in the right spots. Only the letters need to change.
+2. **Make one stack,** with room for 32 letters to start.
+3. **Go through the message word by word.** A space is where one word ends and the next one starts.
+4. **Skip some words.** Money (like `$20` or `100 dollars`) and the player's name stay just as they are. Plain numbers have no letters, so the stack does not touch them anyway.
+5. **Pass 1, push:** push only the letters of the word, from left to right.
+6. **Pass 2, pop:** go through the same word again. Every spot that holds a letter gets the letter popped off the top. Marks like `'` and `!` are skipped, so they stay in their spots.
+7. **The stack is now empty,** and the next word uses it.
+8. **After the last word,** the stack is thrown away once.
+
+### An example: `don't!`
+
+```
+Pass 1 (push the letters):  d, o, n, t     stack: [d o n t]   the top is t
+
+Pass 2 (fill the letter spots, skip ' and !):
+  spot 0 'd' gets pop() = t
+  spot 1 'o' gets pop() = n
+  spot 2 'n' gets pop() = o
+  spot 3 '''  skipped
+  spot 4 't' gets pop() = d
+  spot 5 '!'  skipped
+
+Result: tno'd!               stack: [] empty, ready for the next word
+```
+
+### Why one stack, and not a new one for every word
+
+- Making a stack means asking the computer for memory. Doing that once for a message costs less than doing it again for every word.
+- It is safe to use the same stack again, because every word pushes and pops the same number of letters. So the stack is always empty when a word is done.
+- The History panel adds up the pushes and pops for the whole message. "How old are you?" has 12 letters, so it shows 12 pushes and 12 pops.
+
+### How long it takes
+
+- Each letter is pushed once and popped once.
+- So the time it takes grows with the length of the message. This is called **O(n)**.
+- The stack only ever needs as much room as the longest word.
+
+### Where it runs
+
+- The same C code is turned into WebAssembly (`public/stack.wasm`).
+- Your browser runs it each time Benji flips your words, and again for Zazo's answer.
+- So every message gets its own fresh stack.
+
+---
+
 ## How Calonis Works
 
 These are the rules for turning English into Calonis.
