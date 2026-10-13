@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- Source template for the 1200x630 social preview (og-image.png). Render at 1200x630 to regenerate. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg0:#0e2a1e;--bg1:#12382a;--leaf:#8fe3a9;--leaf2:#4bbf7a;--cream:#f3fff6;--muted:#a9d6ba}
+  html,body{width:1200px;height:630px;overflow:hidden;font-family:'Nunito',system-ui,sans-serif}
+  .wrap{position:relative;width:1200px;height:630px;padding:74px 84px;color:var(--cream);
+    background:
+      radial-gradient(800px 460px at 82% 18%, rgba(143,227,169,.16), transparent 62%),
+      radial-gradient(700px 500px at 10% 110%, rgba(75,191,122,.18), transparent 60%),
+      linear-gradient(160deg,var(--bg1),var(--bg0));
+    display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:16px}
+  .leaf{font-size:52px;line-height:1}
+  .brandname{font-family:'Fredoka';font-weight:600;font-size:46px;color:var(--cream);letter-spacing:.3px}
+  .site{font-family:'JetBrains Mono',monospace;font-size:17px;color:var(--muted)}
+  .mid{max-width:1010px}
+  .tag{font-family:'Fredoka';font-weight:600;font-size:82px;line-height:1.04;color:var(--cream)}
+  .tag b{color:var(--leaf);font-weight:700}
+  .rev{font-family:'JetBrains Mono',monospace;font-size:26px;color:var(--leaf);margin-top:26px;letter-spacing:.02em}
+  .rev span{color:var(--muted)}
+  .foot{display:flex;align-items:center;gap:14px;font-family:'Nunito';font-weight:600;font-size:20px;color:var(--muted)}
+  .chip{background:rgba(143,227,169,.12);border:1px solid rgba(143,227,169,.25);border-radius:999px;padding:8px 18px;color:var(--cream)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand"><span class="leaf">🌿</span><span class="brandname">Tribezo</span></div>
+      <div class="site">tribezo-8tqo.vercel.app</div>
+    </div>
+    <div class="mid">
+      <div class="tag">Talk to a forest tribe that speaks in <b>reverse</b>.</div>
+      <div class="rev">you: "hello"  <span>·</span>  tribe: "olleh"</div>
+    </div>
+    <div class="foot">
+      <span class="chip">Stack-powered word reverser</span>
+      <span>C backend · React + Vite frontend</span>
+    </div>
+  </div>
+</body>
+</html>
